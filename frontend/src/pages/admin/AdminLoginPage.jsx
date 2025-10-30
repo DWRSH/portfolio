@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Code, Lock, Loader2 } from 'lucide-react'; // ❗️ Loader2 ko import karein
 // ❗️ FIX: Hardcoded 'axios' ki jagah configured 'api' instance import karein
-import api from '../../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
+import api from '../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState('');
