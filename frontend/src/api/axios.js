@@ -1,10 +1,12 @@
 import axios from 'axios';
 
+// Production aur Development dono URLs me '/api' add karein
+const API_URL = import.meta.env.PROD 
+  ? 'https://port-server-i30v.onrender.com/api' // Production (Live)
+  : 'http://localhost:5001/api';               // Development (Local)
+
 const api = axios.create({
-  // Humne logic ko theek kar diya hai:
-  baseURL: import.meta.env.PROD 
-    ? 'https://port-server-i30v.onrender.com' // Production: Aapka live backend URL
-    : 'http://localhost:5001',                // Development: Aapka local backend URL
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
   }
