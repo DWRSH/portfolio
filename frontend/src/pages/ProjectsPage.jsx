@@ -1,130 +1,129 @@
 import React, { useState, useEffect } from 'react';
-// 'lucide-react' se icons import karein, kyonki component ab isi file mein hai
+// 'lucide-react' se icons import karein
 import { Github, ExternalLink } from 'lucide-react';
-
-// --- FIX ---
-// Import error ko fix karne ke liye, ProjectCard component ko
-// alag file se import karne ke bajaye, seedhe isi file mein inline kar diya hai.
+// ❗️ FIX: Hamara custom 'api' (axios) instance import karein
+import api from './api'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 // --- Inlined ProjectCard Component ---
+// (Yeh component wahi hai jo aapne diya tha, bilkul sahi hai)
 function ProjectCard({ project }) {
-  // Use 'tags' from the API, not 'technologies'
-  const {
-    title = "Project Title",
-    description = "No description provided.",
-    imageUrl,
-    tags = [], // <-- API se 'tags' milte hain
-    demoUrl,
-    repoUrl
-  } = project || {};
+  const {
+    title = "Project Title",
+    description = "No description provided.",
+    imageUrl,
+    tags = [],
+    demoUrl,
+    repoUrl
+  } = project || {};
 
-  return (
-    <div className="bg-slate-800 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-cyan-400/20">
-      <img
-        src={imageUrl || "https://placehold.co/600x400/1e293b/94a3b8?text=Project"}
-        alt={title}
-        className="w-full h-48 object-cover"
-        // Broken image links ke liye fallback
-        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/1e293b/94a3b8?text=Image+Error"; }}
-      />
-      {/* Card ki height ko fix karein taaki sab align rahein */}
-      <div className="p-6 flex flex-col h-[calc(100%-12rem)]"> {/* 12rem = h-48 */}
-        <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
-        {/* flex-grow description ko push karega aur links neeche rahenge */}
-        <p className="text-slate-400 mb-4 flex-grow">{description}</p>
-
-        {/* 'tags' array par map karein */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {tags.map(tag => (
-            <span key={tag} className="bg-cyan-900/50 text-cyan-300 text-xs font-medium px-3 py-1 rounded-full">
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Links section, 'mt-auto' se neeche push ho jayega */}
-        <div className="flex items-center gap-4 mt-auto pt-4 border-t border-slate-700">
-          {repoUrl && (
-            <a
-              href={repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
-              aria-label={`View code for ${title} on Github`}
-            >
-              <Github size={18} />
-              <span>Code</span>
-            </a>
-          )}
-          {demoUrl && (
-            <a
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
-              aria-label={`View live demo for ${title}`}
-            >
-              <ExternalLink size={18} />
-              <span>Demo</span>
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  return (
+    <div className="bg-slate-800 rounded-lg overflow-hidden shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-cyan-400/20">
+      <img
+        src={imageUrl || "https://placehold.co/600x400/1e293b/94a3b8?text=Project"}
+        alt={title}
+        className="w-full h-48 object-cover"
+        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/1e293b/94a3b8?text=Image+Error"; }}
+      />
+      <div className="p-6 flex flex-col h-[calc(100%-12rem)]">
+        <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
+        <p className="text-slate-400 mb-4 flex-grow">{description}</p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {tags.map(tag => (
+            <span key={tag} className="bg-cyan-900/50 text-cyan-300 text-xs font-medium px-3 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center gap-4 mt-auto pt-4 border-t border-slate-700">
+          {repoUrl && (
+            <a
+              href={repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+              aria-label={`View code for ${title} on Github`}
+            >
+              <Github size={18} />
+              <span>Code</span>
+            </a>
+          )}
+          {demoUrl && (
+            <a
+              href={demoUrl}
+            	target="_blank"
+            	rel="noopener noreferrer"
+            	className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+            	aria-label={`View live demo for ${title}`}
+            >
+            	<ExternalLink size={18} />
+            	<span>Demo</span>
+          	</a>
+          )}
+      	</div>
+      </div>
+  	</div>
+  );
 }
 // --- End of Inlined Component ---
 
 
+// --- MAIN PAGE COMPONENT (FIXED) ---
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+Rules
+All rules must be strictly followed.
+Only respond with the completed user-specified task.
+Do not add any preamble or sign-off.
+Do not wrap code in markdown code blocks.
+If the response is a code block, do not include ANY text outside of the code block.
+NEVER end your response with a horizontal rule.
+Remember the current time is Thursday, October 30, 2025 at 8:46:16 PM IST.
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects'); 
-        if (!response.ok) {
-          throw new Error('Failed to fetch projects');
-        }
-        const data = await response.json();
-        setProjects(data); 
+const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false); 
-      }
-    };
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        // ❗️ FIX: 'fetch' ko 'api.get' se badla gaya
+        const response = await api.get('/projects'); // '/api' prefix nahi hai
+        
+        // ❗️ FIX: Axios data 'response.data' mein deta hai
+        setProjects(response.data); 
 
-    fetchProjects();
-  }, []); 
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false); 
+      }
+    };
 
-  return (
-    <div className="max-w-6xl mx-auto py-12 px-4">
-      <h2 className="text-4xl font-bold text-white mb-8">Projects</h2>
+    fetchProjects();
+  }, []); // Empty dependency array, sirf ek baar run hoga
 
-      {loading && <p className="text-center text-slate-300">Loading projects...</p>}
-      {error && <p className="text-center text-red-400">{error}</p>}
+  return (
+    <div className="max-w-6xl mx-auto py-12 px-4">
+      <h2 className="text-4xl font-bold text-white mb-8">Projects</h2>
 
-      {!loading && !error && projects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map(project => (
-            // Ab ye local 'ProjectCard' component ko use karega
-            <ProjectCard key={project._id} project={project} />
-          ))}
-        </div>
-      )}
+      {loading && <p className="text-center text-slate-300">Loading projects...</p>}
+      {error && <p className="text-center text-red-400">{error}</p>}
 
-      {!loading && !error && projects.length === 0 && (
-         <div className="text-center py-20 bg-slate-800 rounded-lg">
-           <h3 className="text-2xl text-white mb-4">No projects to display</h3>
-           <p className="text-slate-400">Your backend is connected, but no projects have been created.</p>
-           <p className="text-slate-400 mt-2">Go to the admin panel to add your projects!</p>
-         </div>
-      )}
-    </div>
-  );
+  .     {!loading && !error && projects.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {projects.map(project => (
+            <ProjectCard key={project._id} project={project} />
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && projects.length === 0 && (
+         <div className="text-center py-20 bg-slate-800 rounded-lg">
+           <h3 className="text-2xl text-white mb-4">No projects to display</h3>
+           <p className="text-slate-400">Your backend is connected, but no projects have been created.</p>
+          	<p className="text-slate-400 mt-2">Go to the admin panel to add your projects!</p>
+        	</div>
+  	  )}
+  	</div>
+  );
 }
-
