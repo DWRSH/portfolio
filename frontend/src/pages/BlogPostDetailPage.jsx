@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-// ❗️ FIX: Hamara custom 'api' (axios) instance import karein
-import api from './api'; // (Path check kar lein, 'api.js' ya 'axios.js')
+// ❗️ FIX: Path ko theek kar diya gaya hai (ek folder upar)
+import api from '../api'; // './api' ko '../api' se badal diya
 
 // Naya component: Poora blog post dikhane ke liye
 export default function BlogPostDetailPage() {
@@ -16,13 +16,13 @@ export default function BlogPostDetailPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        // ❗️ FIX: 'fetch' ko 'api.get' se badla gaya
+        // Naye API endpoint ko call karein jo humne banaya hai
         const response = await api.get(`/blogs/slug/${slug}`); // '/api' prefix nahi hai
-        
-        // ❗️ FIX: Axios data 'response.data' mein deta hai
+        
+        // Axios data 'response.data' mein deta hai
         setPost(response.data);
       } catch (err) {
-        console.error("Failed to fetch post:", err);
+        console.error("Failed to fetch post:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -72,25 +72,25 @@ export default function BlogPostDetailPage() {
       <article>
         {post.featuredImage && (
           <img 
-            src={post.featuredImage}s
+            src={post.featuredImage}
             alt={post.title} 
           	className="w-full h-64 md:h-80 object-cover rounded-lg mb-6"
         	/>
-        )}
+        )}
         
     	  <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
         
     	  <div className="flex items-center text-slate-400 text-sm mb-8">
-      	  <Calendar size={14} className="mr-2" />
-  s     	<time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-    	  </div>
+    	 	<Calendar size={14} className="mr-2" />
+      		<time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+D   	  </div>
 
     	  <div className="prose prose-invert prose-lg max-w-none prose-p:text-slate-300 prose-headings:text-white prose-a:text-cyan-400 prose-strong:text-white">
-a     	<ReactMarkdown>
-          	{post.content}
+    		<ReactMarkdown>
+        	  {post.content}
       	  </ReactMarkdown>
     	  </div>
   	  </article>
-    </div>
+    </div>
   );
 }
