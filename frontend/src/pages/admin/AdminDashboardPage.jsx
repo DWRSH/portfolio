@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Files, Newspaper, ArrowRight, Loader2 } from 'lucide-react';
 // ❗️ FIX: Hamara custom 'api' (axios) instance import karein
-import api from '../../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
+import api from '../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 /**
  * Helper component ek stat card dikhane ke liye
