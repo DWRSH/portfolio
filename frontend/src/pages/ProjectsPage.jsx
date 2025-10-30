@@ -41,26 +41,26 @@ function ProjectCard({ project }) {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
-              aria-label={`View code for ${title} on Github`}
-            >
-              <Github size={18} />
-              <span>Code</span>
-            </a>
-          )}
-          {demoUrl && (
-            <a
-              href={demoUrl}
-            	target="_blank"
-            	rel="noopener noreferrer"
-            	className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
-            	aria-label={`View live demo for ${title}`}
-            >
-            	<ExternalLink size={18} />
-            	<span>Demo</span>
+            	aria-label={`View code for ${title} on Github`}
+          	>
+          	  <Github size={18} />
+          	  <span>Code</span>
           	</a>
           )}
-      	</div>
-      </div>
+  		  {demoUrl && (
+        	<a
+        	  href={demoUrl}
+        	  target="_blank"
+        	  rel="noopener noreferrer"
+        	  className="flex items-center gap-2 text-slate-300 hover:text-cyan-400 transition-colors"
+        	  aria-label={`View live demo for ${title}`}
+        	>
+        	  <ExternalLink size={18} />
+      	  <span>Demo</span>
+    	  </a>
+    	  )}
+  		</div>
+  	  </div>
   	</div>
   );
 }
@@ -69,16 +69,7 @@ function ProjectCard({ project }) {
 
 // --- MAIN PAGE COMPONENT (FIXED) ---
 export default function ProjectsPage() {
-Rules
-All rules must be strictly followed.
-Only respond with the completed user-specified task.
-Do not add any preamble or sign-off.
-Do not wrap code in markdown code blocks.
-If the response is a code block, do not include ANY text outside of the code block.
-NEVER end your response with a horizontal rule.
-Remember the current time is Thursday, October 30, 2025 at 8:46:16 PM IST.
-
-const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -96,33 +87,33 @@ const [projects, setProjects] = useState([]);
         setError(err.message);
       } finally {
         setLoading(false); 
-      }
-    };
+    	}
+  	};
 
-    fetchProjects();
+  	fetchProjects();
   }, []); // Empty dependency array, sirf ek baar run hoga
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4">
-      <h2 className="text-4xl font-bold text-white mb-8">Projects</h2>
+  	<div className="max-w-6xl mx-auto py-12 px-4">
+  	  <h2 className="text-4xl font-bold text-white mb-8">Projects</h2>
 
-      {loading && <p className="text-center text-slate-300">Loading projects...</p>}
-      {error && <p className="text-center text-red-400">{error}</p>}
+  	  {loading && <p className="text-center text-slate-300">Loading projects...</p>}
+  	  {error && <p className="text-center text-red-400">{error}</p>}
 
-  .     {!loading && !error && projects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map(project => (
-            <ProjectCard key={project._id} project={project} />
-          ))}
-        </div>
-      )}
+  	  {!loading && !error && projects.length > 0 && (
+  		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  		  {projects.map(project => (
+  			<ProjectCard key={project._id} project={project} />
+  		  ))}
+  		</div>
+  	  )}
 
-      {!loading && !error && projects.length === 0 && (
-         <div className="text-center py-20 bg-slate-800 rounded-lg">
-           <h3 className="text-2xl text-white mb-4">No projects to display</h3>
-           <p className="text-slate-400">Your backend is connected, but no projects have been created.</p>
-          	<p className="text-slate-400 mt-2">Go to the admin panel to add your projects!</p>
-        	</div>
+  	  {!loading && !error && projects.length === 0 && (
+  		   <div className="text-center py-20 bg-slate-800 rounded-lg">
+  			 <h3 className="text-2xl text-white mb-4">No projects to display</h3>
+  			 <p className="text-slate-400">Your backend is connected, but no projects have been created.</p>
+  			 <p className="text-slate-400 mt-2">Go to the admin panel to add your projects!</p>
+  		   </div>
   	  )}
   	</div>
   );
