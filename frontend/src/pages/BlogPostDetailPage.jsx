@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 // ❗️ FIX: Path ko theek kar diya gaya hai (ek folder upar)
-import api from '../../api/axios'; // './api' ko '../api' se badal diya
+import api from '../api/axios'; // './api' ko '../api' se badal diya
 
 // Naya component: Poora blog post dikhane ke liye
 export default function BlogPostDetailPage() {
