@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 // 'lucide-react' se icons import karein
 import { Github, ExternalLink } from 'lucide-react';
 // ❗️ FIX: Hamara custom 'api' (axios) instance import karein
-import api from '../../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
+import api from '../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 // --- Inlined ProjectCard Component ---
 // (Yeh component wahi hai jo aapne diya tha, bilkul sahi hai)
