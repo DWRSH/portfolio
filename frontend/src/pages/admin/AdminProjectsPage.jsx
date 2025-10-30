@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Image as ImageIcon, Github, ExternalLink, Loader2, Trash2, X } from 'lucide-react';
 // ❗️ FIX: Hamara custom 'api' (axios) instance import karein
-import api from '../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
+import api from '../../api/axios'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 // Helper to get the auth token
 const getAuthToken = () => localStorage.getItem('adminAuthToken');
