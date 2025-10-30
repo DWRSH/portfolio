@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import api from './api'; // ❗️ 1. Apni axios file ko import karein (path check kar lein)
+// ❗️ FIX: Hamara custom 'api' (axios) instance import karein
+import api from './api'; // (Path check kar lein, 'api.js' ya 'axios.js')
 
 // Naya component: Poora blog post dikhane ke liye
 export default function BlogPostDetailPage() {
@@ -15,14 +16,13 @@ export default function BlogPostDetailPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        // ❗️ 2. fetch() ko api.get() se badlein
-        // '/api' prefix na lagayein, kyunki yeh baseURL mein hai
-        const response = await api.get(`/blogs/slug/${slug}`);
-        
-        // ❗️ 3. Axios data ko .data property mein deta hai
+        // ❗️ FIX: 'fetch' ko 'api.get' se badla gaya
+        const response = await api.get(`/blogs/slug/${slug}`); // '/api' prefix nahi hai
+        
+        // ❗️ FIX: Axios data 'response.data' mein deta hai
         setPost(response.data);
       } catch (err) {
-        console.error("Failed to fetch post:", err); // Error log karein
+        console.error("Failed to fetch post:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -31,9 +31,6 @@ export default function BlogPostDetailPage() {
 
     fetchPost();
   }, [slug]); // Jab bhi slug badlega, yeh effect dubara chalega
-
-  // ... Baaki ka component code bilkul same rahega ...
-  // (formatDate function, loading/error states, aur return JSX)
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -59,8 +56,8 @@ export default function BlogPostDetailPage() {
   }
 
   if (!post) {
-    return <p className="text-center text-slate-300 py-20">Post not found.</p>;
-}
+  	return <p className="text-center text-slate-300 py-20">Post not found.</p>;
+  }
 
   return (
     <div className="max-w-3xl mx-auto py-12 px-4 animate-fade-in">
@@ -75,25 +72,25 @@ export default function BlogPostDetailPage() {
       <article>
         {post.featuredImage && (
           <img 
-            src={post.featuredImage} 
+            src={post.featuredImage}s
             alt={post.title} 
-            className="w-full h-64 md:h-80 object-cover rounded-lg mb-6"
-          />
-        )}
+          	className="w-full h-64 md:h-80 object-cover rounded-lg mb-6"
+        	/>
+        )}
         
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
+    	  <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
         
-        <div className="flex items-center text-slate-400 text-sm mb-8">
-          <Calendar size={14} className="mr-2" />
-          <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-        </div>
+    	  <div className="flex items-center text-slate-400 text-sm mb-8">
+      	  <Calendar size={14} className="mr-2" />
+  s     	<time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+    	  </div>
 
-        <div className="prose prose-invert prose-lg max-w-none prose-p:text-slate-300 prose-headings:text-white prose-a:text-cyan-400 prose-strong:text-white">
-          <ReactMarkdown>
-            {post.content}
-          </ReactMarkdown>
-        </div>
-      </article>
-    </div>
+    	  <div className="prose prose-invert prose-lg max-w-none prose-p:text-slate-300 prose-headings:text-white prose-a:text-cyan-400 prose-strong:text-white">
+a     	<ReactMarkdown>
+          	{post.content}
+      	  </ReactMarkdown>
+    	  </div>
+  	  </article>
+    </div>
   );
 }
