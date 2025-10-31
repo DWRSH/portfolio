@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center text-center py-20 min-h-[calc(100vh-200px)]">
       <h1 className="text-6xl md:text-8xl font-bold text-white mb-4">
-        [Darsh's Portfolio]
+        Hey, I'm Darsh
       </h1>
       <h2 className="text-2xl md:text-3xl font-light text-cyan-300 mb-8">
         MERN Stack Developer | Web Innovator
