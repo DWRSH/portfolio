@@ -9,7 +9,7 @@ export default function Footer() {
           <h4 className="text-xl font-semibold text-white">Get In Touch</h4>
           <p className="text-slate-400">I'm available for freelance & full-time roles.</p>
           <a 
-            href="mailto:youremail@example.com" 
+            href="mailto:darshprajapati1510@gmail.com" 
             className="text-cyan-400 hover:text-cyan-300 transition-colors inline-flex items-center gap-2 mt-2"
           >
             <Mail size={18} /> darshprajapati@gmail.com
