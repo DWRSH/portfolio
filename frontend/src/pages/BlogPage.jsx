@@ -4,20 +4,40 @@ import { ArrowRight, Search } from 'lucide-react'; // Added Search icon
 // ❗️ External dependency kept as requested
 import api from '../api/axios'; 
 
+/**
+ * Helper function to strip HTML tags from a string
+ * @param {string} html - The HTML string from Jodit editor
+ * @returns {string} - The plain text content
+ */
+const stripHtml = (html) => {
+  try {
+    // Use DOMParser to turn the HTML string into a document
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    // Get all text content from the body
+    return doc.body.textContent || "";
+  } catch (error) {
+    console.error("Error stripping HTML:", error);
+    // Fallback to the original string if parsing fails
+    return html; 
+  }
+};
 
-// --- COMPONENT INLINED ---
+
+// --- COMPONENT INLINED (FIXED) ---
 function BlogPostCard({ post }) {
   // Set default values and destructure all correct props
   const {
     title = "Blog Post Title",
     slug = "blog-post-title",
-    content = "No excerpt available...", 
+    // Get textContent which was created in the parent's fetch logic
+    textContent = "No excerpt available...", 
     createdAt = "2025-10-29T00:00:00.000Z",
     featuredImage // Get the featured image URL
   } = post || {};
 
-  // Create a simple excerpt from the content
-  const excerpt = content.substring(0, 120) + '...';
+  // --- FIX 1 ---
+  // Create a simple excerpt from the *textContent*, not the raw HTML content
+  const excerpt = textContent.substring(0, 120) + '...';
 
   // Format the date
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
@@ -49,7 +69,10 @@ function BlogPostCard({ post }) {
             </Link>
           </h3>
         </header>
+        
+        {/* This <p> now shows the clean text excerpt */}
         <p className="text-slate-300 my-4">{excerpt}</p>
+        
         <footer className="mt-auto">
           <Link
             to={`/blog/${slug}`}
@@ -68,20 +91,36 @@ function BlogPostCard({ post }) {
 
 // --- MAIN PAGE COMPONENT (WITH SEARCH LOGIC) ---
 function BlogPage() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // Holds original, *processed* data
   const [filteredPosts, setFilteredPosts] = useState([]); // State for posts after search filter
   const [searchQuery, setSearchQuery] = useState('');     // State for the search bar input
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. Data Fetching (Original Logic)
+  // 1. Data Fetching (Logic MODIFIED)
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         // Using the imported 'api' to fetch data from the backend
         const response = await api.get('/blogs');
         const fetchedPosts = response.data || [];
-        setPosts(fetchedPosts);
+
+        // --- FIX 2 ---
+        // Process posts *once* on fetch to create clean textContent
+        const processedPosts = fetchedPosts.map(post => ({
+          ...post,
+          // Create a new property with just the plain text for search/excerpts
+          textContent: stripHtml(post.content || "") 
+        }));
+        
+        // Sort by date, newest first
+        const sortedPosts = processedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        setPosts(sortedPosts);
+        setFilteredPosts(sortedPosts); // Initialize filtered list with all posts
       } catch (err) {
         console.error("Failed to fetch blogs:", err);
         setError("Failed to load posts. Please check API connection.");
@@ -93,7 +132,7 @@ function BlogPage() {
     fetchPosts();
   }, []); // Runs only once to fetch data
 
-  // 2. Filtering Logic (Runs whenever posts or searchQuery changes)
+  // 2. Filtering Logic (Logic MODIFIED)
   useEffect(() => {
     if (searchQuery.trim() === '') {
       // If search query is empty, show all fetched posts
@@ -103,10 +142,12 @@ function BlogPage() {
 
     const lowerCaseQuery = searchQuery.toLowerCase();
     
-    // Filter posts based on title or content (case-insensitive)
+    // Filter posts based on title or *textContent* (case-insensitive)
     const results = posts.filter(post =>
       post.title.toLowerCase().includes(lowerCaseQuery) ||
-      post.content.toLowerCase().includes(lowerCaseQuery)
+      // --- FIX 3 ---
+      // Search the clean textContent, not the raw HTML content
+      post.textContent.toLowerCase().includes(lowerCaseQuery)
     );
     setFilteredPosts(results);
   }, [posts, searchQuery]); // Re-run when source posts or query changes
@@ -176,3 +217,4 @@ function BlogPage() {
 
 // Ensure only one default export
 export default BlogPage;
+
