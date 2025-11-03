@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'; // Added useRef and useMemo
-import JoditEditor from 'jodit-react'; // Added JoditEditor
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, X } from 'lucide-react';
 
 // Helper to get the auth token
@@ -14,22 +13,8 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
   const [currentImage, setCurrentImage] = useState(null);
 
   const isEditMode = !!post;
-  const editor = useRef(null); // Create a ref for the editor
 
-  // Jodit Editor Configuration (memoized)
-  const config = useMemo(
-    () => ({
-      readonly: false, // all options here
-      placeholder: 'Start writing your blog content...',
-      theme: 'dark',   // <-- This is key for your dark UI
-      height: 500,     // Set a good default height
-      // You can add more Jodit config options here
-      // e.g., 'buttons': ['bold', 'italic', 'underline', '|', 'image', 'video']
-    }),
-    [] // Empty dependency array ensures this config is created only once
-  );
-
-  // Auto-generate slug from title
+  // Auto-generate slug from title (only if slug is not manually changed)
   useEffect(() => {
     if (isEditMode && post) {
       setFormData({
@@ -58,15 +43,8 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
     setFormData(prev => ({ ...prev, title: newTitle, slug: newSlug }));
   };
 
-  // Handles standard inputs like 'slug'
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  
-  // NEW: Specific handler for Jodit Editor
-  // We use onBlur to update state only when the user clicks out, which is better for performance.
-  const handleContentChange = (newContent) => {
-    setFormData(prev => ({ ...prev, content: newContent }));
   };
 
   const handleFileChange = (e) => {
@@ -91,9 +69,9 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
     const blogFormData = new FormData();
     blogFormData.append('title', formData.title);
     blogFormData.append('slug', formData.slug);
-    blogFormData.append('content', formData.content); // This will now send HTML content
+    blogFormData.append('content', formData.content);
     if (file) {
-      blogFormData.append('image', file);
+      blogFormData.append('image', file); // 'image' must match server's upload.single('image')
     }
 
     try {
@@ -112,8 +90,8 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || `Failed to ${isEditMode ? 'update' : 'add'} post`);
       
-      onSave(data);
-      onClose();
+      onSave(data); // Send new/updated post back to parent
+      onClose(); // Close modal
     } catch (err) {
       setError(err.message);
     } finally {
@@ -125,7 +103,7 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 animate-fade-in p-4">
-      <div className="bg-slate-800 p-8 rounded-lg shadow-xl w-full max-w-4xl border border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div className="bg-slate-800 p-8 rounded-lg shadow-xl w-full max-w-3xl border border-slate-700 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">{isEditMode ? 'Edit Post' : 'Add New Post'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white">
@@ -141,22 +119,10 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
             <label className="block text-sm font-medium text-slate-300">Slug</label>
             <input type="text" name="slug" value={formData.slug} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
           </div>
-          
-          {/* --- JODIT EDITOR REPLACEMENT --- */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Content</label>
-            <JoditEditor
-              ref={editor}
-              value={formData.content}
-              config={config}
-              tabIndex={1} // optional
-              onBlur={handleContentChange} // We use onBlur for performance
-              // You can use onChange if you need real-time updates:
-              // onChange={handleContentChange}
-            />
+            <label className="block text-sm font-medium text-slate-300">Content (Markdown supported)</label>
+            <textarea name="content" value={formData.content} onChange={handleInputChange} required rows="10" className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white"></textarea>
           </div>
-          {/* --- END REPLACEMENT --- */}
-
           <div>
             <label className="block text-sm font-medium text-slate-300">Featured Image</label>
             <input type="file" name="image" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif, image/webp" className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500" />
@@ -183,7 +149,6 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
 };
 
 // --- Delete Confirmation Modal ---
-// (No changes needed here, included for completeness)
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
   if (!isOpen) return null;
   return (
@@ -209,7 +174,6 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
 
 
 // --- Main Admin Page Component ---
-// (No changes needed here, included for completeness)
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -375,3 +339,4 @@ export default function AdminBlogPage() {
     </div>
   );
 }
+
