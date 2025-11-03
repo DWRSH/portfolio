@@ -63,7 +63,7 @@ export default function BlogPostDetailPage() {
   }
 
   if (!post) {
-  	return <p className="text-center text-slate-300 py-20">Post not found.</p>;
+    return <p className="text-center text-slate-300 py-20">Post not found.</p>;
   }
 
   // --- IMPORTANT ---
@@ -85,23 +85,24 @@ export default function BlogPostDetailPage() {
           <img 
             src={post.featuredImage}
             alt={post.title} 
-          	className="w-full h-64 md:h-80 object-cover rounded-lg mb-6"
-        	/>
+            className="w-full h-64 md:h-80 object-cover rounded-lg mb-6"
+            />
         )}
         
-      	<h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
         
-      	<div className="flex items-center text-slate-400 text-sm mb-8">
-       	<Calendar size={14} className="mr-2" />
-       		<time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-      	</div>
+        <div className="flex items-center text-slate-400 text-sm mb-8">
+        <Calendar size={14} className="mr-2" />
+          <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+        </div>
 
         {/* --- ReactMarkdown ko HTML render se badal diya --- */}
-      	<div 
+        <div 
           className="prose prose-invert prose-lg max-w-none prose-p:text-slate-300 prose-headings:text-white prose-a:text-cyan-400 prose-strong:text-white"
           dangerouslySetInnerHTML={{ __html: cleanHtml }}
         />
-    	</article>
+        </article>
     </div>
   );
 }
+
