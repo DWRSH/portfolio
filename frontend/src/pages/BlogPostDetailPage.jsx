@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
-// import ReactMarkdown from 'react-markdown'; // <-- Hata diya (Removed)
-// import api from '../api/axios'; // <-- Hata diya (Removed)
-import DOMPurify from 'dompurify'; // <-- Safe HTML render ke liye (For safe HTML)
+// import ReactMarkdown from 'react-markdown'; // <-- Correctly removed
+// import api from '../api/axios'; // <-- Correctly removed
+import DOMPurify from 'dompurify'; // <-- This line is correct
 
 // Naya component: Poora blog post dikhane ke liye
 export default function BlogPostDetailPage() {
@@ -105,4 +105,3 @@ export default function BlogPostDetailPage() {
     </div>
   );
 }
-
