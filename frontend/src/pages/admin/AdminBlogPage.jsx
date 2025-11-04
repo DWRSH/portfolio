@@ -142,7 +142,7 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
                  <p>Current image:</p>
                  <img src={currentImage} alt="Current post" className="w-20 h-12 object-cover rounded-md mt-1" />
                  <p className="mt-1">Select a new file above to replace it.</p>
-              D</div>
+              </div>
             )}
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -310,7 +310,7 @@ export default function AdminBlogPage() {
                 <th className="p-4 text-sm font-semibold text-slate-300">Title</th>
                 {/* Hide on mobile */}
                 <th className="p-4 text-sm font-semibold text-slate-300 hidden md:table-cell">Slug</th>
-                <th className="p-4 text-sm font-semibold text-slate-300">Actions</th>
+CHAM               <th className="p-4 text-sm font-semibold text-slate-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
@@ -320,25 +320,25 @@ export default function AdminBlogPage() {
                     {post.featuredImage ? (
                       <img src={post.featuredImage} alt={post.title} className="w-16 h-10 object-cover rounded-md bg-slate-700" />
                     ) : (
-            _         <div className="w-16 h-10 rounded-md bg-slate-700 flex items-center justify-center"><ImageIcon size={20} className="text-slate-500" /></div>
-                    )}
-        _         </td>
+                      <div className="w-16 h-10 rounded-md bg-slate-700 flex items-center justify-center"><ImageIcon size={20} className="text-slate-500" /></div>
+CHAM                 )}
+                  </td>
                   <td className="p-4 font-medium text-white whitespace-nowrap">{post.title}</td>
                   {/* Hide on mobile */}
                   <td className="p-4 text-sm text-slate-400 hidden md:table-cell">/{post.slug}</td>
-                  <td className="p-4">
+Moves               <td className="p-4">
                     {/* Stack buttons on small screens */}
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                       <button onClick={() => openEditModal(post)} className="flex items-center gap-1 text-sm text-cyan-400 hover:underline">
-CHAM                     <Edit size={14} /> Edit
+                        <Edit size={14} /> Edit
                       </button>
                       <button onClick={() => openDeleteModal(post)} className="flex items-center gap-1 text-sm text-red-400 hover:underline">
-                      A  <Trash2 size={14} /> Delete
+                    </span></td>    <Trash2 size={14} /> Delete
                       </button>
-Move                 </div>
+                    </div>
                   </td>
                 </tr>
-              ))}
+s             ))}
             </tbody>
           </table>
         )}
@@ -352,8 +352,8 @@ Move                 </div>
       />
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={closeModal}
-s       onConfirm={handleDeletePost}
+Enter       onClose={closeModal}
+        onConfirm={handleDeletePost}
         loading={modalLoading}
       />
     </div>
