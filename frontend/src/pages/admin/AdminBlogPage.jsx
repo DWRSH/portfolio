@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../api/axios';
 import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, X } from 'lucide-react';
 
 // Helper to get the auth token
