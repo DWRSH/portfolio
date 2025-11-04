@@ -87,8 +87,20 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
         body: blogFormData,
       });
 
+      // --- START ROBUST FIX ---
+      if (!res.ok) {
+        let errorMsg = `Failed to ${isEditMode ? 'update' : 'add'} post.`;
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.msg || errorMsg;
+        } catch (jsonError) {
+          errorMsg = `${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || `Failed to ${isEditMode ? 'update' : 'add'} post`);
+      // --- END ROBUST FIX ---
       
       onSave(data); // Send new/updated post back to parent
       onClose(); // Close modal
@@ -121,6 +133,7 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300">Content (Markdown supported)</label>
+            {/* --- Reverted to textarea --- */}
             <textarea name="content" value={formData.content} onChange={handleInputChange} required rows="10" className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white"></textarea>
           </div>
           <div>
@@ -128,10 +141,10 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
             <input type="file" name="image" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif, image/webp" className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500" />
             {isEditMode && currentImage && !file && (
                <div className="mt-2 text-sm text-slate-400">
-                <p>Current image:</p>
-                <img src={currentImage} alt="Current post" className="w-20 h-12 object-cover rounded-md mt-1" />
-                <p className="mt-1">Select a new file above to replace it.</p>
-              </div>
+                 <p>Current image:</p>
+                 <img src={currentImage} alt="Current post" className="w-20 h-12 object-cover rounded-md mt-1" />
+                 <p className="mt-1">Select a new file above to replace it.</p>
+               </div>
             )}
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -190,8 +203,22 @@ export default function AdminBlogPage() {
       setLoading(true);
       setError('');
       const res = await fetch('/api/blogs');
-      if (!res.ok) throw new Error('Failed to fetch blog posts');
+
+      // --- START ROBUST FIX ---
+      if (!res.ok) {
+        let errorMsg = 'Failed to fetch posts';
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.msg || errorMsg;
+        } catch (jsonError) {
+          errorMsg = `${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+      }
+      
       const data = await res.json();
+      // --- END ROBUST FIX ---
+      
       setPosts(data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
       setError(err.message);
@@ -248,8 +275,18 @@ export default function AdminBlogPage() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || 'Failed to delete post');
+      // --- START ROBUST FIX ---
+      if (!res.ok) {
+        let errorMsg = 'Failed to delete post';
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.msg || errorMsg;
+        } catch (jsonError) {
+          errorMsg = `${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMsg);
+      }
+      // --- END ROBUST FIX ---
 
       // Remove from UI
       setPosts(posts.filter(p => p._id !== currentPost._id));
