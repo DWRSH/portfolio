@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, X } from 'lucide-react';
-// 1. 'api' (axios) instance ko import karein (path check kar lein)
 import api from '../../api/axios'; 
 
 // Helper to get the auth token
 const getAuthToken = () => localStorage.getItem('adminAuthToken');
 
 // --- Blog Post Modal (Add/Edit) ---
+// ... (Aapka BlogModal component yahan hai - KOI BADLAAV NAHI)
 const BlogModal = ({ isOpen, onClose, onSave, post }) => {
   const [formData, setFormData] = useState({ title: '', slug: '', content: '' });
   const [file, setFile] = useState(null);
@@ -16,7 +16,6 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
 
   const isEditMode = !!post;
 
-  // Auto-generate slug from title (only if slug is not manually changed)
   useEffect(() => {
     if (isEditMode && post) {
       setFormData({
@@ -27,21 +26,19 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
       setCurrentImage(post.featuredImage || null);
       setFile(null);
     } else {
-      // Reset for Add mode
       setFormData({ title: '', slug: '', content: '' });
       setCurrentImage(null);
       setFile(null);
     }
   }, [isOpen, post, isEditMode]);
 
-  // Handle title change to auto-update slug
   const handleTitleChange = (e) => {
     const newTitle = e.target.value;
     const newSlug = newTitle
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')       // replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, ''); // remove invalid chars
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
     setFormData(prev => ({ ...prev, title: newTitle, slug: newSlug }));
   };
 
@@ -79,31 +76,21 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
     try {
       const token = getAuthToken();
       if (!token) throw new Error("Authentication token not found.");
-
-      // 2. URL se '/api' prefix hatayein
       const url = isEditMode ? `/blogs/${post._id}` : '/blogs';
-
-      // 3. Axios config banayein
       const config = {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       };
-      
-      // 4. 'fetch' ko 'api.post' / 'api.put' se badlein
       const res = isEditMode
         ? await api.put(url, blogFormData, config)
         : await api.post(url, blogFormData, config);
-
-      // 5. Axios response 'res.data' mein hota hai
       const responseData = res.data;
       if (!responseData) throw new Error(`Failed to ${isEditMode ? 'update' : 'add'} post`);
-      
-      onSave(responseData); // Send new/updated post back to parent
-      onClose(); // Close modal
+      onSave(responseData);
+      onClose();
     } catch (err) {
-      // 6. Axios error handling
       setError(err.response?.data?.msg || err.message);
     } finally {
       setLoading(false);
@@ -159,7 +146,9 @@ const BlogModal = ({ isOpen, onClose, onSave, post }) => {
   );
 };
 
+
 // --- Delete Confirmation Modal ---
+// ... (Aapka DeleteConfirmModal component yahan hai - KOI BADLAAV NAHI)
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
   if (!isOpen) return null;
   return (
@@ -184,6 +173,53 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
 };
 
 
+// --- [NEW] Naya Mobile Post Card Design ---
+const MobilePostCard = ({ post, onEdit, onDelete }) => {
+  return (
+    // Card ab poori width lega aur 'overflow-hidden' use karega
+    <div className="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+      
+      {/* 1. Image (Full-width) */}
+      {post.featuredImage ? (
+        <img 
+          src={post.featuredImage} 
+          alt={post.title} 
+          className="w-full h-32 object-cover" // Poori width, 32px height
+        />
+      ) : (
+        <div className="w-full h-32 bg-slate-700 flex items-center justify-center">
+          <ImageIcon size={32} className="text-slate-500" />
+        </div>
+      )}
+
+      {/* 2. Content (Padding ke saath) */}
+      <div className="p-4">
+        
+        {/* 3. Title & Slug (Ab text wrap hoga) */}
+        <h3 className="font-semibold text-white text-lg break-words">{post.title}</h3>
+        <p className="text-sm text-slate-400 mb-4 break-words">/{post.slug}</p>
+
+        {/* 4. Buttons (Bade aur side-by-side) */}
+        <div className="flex gap-3">
+          <button 
+            onClick={() => onEdit(post)} 
+            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 px-3 py-2 rounded-md"
+          >
+            <Edit size={14} /> Edit
+          </button>
+          <button 
+            onClick={() => onDelete(post)} 
+            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 px-3 py-2 rounded-md"
+          >
+            <Trash2 size={14} /> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // --- Main Admin Page Component ---
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState([]);
@@ -200,18 +236,13 @@ export default function AdminBlogPage() {
     try {
       setLoading(true);
       setError('');
-      // 7. 'fetch' ko 'api.get' se badlein aur '/api' prefix hatayein
       const res = await api.get('/blogs');
-      
-      // 8. Axios response 'res.data' mein hota hai
       const data = res.data;
       if (!Array.isArray(data)) {
         throw new Error('Invalid response format from server');
       }
-      
       setPosts(data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (err) {
-      // 9. Axios error handling
       setError(err.response?.data?.msg || err.message || 'Failed to load posts');
     } finally {
       setLoading(false);
@@ -220,22 +251,19 @@ export default function AdminBlogPage() {
 
   useEffect(() => { fetchPosts(); }, []);
 
-  // --- Modal Handlers ---
+  // --- Modal Handlers (KOI BADLAAV NAHI) ---
   const openAddModal = () => {
     setCurrentPost(null);
     setIsModalOpen(true);
   };
-
   const openEditModal = (post) => {
     setCurrentPost(post);
     setIsModalOpen(true);
   };
-
   const openDeleteModal = (post) => {
     setCurrentPost(post);
     setIsDeleteModalOpen(true);
   };
-
   const closeModal = () => {
     setIsModalOpen(false);
     setIsDeleteModalOpen(false);
@@ -243,37 +271,25 @@ export default function AdminBlogPage() {
     setModalLoading(false);
   };
 
-  // --- CRUD Operations ---
+  // --- CRUD Operations (KOI BADLAAV NAHI) ---
   const handleSavePost = (savedPost) => {
     if (currentPost) {
-      // Edit mode
       setPosts(posts.map(p => p._id === savedPost._id ? savedPost : p));
     } else {
-      // Add mode
       setPosts([savedPost, ...posts]);
     }
   };
-
   const handleDeletePost = async () => {
     if (!currentPost) return;
     setModalLoading(true);
     try {
       const token = getAuthToken();
       if (!token) throw new Error('Authentication token not found.');
-
-      // 10. Axios config banayein
-      const config = {
-        headers: { 'Authorization': `Bearer ${token}` }
-      };
-
-      // 11. 'fetch' ko 'api.delete' se badlein aur '/api' prefix hatayein
+      const config = { headers: { 'Authorization': `Bearer ${token}` } };
       await api.delete(`/blogs/${currentPost._id}`, config);
-
-      // Remove from UI
       setPosts(posts.filter(p => p._id !== currentPost._id));
       closeModal();
     } catch (err) {
-      // 12. Axios error handling
       setError(err.response?.data?.msg || err.message);
       closeModal();
     }
@@ -295,53 +311,73 @@ export default function AdminBlogPage() {
 
       {error && <p className="p-4 mb-4 text-red-400 bg-red-900/20 rounded-md">{error}</p>}
 
-      {/* === Responsive Table Container === */}
-      <div className="rounded-lg bg-slate-800 shadow-lg overflow-x-auto">
+      {/* === Responsive List Container === */}
+      <div>
         {loading ? (
-          <p className="p-6 text-slate-400">Loading posts...</p>
+          <p className="p-6 text-slate-400 text-center">Loading posts...</p>
         ) : !posts.length ? (
-          <div className="p-12 text-center"><p className="text-lg text-slate-400">No blog posts found. Add one to get started!</p></div>
+          <div className="p-12 text-center bg-slate-800 rounded-lg">
+            <p className="text-lg text-slate-400">No blog posts found. Add one to get started!</p>
+          </div>
         ) : (
-          <table className="w-full text-left min-w-[640px]">
-            <thead className="bg-slate-900">
-              <tr>
-                <th className="p-4 text-sm font-semibold text-slate-300">Image</th>
-                <th className="p-4 text-sm font-semibold text-slate-300">Title</th>
-                {/* Hide on mobile */}
-                <th className="p-4 text-sm font-semibold text-slate-300 hidden md:table-cell">Slug</th>
-                <th className="p-4 text-sm font-semibold text-slate-300">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-700">
+          <>
+            {/* === Mobile Card View (Hides on 'md' and up) === */}
+            {/* (Naya MobilePostCard component yahan use ho raha hai) */}
+            <div className="md:hidden space-y-4 max-h-[70vh] overflow-y-auto p-1">
               {posts.map(post => (
-                <tr key={post._id} className="hover:bg-slate-700/50">
-                  <td className="p-4">
-                    {post.featuredImage ? (
-                      <img src={post.featuredImage} alt={post.title} className="w-16 h-10 object-cover rounded-md bg-slate-700" />
-                    ) : (
-                      <div className="w-16 h-10 rounded-md bg-slate-700 flex items-center justify-center"><ImageIcon size={20} className="text-slate-500" /></div>
-                    )}
-                  </td>
-                  <td className="p-4 font-medium text-white whitespace-nowrap">{post.title}</td>
-                  {/* Hide on mobile */}
-                  <td className="p-4 text-sm text-slate-400 hidden md:table-cell">/{post.slug}</td>
-                  <td className="p-4">
-                    {/* Stack buttons on small screens */}
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                      <button onClick={() => openEditModal(post)} className="flex items-center gap-1 text-sm text-cyan-400 hover:underline">
-                        <Edit size={14} /> Edit
-                      </button>
-                      <button onClick={() => openDeleteModal(post)} className="flex items-center gap-1 text-sm text-red-400 hover:underline">
-                        <Trash2 size={14} /> Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                <MobilePostCard 
+                  key={post._id}
+                  post={post}
+                  onEdit={openEditModal}
+                  onDelete={openDeleteModal}
+                />
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* === Desktop Table View (Hidden below 'md') === */}
+            {/* (Desktop view wahi hai) */}
+            <div className="hidden md:block rounded-lg bg-slate-800 shadow-lg overflow-auto max-h-[70vh]">
+              <table className="w-full text-left min-w-[640px]">
+                <thead className="bg-slate-900 sticky top-0"> {/* Sticky header for scrolling */}
+                  <tr>
+                    <th className="p-4 text-sm font-semibold text-slate-300">Image</th>
+                    <th className="p-4 text-sm font-semibold text-slate-300">Title</th>
+                    <th className="p-4 text-sm font-semibold text-slate-300">Slug</th>
+                    <th className="p-4 text-sm font-semibold text-slate-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700">
+                  {posts.map(post => (
+                    <tr key={post._id} className="hover:bg-slate-700/50">
+                      <td className="p-4">
+                        {post.featuredImage ? (
+                          <img src={post.featuredImage} alt={post.title} className="w-16 h-10 object-cover rounded-md bg-slate-700" />
+                        ) : (
+                          <div className="w-16 h-10 rounded-md bg-slate-700 flex items-center justify-center"><ImageIcon size={20} className="text-slate-500" /></div>
+                        )}
+                      </td>
+                      <td className="p-4 font-medium text-white whitespace-nowrap">{post.title}</td>
+                      <td className="p-4 text-sm text-slate-400">/{post.slug}</td>
+                      <td className="p-4">
+                        <div className="flex gap-4">
+                          <button onClick={() => openEditModal(post)} className="flex items-center gap-1 text-sm text-cyan-400 hover:underline">
+                            <Edit size={14} /> Edit
+                          </button>
+                          <button onClick={() => openDeleteModal(post)} className="flex items-center gap-1 text-sm text-red-400 hover:underline">
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
+      {/* === End Responsive List Container === */}
+
 
       <BlogModal
         isOpen={isModalOpen}
