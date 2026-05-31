@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Github, ExternalLink, AlertCircle, FolderOpen, ArrowUpRight } from 'lucide-react';
-import api from '../api/axios'; // Tumhara custom Axios instance
+import api from '../api/axios'; 
 
-/* ─── ULTRA-PREMIUM STYLES ────────────────────────────────────────────────── */
+/* ─── ULTRA-PREMIUM 3D & RESPONSIVE STYLES ───────────────────────────────── */
 const eliteProjectStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -28,7 +28,7 @@ const eliteProjectStyles = `
   }
 
   /* --- Ambient Background --- */
-  .ep-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .ep-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .ep-glow {
     position: absolute; width: 800px; height: 800px; border-radius: 50%;
     background: radial-gradient(circle, rgba(0,210,180,0.04) 0%, transparent 60%);
@@ -60,12 +60,12 @@ const eliteProjectStyles = `
     animation: revealUp 1s var(--easing-premium) forwards; 
   }
   .ep-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(50px, 10vw, 120px);
+    font-family: 'Syne', sans-serif; font-size: clamp(40px, 10vw, 120px);
     font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px;
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; word-break: break-word;
   }
   .ep-text-outline {
-    color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+    color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
   }
   .ep-text-solid { color: var(--text-main); }
   .ep-subtitle {
@@ -78,6 +78,7 @@ const eliteProjectStyles = `
     display: grid; 
     grid-template-columns: repeat(12, 1fr);
     gap: 32px;
+    perspective: 1200px; /* Perspective for 3D Cards */
   }
 
   /* --- The Cinematic Project Card --- */
@@ -88,31 +89,38 @@ const eliteProjectStyles = `
     display: flex; flex-direction: column;
     position: relative; opacity: 0;
     animation: revealUp 1s var(--easing-premium) forwards;
-    transition: all 0.5s var(--easing-premium);
+    transition: transform 0.6s var(--easing-premium), box-shadow 0.6s var(--easing-premium), border-color 0.6s;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
 
-  /* Grid Hierarchy Logic (The Magic) */
+  /* Responsive Grid Hierarchy */
   .ep-card { grid-column: span 12; } /* Mobile default */
   
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Tablet (iPad) View */
+    .ep-card:nth-child(1) { grid-column: span 12; } /* First item stays full width */
+    .ep-card:nth-child(n+2) { grid-column: span 6; } /* Others take half width */
+  }
+
   @media (min-width: 1024px) {
-    /* 1st project: Massive Full Width (Case Study Style) */
+    /* Desktop Elite View */
     .ep-card:nth-child(1) { grid-column: span 12; flex-direction: row; align-items: center; }
     .ep-card:nth-child(1) .ep-image-wrap { width: 60%; height: 500px; border-bottom: none; border-right: 1px solid var(--glass-border); }
     .ep-card:nth-child(1) .ep-content { width: 40%; padding: 48px; }
     .ep-card:nth-child(1) .ep-card-title { font-size: 48px; }
     
-    /* 2nd & 3rd projects: Half Width */
     .ep-card:nth-child(2), .ep-card:nth-child(3) { grid-column: span 6; }
     .ep-card:nth-child(2) .ep-image-wrap, .ep-card:nth-child(3) .ep-image-wrap { height: 320px; }
     
-    /* 4th+ projects: One-Third Width (Standard) */
     .ep-card:nth-child(n+4) { grid-column: span 4; }
   }
 
+  /* 3D Hover Effect */
   .ep-card:hover {
-    background: rgba(255,255,255,0.03); border-color: rgba(0,210,180,0.3);
-    transform: translateY(-8px);
-    box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,210,180,0.1);
+    background: rgba(255,255,255,0.02); border-color: rgba(0,210,180,0.3);
+    transform: translateY(-8px) scale(1.02) rotateX(2deg) rotateY(-2deg);
+    box-shadow: -10px 30px 60px rgba(0,0,0,0.5), 0 0 20px rgba(0,210,180,0.1);
   }
 
   /* Image Wrap & Hover Overlay */
@@ -125,7 +133,8 @@ const eliteProjectStyles = `
     transition: transform 0.8s var(--easing-premium), filter 0.8s;
     filter: grayscale(40%) contrast(1.1);
   }
-  .ep-card:hover .ep-image { transform: scale(1.05); filter: grayscale(0%) contrast(1); }
+  .ep-card:hover .ep-image { transform: scale(1.08); filter: grayscale(0%) contrast(1); }
+  
   .ep-overlay {
     position: absolute; inset: 0;
     background: linear-gradient(0deg, rgba(2,4,6,0.9) 0%, transparent 60%);
@@ -136,20 +145,25 @@ const eliteProjectStyles = `
   /* Content & Watermark */
   .ep-content {
     padding: 32px; display: flex; flex-direction: column; flex-grow: 1; position: relative;
+    transform: translateZ(20px); /* Brings content forward in 3D space */
   }
   .ep-watermark {
     position: absolute; top: 16px; right: 24px;
     font-family: 'Syne', sans-serif; font-size: 80px; font-weight: 800;
     color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none;
-    transition: color 0.5s;
+    transition: color 0.5s, transform 0.5s;
   }
-  .ep-card:hover .ep-watermark { color: rgba(0,210,180,0.08); }
+  .ep-card:hover .ep-watermark { 
+    color: rgba(0,210,180,0.08); transform: scale(1.1) translateZ(10px); 
+  }
 
   .ep-card-title {
-    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 28px); font-weight: 800;
     color: var(--text-main); margin: 0 0 16px; letter-spacing: -0.02em;
-    z-index: 1;
+    z-index: 1; transition: color 0.3s;
   }
+  .ep-card:hover .ep-card-title { color: var(--primary); }
+
   .ep-card-desc {
     font-size: 15px; font-weight: 300; line-height: 1.6;
     color: var(--text-muted); margin: 0 0 32px; flex-grow: 1; z-index: 1;
@@ -199,11 +213,16 @@ const eliteProjectStyles = `
   }
   .ep-state svg { color: var(--text-muted); margin: 0 auto 20px; width: 56px; height: 56px; }
   .ep-state-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+
+  /* Mobile Tweaks */
+  @media (max-width: 768px) {
+    .ep-wrapper { padding: 100px 16px 80px; }
+    .ep-header { margin-bottom: 48px; }
+  }
 `;
 
 // --- ASYMMETRICAL SKELETON LOADER ---
 function ProjectSkeleton({ index }) {
-  // Skeleton mimics the exact CSS grid layout logic
   return (
     <div className="ep-card" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="ep-image-wrap sk-box" />
@@ -223,7 +242,6 @@ function ProjectSkeleton({ index }) {
 // --- ELITE PROJECT CARD ---
 function ProjectCard({ project, index }) {
   const { title, description, imageUrl, tags = [], demoUrl, repoUrl } = project || {};
-  // Format index as 01, 02, etc.
   const watermarkNum = String(index + 1).padStart(2, '0');
 
   return (
