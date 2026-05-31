@@ -112,9 +112,11 @@ const eliteAdminStyles = `
     transform: translateY(-4px); border-color: rgba(255,255,255,0.15);
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
   }
+  
+  /* Mouse Tracking Glow Effect */
   .ad-stat-card::before {
     content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s;
-    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.03), transparent 40%);
+    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.04), transparent 40%);
   }
   .ad-stat-card:hover::before { opacity: 1; }
 
