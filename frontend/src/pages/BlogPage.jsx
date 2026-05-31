@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Search, FileText, AlertCircle } from 'lucide-react';
 import api from '../api/axios'; // Tumhara custom Axios instance
 
-
 const proBlogStyles = `
   :root {
     --bg-dark: #05070a;
@@ -114,7 +113,7 @@ const proBlogStyles = `
     transition: all 0.4s var(--easing); opacity: 0;
     animation: blFadeUp 0.8s var(--easing) forwards;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    text-decoration: none; /* Make whole card clickable natively if wrapper is Link */
+    text-decoration: none;
   }
   .bl-card:hover {
     transform: translateY(-6px); border-color: rgba(0,210,180,0.3);
@@ -195,7 +194,7 @@ const proBlogStyles = `
 // --- SKELETON LOADER COMPONENT ---
 function BlogSkeleton({ index }) {
   return (
-    <div className="bl-card" style={{ animationDelay: \`\${index * 0.1}s\` }}>
+    <div className="bl-card" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="bl-image-wrap skeleton-box" />
       <div className="bl-content">
         <div className="skeleton-box" style={{ height: 12, width: '40%', borderRadius: 4, marginBottom: 16 }} />
@@ -224,7 +223,7 @@ function BlogPostCard({ post, index }) {
   });
 
   return (
-    <Link to={\`/blog/\${slug}\`} className="bl-card" style={{ animationDelay: \`\${index * 0.1}s\` }}>
+    <Link to={`/blog/${slug}`} className="bl-card" style={{ animationDelay: `${index * 0.1}s` }}>
       {featuredImage && (
         <div className="bl-image-wrap">
           <img
@@ -349,7 +348,7 @@ function BlogPage() {
               </h3>
               <p className="bl-state-desc">
                 {searchQuery 
-                  ? \`We couldn't find any articles matching "\${searchQuery}". Try adjusting your keywords.\`
+                  ? `We couldn't find any articles matching "${searchQuery}". Try adjusting your keywords.`
                   : "The connection is established, but no content has been published yet. Check back soon."}
               </p>
             </div>
