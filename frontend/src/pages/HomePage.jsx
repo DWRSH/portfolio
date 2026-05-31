@@ -1,478 +1,332 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-/* ─── Google Font import ────────────────────────────────────────────────────
-   Add this inside your <head> (index.html) if not already present:
-
+/* ─── IMPORTANT HEAD TAGS ───────────────────────────────────────────────────
+   Ensure these are in your public/index.html:
    <link rel="preconnect" href="https://fonts.googleapis.com" />
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
-
-   Also add Tabler Icons CDN for button icons:
+   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-   ─────────────────────────────────────────────────────────────────────────── */
+──────────────────────────────────────────────────────────────────────────── */
 
-const styles = `
+const proStyles = `
+  :root {
+    --bg-dark: #05070a;
+    --primary: #00d2b4;
+    --primary-hover: #00f0cc;
+    --accent: #6366f1;
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.55);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --easing: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Core Reset & Typography */
+  .hp-wrapper {
+    background-color: var(--bg-dark);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 80px 24px;
+    box-sizing: border-box;
+    color: var(--text-main);
+  }
+
+  /* Hardware Accelerated Animations */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translate3d(0, 30px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes fadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
   @keyframes float1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50%      { transform: translate(-24px, 28px) scale(1.04); }
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50%      { transform: translate3d(-30px, 40px, 0) scale(1.05); }
   }
   @keyframes float2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50%      { transform: translate(20px, -20px) scale(0.97); }
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50%      { transform: translate3d(40px, -30px, 0) scale(0.95); }
   }
-  @keyframes floatRev {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50%      { transform: translate(14px, -18px) scale(1.03); }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.4; }
-  }
-  @keyframes scrollPulse {
-    0%   { opacity: 0; transform: scaleY(0); transform-origin: top; }
-    30%  { opacity: 1; transform: scaleY(1); transform-origin: top; }
-    70%  { opacity: 1; transform: scaleY(1); transform-origin: bottom; }
-    100% { opacity: 0; transform: scaleY(0); transform-origin: bottom; }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--primary); }
+    50%      { opacity: 0.5; box-shadow: 0 0 2px var(--primary); }
   }
 
-  .hp-root { background: #080b12; }
+  /* Staggered Animations */
+  .reveal { opacity: 0; animation: fadeUp 0.9s var(--easing) forwards; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+  .delay-5 { animation-delay: 0.5s; }
+  .delay-6 { animation-delay: 0.6s; }
 
-  /* Animated background orbs */
-  .hp-orb1 { animation: float1 9s ease-in-out infinite; }
-  .hp-orb2 { animation: float2 12s ease-in-out infinite; }
-  .hp-orb3 { animation: floatRev 15s ease-in-out infinite; }
-
-  /* Staggered content reveals */
-  .hp-anim-1 { opacity: 0; animation: fadeUp 0.7s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-2 { opacity: 0; animation: fadeUp 0.7s 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-3 { opacity: 0; animation: fadeUp 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-4 { opacity: 0; animation: fadeUp 0.8s 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-5 { opacity: 0; animation: fadeIn  1.0s 0.7s ease forwards; }
-  .hp-anim-6 { opacity: 0; animation: fadeUp 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-7 { opacity: 0; animation: fadeUp 0.8s 0.9s  cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-8 { opacity: 0; animation: fadeUp 0.8s 1.1s  cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  .hp-anim-9 { opacity: 0; animation: fadeIn  1.0s 1.5s ease forwards; }
-
-  /* Badge dot pulse */
-  .hp-badge-dot { animation: pulse 2s infinite; }
-
-  /* Scroll indicator */
-  .hp-scroll-line { animation: scrollPulse 2.5s ease-in-out infinite; }
-
-  /* Primary button shimmer on hover */
-  .hp-btn-primary-inner::before {
-    content: '';
+  /* Ambient Background System */
+  .hp-ambient-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    will-change: transform;
+  }
+  .orb-teal {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,210,180,0.08) 0%, transparent 60%);
+    top: -150px; right: -100px;
+    animation: float1 12s ease-in-out infinite;
+  }
+  .orb-indigo {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 60%);
+    bottom: -150px; left: -100px;
+    animation: float2 15s ease-in-out infinite;
+  }
+  .grid-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent);
-    opacity: 0;
-    transition: opacity 0.2s;
-    border-radius: 6px;
+    background-image: 
+      linear-gradient(var(--glass-bg) 1px, transparent 1px),
+      linear-gradient(90deg, var(--glass-bg) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
   }
-  .hp-btn-primary-inner:hover::before { opacity: 1; }
-  .hp-btn-primary-inner:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,210,180,0.28); }
-  .hp-btn-primary-inner:active { transform: translateY(0) scale(0.98); }
 
-  /* Secondary button hover */
-  .hp-btn-secondary-inner:hover {
-    border-color: rgba(255,255,255,0.45);
-    color: #fff;
-    background: rgba(255,255,255,0.04);
-    transform: translateY(-2px);
+  /* Top Corners */
+  .hp-corner-badge {
+    position: absolute; top: 32px; z-index: 10;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-muted);
+    opacity: 0; animation: fadeIn 1s 1s ease forwards;
   }
-  .hp-btn-secondary-inner:active { transform: translateY(0) scale(0.98); }
-  .hp-btn-secondary-inner:hover .hp-icon-arr { transform: translateX(4px); }
+  .corner-left { left: 40px; }
+  .corner-right { right: 40px; }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary);
+    animation: pulseGlow 2.5s infinite;
+  }
 
-  /* Arrow icon transition */
-  .hp-icon-arr { transition: transform 0.2s; }
+  /* Main Content Layout */
+  .hp-content {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    max-width: 800px; width: 100%;
+  }
 
-  /* Corner decoration fade */
-  .hp-corner { opacity: 0; animation: fadeIn 1s 1.8s ease forwards; }
+  /* Typography Polish */
+  .hp-role-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(0,210,180,0.3);
+    background: rgba(0,210,180,0.03);
+    border-radius: 100px;
+    padding: 8px 20px; margin-bottom: 32px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
+    color: var(--primary); text-transform: uppercase;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .hp-eyebrow {
+    font-size: 14px; font-weight: 400; letter-spacing: 0.2em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin: 0 0 16px;
+  }
+  .hp-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(48px, 8vw, 100px);
+    line-height: 0.95; letter-spacing: -0.04em;
+    margin: 0 0 12px;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, #00f0cc 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hp-tagline {
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 300; font-style: italic;
+    color: var(--text-muted); margin: 0 0 40px;
+  }
+  .hp-divider {
+    width: 64px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    margin: 0 auto 40px; opacity: 0.5;
+  }
+  .hp-bio {
+    font-size: 18px; font-weight: 300; line-height: 1.7;
+    color: var(--text-muted); max-width: 580px; margin: 0 auto 48px;
+  }
+  .hp-bio strong {
+    color: var(--text-main); font-weight: 500;
+  }
+
+  /* Buttons */
+  .hp-actions {
+    display: flex; gap: 20px; align-items: center;
+    flex-wrap: wrap; justify-content: center; margin-bottom: 72px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 36px; border-radius: 8px;
+    font-size: 15px; font-weight: 500; letter-spacing: 0.03em;
+    text-decoration: none; transition: all 0.3s var(--easing);
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .btn-primary {
+    background: var(--primary); color: var(--bg-dark);
+    border: 1px solid var(--primary);
+    box-shadow: 0 4px 24px rgba(0, 210, 180, 0.15);
+  }
+  .btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 210, 180, 0.3);
+  }
+  .btn-secondary {
+    background: var(--glass-bg); color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-3px);
+  }
+  .btn-secondary:hover i {
+    transform: translateX(4px);
+  }
+  .btn i { transition: transform 0.3s var(--easing); font-size: 18px; }
+
+  /* Stats Grid (Glassmorphism + Responsive Grid) */
+  .hp-stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--glass-border);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; overflow: hidden;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  }
+  .hp-stat-card {
+    background: rgba(5, 7, 10, 0.7); /* creates hairline border effect using gap */
+    padding: 24px 40px; text-align: center;
+    transition: background 0.3s;
+  }
+  .hp-stat-card:hover { background: rgba(255, 255, 255, 0.02); }
+  .hp-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1; margin-bottom: 8px; display: block;
+  }
+  .hp-stat-unit { color: var(--primary); font-size: 24px; }
+  .hp-stat-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-muted); display: block;
+  }
+
+  /* Responsive Design adjustments */
+  @media (max-width: 768px) {
+    .hp-wrapper { padding: 100px 20px 60px; }
+    .hp-corner-badge { display: none; } /* Hide on small screens for clean look */
+    .hp-stats-grid { grid-template-columns: 1fr; border-radius: 12px; width: 100%; max-width: 320px; }
+    .hp-stat-card { padding: 20px; }
+    .hp-actions { flex-direction: column; width: 100%; max-width: 320px; gap: 16px; }
+    .btn { width: 100%; justify-content: center; }
+  }
 `;
 
 export default function HomePage() {
+  const stats = [
+    { num: '2', unit: '+', label: 'Years XP' },
+    { num: '15', unit: '+', label: 'Projects' },
+    { num: '5', unit: '★', label: 'Client Rating' },
+  ];
+
   return (
     <>
-      {/* ── Injected keyframe styles ── */}
-      <style>{styles}</style>
+      <style>{proStyles}</style>
 
-      <div
-        className="hp-root"
-        style={{
-          fontFamily: "'DM Sans', sans-serif",
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          padding: '60px 40px',
-          boxSizing: 'border-box',
-        }}
-      >
-
-        {/* ─── Atmospheric Background ─────────────────────────────────────── */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', zIndex: 0 }}>
-
-          {/* Teal glow — top-right */}
-          <div
-            className="hp-orb1"
-            style={{
-              position: 'absolute',
-              width: 520, height: 520,
-              background: 'radial-gradient(circle, rgba(0,210,180,0.12) 0%, transparent 70%)',
-              borderRadius: '50%',
-              top: -80, right: -60,
-            }}
-          />
-
-          {/* Indigo glow — bottom-left */}
-          <div
-            className="hp-orb2"
-            style={{
-              position: 'absolute',
-              width: 400, height: 400,
-              background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)',
-              borderRadius: '50%',
-              bottom: -100, left: -80,
-            }}
-          />
-
-          {/* Subtle center glow */}
-          <div
-            className="hp-orb3"
-            style={{
-              position: 'absolute',
-              width: 280, height: 280,
-              background: 'radial-gradient(circle, rgba(0,210,180,0.06) 0%, transparent 70%)',
-              borderRadius: '50%',
-              top: '40%', left: '35%',
-            }}
-          />
-
-          {/* Dot grid overlay */}
-          <div
-            style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: `
-                linear-gradient(rgba(0,210,180,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,210,180,0.03) 1px, transparent 1px)
-              `,
-              backgroundSize: '64px 64px',
-              maskImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 100%)',
-            }}
-          />
+      <section className="hp-wrapper">
+        
+        {/* ─── Ambient Background ────────────────────────────────────────── */}
+        <div className="hp-ambient-bg">
+          <div className="orb orb-teal" />
+          <div className="orb orb-indigo" />
+          <div className="grid-overlay" />
         </div>
 
-        {/* ─── Corner Labels ──────────────────────────────────────────────── */}
-
-        {/* Available-for-work — top-left */}
-        <div
-          className="hp-corner"
-          style={{
-            position: 'absolute', top: 28, left: 28, zIndex: 3,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}
-        >
-          <div
-            className="hp-badge-dot"
-            style={{
-              width: 5, height: 5, borderRadius: '50%',
-              background: '#00d2b4',
-              boxShadow: '0 0 6px rgba(0,210,180,0.8)',
-            }}
-          />
-          <span
-            style={{
-              fontSize: 10, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: 'rgba(255,255,255,0.22)',
-            }}
-          >
-            Available for work
-          </span>
+        {/* ─── Top Badges (Desktop Only) ─────────────────────────────────── */}
+        <div className="hp-corner-badge corner-left">
+          <div className="status-dot" />
+          <span>Available for work</span>
+        </div>
+        <div className="hp-corner-badge corner-right">
+          <span>Portfolio v1.0</span>
         </div>
 
-        {/* Version tag — top-right */}
-        <div
-          className="hp-corner"
-          style={{
-            position: 'absolute', top: 28, right: 28, zIndex: 3,
-            fontSize: 10, letterSpacing: '0.16em',
-            textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)',
-          }}
-        >
-          Portfolio v1.0
-        </div>
-
-        {/* ─── Main Content ───────────────────────────────────────────────── */}
-        <div
-          style={{
-            position: 'relative', zIndex: 2,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', textAlign: 'center',
-            maxWidth: 700, width: '100%',
-          }}
-        >
-
-          {/* Status badge */}
-          <div
-            className="hp-anim-1"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              border: '0.5px solid rgba(0,210,180,0.35)',
-              borderRadius: 100,
-              padding: '6px 18px',
-              marginBottom: 36,
-            }}
-          >
-            <div
-              className="hp-badge-dot"
-              style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: '#00d2b4',
-                boxShadow: '0 0 8px rgba(0,210,180,0.7)',
-              }}
-            />
-            <span
-              style={{
-                fontSize: 12, fontWeight: 400,
-                letterSpacing: '0.12em',
-                color: 'rgba(0,210,180,0.85)',
-                textTransform: 'uppercase',
-              }}
-            >
-              MERN Stack Developer
-            </span>
+        {/* ─── Main Content ──────────────────────────────────────────────── */}
+        <div className="hp-content">
+          
+          <div className="hp-role-badge reveal">
+            <div className="status-dot" />
+            MERN Stack Developer
           </div>
 
-          {/* Eyebrow */}
-          <p
-            className="hp-anim-2"
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13, fontWeight: 300,
-              letterSpacing: '0.22em',
-              color: 'rgba(255,255,255,0.38)',
-              textTransform: 'uppercase',
-              marginBottom: 20, marginTop: 0,
-            }}
-          >
-            Full-Stack Engineer &amp; Web Innovator
+          <p className="hp-eyebrow reveal delay-1">
+            Full-Stack Engineer & Web Innovator
           </p>
 
-          {/* Name */}
-          <h1
-            className="hp-anim-3"
-            style={{
-              fontFamily: "'Syne', sans-serif",
-              fontWeight: 800,
-              fontSize: 'clamp(52px, 10vw, 96px)',
-              lineHeight: 0.95,
-              letterSpacing: '-0.03em',
-              color: '#fff',
-              margin: '0 0 8px',
-            }}
-          >
+          <h1 className="hp-title reveal delay-2">
             Hey, I'm<br />
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #00d2b4 0%, #00f0cc 50%, #6366f1 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Darsh
-            </span>
+            <span className="text-gradient">Darsh</span>
           </h1>
 
-          {/* Tagline */}
-          <p
-            className="hp-anim-4"
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 'clamp(15px, 2.5vw, 20px)',
-              fontWeight: 300,
-              fontStyle: 'italic',
-              color: 'rgba(255,255,255,0.45)',
-              margin: '0 0 36px',
-            }}
-          >
-            crafting experiences that live on the web
+          <p className="hp-tagline reveal delay-3">
+            crafting experiences that live on the web.
           </p>
 
-          {/* Divider */}
-          <div
-            className="hp-anim-5"
-            style={{
-              width: 48, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(0,210,180,0.6), transparent)',
-              margin: '0 auto 36px',
-            }}
-          />
+          <div className="hp-divider reveal delay-4" />
 
-          {/* Bio */}
-          <p
-            className="hp-anim-6"
-            style={{
-              fontSize: 16, fontWeight: 300, lineHeight: 1.8,
-              color: 'rgba(255,255,255,0.5)',
-              maxWidth: 520, margin: '0 auto 52px',
-            }}
-          >
-            I build{' '}
-            <strong style={{ color: 'rgba(255,255,255,0.82)', fontWeight: 400 }}>
-              high-performance
-            </strong>
-            , accessible digital products for modern brands and startups — from interactive
-            frontends to full MERN-stack applications that scale.
+          <p className="hp-bio reveal delay-4">
+            I build <strong>high-performance</strong>, accessible digital products for modern brands and startups — bridging the gap between interactive frontends and scalable MERN-stack architectures.
           </p>
 
-          {/* CTA Buttons */}
-          <div
-            className="hp-anim-7"
-            style={{
-              display: 'flex', gap: 16,
-              alignItems: 'center', flexWrap: 'wrap',
-              justifyContent: 'center', marginBottom: 64,
-            }}
-          >
-            {/* Primary — Download CV */}
-            <a
-              href="/Darsh_resume.pdf"
-              download
-              className="hp-btn-primary-inner"
-              style={{
-                position: 'relative',
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '14px 32px',
-                background: '#00d2b4',
-                color: '#080b12',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14, fontWeight: 500, letterSpacing: '0.04em',
-                border: 'none', borderRadius: 6,
-                cursor: 'pointer', textDecoration: 'none',
-                overflow: 'hidden',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-              }}
-            >
-              <i className="ti ti-download" aria-hidden="true" style={{ fontSize: 16 }} />
+          <div className="hp-actions reveal delay-5">
+            <a href="/Darsh_resume.pdf" download className="btn btn-primary">
+              <i className="ti ti-download" aria-hidden="true" />
               Download CV
             </a>
-
-            {/* Secondary — View Projects */}
-            <Link
-              to="/projects"
-              className="hp-btn-secondary-inner"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '14px 32px',
-                background: 'transparent',
-                color: 'rgba(255,255,255,0.75)',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14, fontWeight: 400, letterSpacing: '0.04em',
-                border: '0.5px solid rgba(255,255,255,0.2)',
-                borderRadius: 6,
-                cursor: 'pointer', textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-            >
+            <Link to="/projects" className="btn btn-secondary">
               View Projects
-              <i
-                className="ti ti-arrow-right hp-icon-arr"
-                aria-hidden="true"
-                style={{ fontSize: 14 }}
-              />
+              <i className="ti ti-arrow-right" aria-hidden="true" />
             </Link>
           </div>
 
-          {/* Stats bar */}
-          <div
-            className="hp-anim-8"
-            style={{
-              display: 'flex',
-              border: '0.5px solid rgba(255,255,255,0.08)',
-              borderRadius: 12,
-              overflow: 'hidden',
-            }}
-          >
-            {[
-              { num: '2', unit: '+', label: 'Years XP' },
-              { num: '15', unit: '+', label: 'Projects' },
-              { num: '5', unit: '★', label: 'Client Rating' },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: '20px 36px',
-                  textAlign: 'center',
-                  background: 'rgba(255,255,255,0.02)',
-                  flex: 1,
-                  position: 'relative',
-                  borderLeft: i > 0 ? '0.5px solid rgba(255,255,255,0.08)' : 'none',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Syne', sans-serif",
-                    fontSize: 28, fontWeight: 700,
-                    color: '#fff', display: 'block',
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {stat.num}
-                  <span style={{ fontSize: 18, color: '#00d2b4' }}>{stat.unit}</span>
+          <div className="hp-stats-grid reveal delay-6">
+            {stats.map((stat, i) => (
+              <div key={i} className="hp-stat-card">
+                <span className="hp-stat-num">
+                  {stat.num}<span className="hp-stat-unit">{stat.unit}</span>
                 </span>
-                <span
-                  style={{
-                    display: 'block', fontSize: 11,
-                    letterSpacing: '0.12em', textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.3)', marginTop: 4,
-                  }}
-                >
-                  {stat.label}
-                </span>
+                <span className="hp-stat-label">{stat.label}</span>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* ─── Scroll Indicator ───────────────────────────────────────────── */}
-        <div
-          className="hp-anim-9"
-          style={{
-            position: 'absolute', bottom: 32, left: '50%',
-            transform: 'translateX(-50%)', zIndex: 2,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 8,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 10, letterSpacing: '0.2em',
-              textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)',
-            }}
-          >
-            Scroll
-          </span>
-          <div
-            className="hp-scroll-line"
-            style={{
-              width: 1, height: 48,
-              background: 'linear-gradient(180deg, rgba(0,210,180,0.5), transparent)',
-            }}
-          />
         </div>
-
-      </div>
+      </section>
     </>
   );
 }
