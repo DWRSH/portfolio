@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, Rocket, Layers, ShieldCheck, Code2 } from 'lucide-react';
+import { Calendar, Rocket, Layers, ShieldCheck } from 'lucide-react';
 
-/* ─── ULTRA-PREMIUM EDITORIAL STYLES ──────────────────────────────────────── */
+/* ─── ULTRA-PREMIUM EDITORIAL & 3D STYLES ───────────────────────────────── */
 const eliteAboutStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -13,13 +13,14 @@ const eliteAboutStyles = `
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
     --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* For the 3D Pop effect */
   }
 
   .ea-wrapper {
     background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    padding: 120px 24px 120px;
+    padding: 120px 24px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
@@ -70,52 +71,101 @@ const eliteAboutStyles = `
   /* --- Massive Header --- */
   .ea-header { margin-bottom: 80px; }
   .ea-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(50px, 9vw, 110px);
+    font-family: 'Syne', sans-serif; font-size: clamp(48px, 9vw, 110px);
     font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0;
     display: flex; flex-direction: column;
   }
   .ea-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); }
   .ea-text-solid { color: var(--text-main); }
 
-  /* --- Editorial Grid (Arch Image + Bio) --- */
+  /* --- Editorial Grid --- */
   .ea-content-grid {
     display: grid; grid-template-columns: 1fr; gap: 64px; align-items: center;
     margin-bottom: 120px;
   }
   @media (min-width: 1024px) {
-    .ea-content-grid { grid-template-columns: 4fr 6fr; gap: 100px; }
+    .ea-content-grid { grid-template-columns: 4.5fr 5.5fr; gap: 80px; }
   }
 
-  /* The Arch Image */
-  .ea-image-col { position: relative; }
-  .ea-arch-wrapper {
-    width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 3/4;
-    border-radius: 200px 200px 16px 16px; /* The Signature Arch */
-    overflow: hidden; position: relative;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  /* ─── THE 3D POP-OUT IMAGE ARCHITECTURE ─────────────────────────────────── */
+  
+  /* 1. Perspective Camera */
+  .ea-image-col { 
+    position: relative; 
+    perspective: 1200px; /* Creates the 3D space */
   }
+
+  /* 2. The Rotating Wrapper */
+  .ea-arch-wrapper {
+    width: 100%; max-width: 380px; margin: 0 auto; aspect-ratio: 3/4;
+    position: relative;
+    transform-style: preserve-3d; /* Allows children to pop out in Z space */
+    transition: transform 0.6s var(--easing-premium);
+  }
+
+  /* Hover triggers the 3D tilt */
+  .ea-arch-wrapper:hover {
+    transform: rotateX(8deg) rotateY(-12deg);
+  }
+
+  /* 3. The Glass Frame (Stays flat at the back) */
+  .ea-arch-frame {
+    position: absolute; inset: 0;
+    border-radius: 200px 200px 16px 16px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.01);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    transition: all 0.6s var(--easing-premium);
+    transform: translateZ(0); 
+  }
+  .ea-arch-wrapper:hover .ea-arch-frame {
+    border-color: rgba(0,210,180,0.3);
+    background: rgba(0,210,180,0.05);
+  }
+
+  /* 4. The Image Layer (Pops out on hover) */
+  .ea-image-inner {
+    position: absolute; inset: 0;
+    border-radius: 200px 200px 16px 16px;
+    overflow: hidden;
+    transform: translateZ(1px); /* Slightly above frame to prevent glitching */
+    transition: transform 0.6s var(--easing-bounce), box-shadow 0.6s var(--easing-premium);
+  }
+  .ea-arch-wrapper:hover .ea-image-inner {
+    /* Pop out towards the screen (translateZ) and scale up slightly */
+    transform: translateZ(80px) translateY(-20px) scale(1.05);
+    box-shadow: -20px 40px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,210,180,0.1);
+  }
+
   .ea-arch-image {
     width: 100%; height: 100%; object-fit: cover;
-    filter: grayscale(20%) contrast(1.1); transition: filter 0.5s, transform 0.8s var(--easing-premium);
+    filter: grayscale(20%) contrast(1.1); transition: filter 0.6s;
   }
   .ea-arch-wrapper:hover .ea-arch-image {
-    filter: grayscale(0%) contrast(1); transform: scale(1.05);
-  }
-  .ea-image-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(0deg, rgba(2,4,6,0.8) 0%, transparent 40%);
+    filter: grayscale(0%) contrast(1);
   }
 
-  /* Floating Branding Element */
-  .ea-floating-badge {
-    position: absolute; bottom: 40px; right: -20px;
-    width: 80px; height: 80px; border-radius: 50%;
-    background: rgba(5,7,10,0.8); border: 1px solid rgba(0,210,180,0.3);
-    backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
-    color: var(--primary); font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4); z-index: 3;
+  .ea-image-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(0deg, rgba(2,4,6,0.9) 0%, transparent 40%);
   }
+
+  /* 5. Floating Branding Badge (Pops out EVEN further) */
+  .ea-floating-badge {
+    position: absolute; bottom: 30px; right: -10px;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: rgba(5,7,10,0.9); border: 1px solid rgba(0,210,180,0.4);
+    backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
+    color: var(--primary); font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    transform: translateZ(10px);
+    transition: transform 0.6s var(--easing-bounce);
+  }
+  .ea-arch-wrapper:hover .ea-floating-badge {
+    /* Flies out to the front and rotates */
+    transform: translateZ(120px) scale(1.1) rotate(15deg);
+  }
+  /* ───────────────────────────────────────────────────────────────────────── */
 
   /* Bio Typography */
   .ea-bio-col { display: flex; flex-direction: column; gap: 32px; }
@@ -126,7 +176,7 @@ const eliteAboutStyles = `
   .ea-label::before { content: ''; width: 24px; height: 1px; background: var(--primary); }
 
   .ea-bio-lead {
-    font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 32px);
+    font-family: 'Syne', sans-serif; font-size: clamp(22px, 3.5vw, 32px);
     font-weight: 700; line-height: 1.3; color: var(--text-main); letter-spacing: -0.02em;
   }
   .ea-bio-text {
@@ -185,6 +235,16 @@ const eliteAboutStyles = `
     width: 7px; height: 7px; border-radius: 50%; background: #fff;
     box-shadow: 0 0 12px 2px var(--primary);
   }
+
+  /* --- MOBILE RESPONSIVENESS FIXES --- */
+  @media (max-width: 768px) {
+    .ea-wrapper { padding: 90px 16px 80px; }
+    .ea-header { margin-bottom: 50px; }
+    .ea-content-grid { gap: 48px; margin-bottom: 80px; }
+    .ea-arch-wrapper { max-width: 300px; }
+    .ea-skills-section { margin-top: 80px; }
+    .ea-skills-grid { gap: 24px; }
+  }
 `;
 
 const SKILLS = [
@@ -232,21 +292,31 @@ export default function AboutPage() {
           {/* --- The Arch & Bio Grid --- */}
           <div className="ea-content-grid">
             
-            {/* Left: Arch Image */}
+            {/* Left: 3D Pop-Out Image Architecture */}
             <div className="ea-image-col reveal-2">
               <div className="ea-arch-wrapper">
-                <img
-                  src="/d2d.png"
-                  alt="Darsh"
-                  className="ea-arch-image"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = 'https://placehold.co/600x800/020406/1e293b?text=Portrait';
-                  }}
-                />
-                <div className="ea-image-overlay" />
+                
+                {/* Layer 1: The Glass Frame Background */}
+                <div className="ea-arch-frame"></div>
+                
+                {/* Layer 2: The Popping Image Container */}
+                <div className="ea-image-inner">
+                  <img
+                    src="/d2d.png"
+                    alt="Darsh"
+                    className="ea-arch-image"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://placehold.co/600x800/020406/1e293b?text=Portrait';
+                    }}
+                  />
+                  <div className="ea-image-overlay" />
+                </div>
+                
+                {/* Layer 3: Floating Branding Badge */}
+                <div className="ea-floating-badge">D</div>
+                
               </div>
-              <div className="ea-floating-badge">D</div>
             </div>
 
             {/* Right: Editorial Bio */}
