@@ -1,214 +1,223 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Search, FileText, AlertCircle } from 'lucide-react';
-import api from '../api/axios'; // Tumhara custom Axios instance
+import { ArrowRight, Search, FileText, AlertCircle, Clock } from 'lucide-react';
+import api from '../api/axios';
 
-const proBlogStyles = `
+/* ─── ULTRA-PREMIUM EDITORIAL STYLES ──────────────────────────────────────── */
+const eliteBlogStyles = `
   :root {
-    --bg-dark: #05070a;
+    --bg-ultra-dark: #020406;
     --primary: #00d2b4;
     --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-muted: rgba(255, 255, 255, 0.45);
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-hover: rgba(255, 255, 255, 0.04);
-    --easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .bl-wrapper {
+  .eb-wrapper {
+    background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
-    background-color: var(--bg-dark);
     min-height: 100vh;
-    padding: 100px 24px 120px;
+    padding: 120px 24px 120px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
     color: var(--text-main);
   }
 
-  /* Hardware Accelerated Animations */
-  @keyframes blFadeUp {
-    from { opacity: 0; transform: translate3d(0, 24px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  /* --- Ambient Background --- */
+  .eb-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .eb-glow-top {
+    position: absolute; width: 1000px; height: 500px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 60%);
+    top: -200px; left: 50%; transform: translateX(-50%);
   }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  /* Ambient Background System */
-  .bl-ambient-bg {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  }
-  .bl-grid-overlay {
+  .eb-noise {
     position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(var(--glass-bg) 1px, transparent 1px),
-      linear-gradient(90deg, var(--glass-bg) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 10%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 10%, transparent 100%);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
   }
-  .bl-glow {
-    position: absolute; top: -150px; left: 50%; transform: translateX(-50%);
-    width: 600px; height: 300px; border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(0,210,180,0.08) 0%, transparent 70%);
-    filter: blur(60px);
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
   }
 
-  /* Layout Container */
-  .bl-container {
+  .eb-container {
     position: relative; z-index: 2;
-    max-width: 1100px; margin: 0 auto;
+    max-width: 1200px; margin: 0 auto;
   }
 
-  /* Header & Search */
-  .bl-header { 
-    text-align: center; margin-bottom: 56px; 
-    opacity: 0; animation: blFadeUp 0.8s var(--easing) forwards; 
+  /* --- Massive Editorial Header --- */
+  .eb-header { 
+    text-align: center; margin-bottom: 64px; 
+    opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; 
   }
-  .bl-title {
-    font-family: 'Syne', sans-serif; font-weight: 800;
-    font-size: clamp(40px, 6vw, 64px); letter-spacing: -0.03em; margin: 0 0 16px;
+  .eb-massive-text {
+    font-family: 'Syne', sans-serif; font-size: clamp(50px, 9vw, 110px);
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px;
+    display: flex; flex-direction: column; align-items: center;
   }
-  .bl-subtitle {
-    font-size: 16px; color: var(--text-muted); font-weight: 300; letter-spacing: 0.05em; margin-bottom: 40px;
+  .eb-text-outline {
+    color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
   }
-  
-  /* Glassmorphism Search Bar */
-  .bl-search-wrapper {
-    position: relative; max-width: 540px; margin: 0 auto;
+  .eb-text-solid { color: var(--text-main); }
+  .eb-subtitle {
+    font-size: 18px; color: var(--text-muted); font-weight: 300; letter-spacing: 0.05em;
+    max-width: 600px; margin: 24px auto 48px;
   }
-  .bl-search-input {
-    width: 100%; padding: 18px 24px 18px 52px;
-    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-    border-radius: 100px; color: var(--text-main); font-family: inherit; font-size: 15px;
-    transition: all 0.3s var(--easing); box-sizing: border-box; outline: none;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  }
-  .bl-search-input::placeholder { color: rgba(255,255,255,0.3); }
-  .bl-search-input:focus {
-    border-color: rgba(0,210,180,0.5);
-    background: rgba(255,255,255,0.05);
-    box-shadow: 0 0 0 4px rgba(0,210,180,0.1);
-  }
-  .bl-search-icon {
-    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
-    color: var(--text-muted); transition: color 0.3s;
-  }
-  .bl-search-input:focus + .bl-search-icon { color: var(--primary); }
 
-  /* Grid System */
-  .bl-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* --- Elite Search Bar --- */
+  .eb-search-wrapper {
+    position: relative; max-width: 600px; margin: 0 auto;
+    transition: transform 0.4s var(--easing-premium);
+  }
+  .eb-search-wrapper:focus-within { transform: scale(1.02); }
+  .eb-search-input {
+    width: 100%; padding: 20px 24px 20px 60px;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+    border-radius: 100px; color: var(--text-main); font-family: inherit; font-size: 16px;
+    transition: all 0.4s var(--easing-premium); outline: none;
+    backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .eb-search-input::placeholder { color: rgba(255,255,255,0.3); font-weight: 300; }
+  .eb-search-input:focus {
+    background: rgba(255,255,255,0.05); border-color: rgba(0,210,180,0.4);
+    box-shadow: 0 10px 40px rgba(0,210,180,0.1);
+  }
+  .eb-search-icon {
+    position: absolute; left: 24px; top: 50%; transform: translateY(-50%);
+    color: rgba(255,255,255,0.3); transition: color 0.4s;
+  }
+  .eb-search-input:focus + .eb-search-icon { color: var(--primary); }
+
+  /* --- Asymmetrical Magazine Grid --- */
+  .eb-grid {
+    display: grid; 
+    grid-template-columns: repeat(12, 1fr);
     gap: 32px;
   }
 
-  /* Blog Card */
-  .bl-card {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-    transition: all 0.4s var(--easing); opacity: 0;
-    animation: blFadeUp 0.8s var(--easing) forwards;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    text-decoration: none;
+  /* The Cinematic Blog Card */
+  .eb-card {
+    background: transparent;
+    display: flex; flex-direction: column; position: relative;
+    opacity: 0; animation: revealUp 1s var(--easing-premium) forwards;
+    text-decoration: none; cursor: pointer;
   }
-  .bl-card:hover {
-    transform: translateY(-6px); border-color: rgba(0,210,180,0.3);
-    background: var(--glass-hover);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,210,180,0.05);
-  }
+  .eb-card:hover .eb-image { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
+  .eb-card:hover .eb-card-title { color: var(--primary); }
 
-  /* Image Section */
-  .bl-image-wrap {
-    position: relative; height: 220px; overflow: hidden;
-    border-bottom: 1px solid var(--glass-border);
-  }
-  .bl-image {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform 0.6s var(--easing); filter: grayscale(15%) contrast(1.05);
-  }
-  .bl-card:hover .bl-image {
-    transform: scale(1.05); filter: grayscale(0%) contrast(1);
-  }
-
-  /* Content Section */
-  .bl-content { padding: 28px; display: flex; flex-direction: column; flex-grow: 1; }
-  .bl-meta {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
-    color: var(--primary); text-transform: uppercase; margin-bottom: 12px;
-  }
-  .bl-card-title {
-    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
-    color: var(--text-main); margin: 0 0 12px; line-height: 1.3;
-    transition: color 0.2s;
-  }
-  .bl-card:hover .bl-card-title { color: var(--primary); }
+  /* Grid Hierarchy Logic (Editorial Flow) */
+  .eb-card { grid-column: span 12; } /* Mobile default */
   
-  /* CSS Line Clamping (Pro Truncation) */
-  .bl-card-desc {
-    font-size: 15px; font-weight: 300; line-height: 1.7;
-    color: var(--text-muted); margin: 0 0 24px;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  @media (min-width: 1024px) {
+    /* 1st Article: The Cover Story */
+    .eb-card:nth-child(1) { grid-column: span 12; flex-direction: row; gap: 48px; align-items: center; }
+    .eb-card:nth-child(1) .eb-image-wrap { width: 60%; height: 480px; border-radius: 24px; }
+    .eb-card:nth-child(1) .eb-content { width: 40%; padding: 0; }
+    .eb-card:nth-child(1) .eb-card-title { font-size: 40px; line-height: 1.1; }
+    .eb-card:nth-child(1) .eb-card-desc { -webkit-line-clamp: 4; font-size: 16px; }
+    
+    /* 2nd & 3rd Articles: Secondary Features */
+    .eb-card:nth-child(2), .eb-card:nth-child(3) { grid-column: span 6; }
+    .eb-card:nth-child(2) .eb-image-wrap, .eb-card:nth-child(3) .eb-image-wrap { height: 320px; }
+    
+    /* 4th+ Articles: The Feed */
+    .eb-card:nth-child(n+4) { grid-column: span 4; }
+  }
+
+  /* Image Wrap */
+  .eb-image-wrap {
+    position: relative; height: 260px; width: 100%; overflow: hidden;
+    border-radius: 16px; border: 1px solid var(--glass-border);
+    margin-bottom: 24px; transition: border-color 0.4s;
+  }
+  .eb-card:hover .eb-image-wrap { border-color: rgba(0,210,180,0.3); }
+  .eb-image {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.8s var(--easing-premium), filter 0.8s;
+    filter: grayscale(20%) contrast(1.05);
+  }
+
+  /* Content */
+  .eb-content { display: flex; flex-direction: column; flex-grow: 1; }
+  
+  .eb-meta-bar {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+  }
+  .eb-meta-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,210,180,0.08); border: 1px solid rgba(0,210,180,0.2);
+    color: var(--primary); font-size: 11px; font-weight: 600; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px; letter-spacing: 0.1em;
+  }
+  
+  .eb-card-title {
+    font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700;
+    color: var(--text-main); margin: 0 0 16px; line-height: 1.2; letter-spacing: -0.02em;
+    transition: color 0.4s var(--easing-premium);
+  }
+  .eb-card-desc {
+    font-size: 15px; font-weight: 300; line-height: 1.7; color: var(--text-muted);
+    margin: 0 0 24px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
     overflow: hidden; flex-grow: 1;
   }
 
-  .bl-read-more {
-    display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+  /* Animated Read Trigger */
+  .eb-read-trigger {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
     color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em;
-    margin-top: auto; transition: color 0.2s;
+    margin-top: auto; opacity: 0.6; transition: all 0.4s var(--easing-premium);
   }
-  .bl-card:hover .bl-read-more { color: var(--primary); }
-  .bl-read-more svg { transition: transform 0.3s var(--easing); }
-  .bl-card:hover .bl-read-more svg { transform: translateX(4px); }
+  .eb-read-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--glass-border);
+    transition: all 0.4s var(--easing-premium);
+  }
+  .eb-card:hover .eb-read-trigger { opacity: 1; color: var(--primary); }
+  .eb-card:hover .eb-read-icon {
+    background: var(--primary); border-color: var(--primary); color: #000;
+    transform: translateX(8px);
+  }
 
   /* Skeletons */
-  .skeleton-box {
-    background: rgba(255,255,255,0.03); position: relative; overflow: hidden;
-  }
-  .skeleton-box::after {
+  .sk-box { background: rgba(255,255,255,0.03); position: relative; overflow: hidden; border-radius: 8px; }
+  .sk-box::after {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
     animation: shimmer 2s infinite;
   }
 
-  /* Empty/Error States */
-  .bl-state {
-    text-align: center; padding: 80px 24px; border-radius: 16px;
-    background: var(--glass-bg); border: 1px dashed var(--glass-border);
-    animation: blFadeUp 0.6s var(--easing) forwards;
-    max-width: 600px; margin: 40px auto 0;
+  /* States */
+  .eb-state {
+    grid-column: span 12; text-align: center; padding: 100px 24px; border-radius: 24px;
+    background: rgba(255,255,255,0.01); border: 1px dashed var(--glass-border);
+    animation: revealUp 0.6s var(--easing-premium) forwards;
   }
-  .bl-state svg { color: var(--text-muted); margin: 0 auto 16px; width: 48px; height: 48px; }
-  .bl-state-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-  .bl-state-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
-
-  @media (max-width: 768px) {
-    .bl-wrapper { padding: 80px 20px; }
-    .bl-grid { grid-template-columns: 1fr; }
-  }
+  .eb-state svg { color: var(--text-muted); margin: 0 auto 20px; width: 56px; height: 56px; }
+  .eb-state-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
 `;
 
-// --- SKELETON LOADER COMPONENT ---
+// --- ASYMMETRICAL SKELETON LOADER ---
 function BlogSkeleton({ index }) {
+  // Skeleton mimics the exact CSS grid layout logic
   return (
-    <div className="bl-card" style={{ animationDelay: `${index * 0.1}s` }}>
-      <div className="bl-image-wrap skeleton-box" />
-      <div className="bl-content">
-        <div className="skeleton-box" style={{ height: 12, width: '40%', borderRadius: 4, marginBottom: 16 }} />
-        <div className="skeleton-box" style={{ height: 28, width: '90%', borderRadius: 4, marginBottom: 16 }} />
-        <div className="skeleton-box" style={{ height: 14, width: '100%', borderRadius: 4, marginBottom: 8 }} />
-        <div className="skeleton-box" style={{ height: 14, width: '100%', borderRadius: 4, marginBottom: 8 }} />
-        <div className="skeleton-box" style={{ height: 14, width: '60%', borderRadius: 4, marginBottom: 24, flexGrow: 1 }} />
-        <div className="skeleton-box" style={{ height: 16, width: 100, borderRadius: 4 }} />
+    <div className="eb-card" style={{ animationDelay: `${index * 0.1}s` }}>
+      <div className="eb-image-wrap sk-box" style={{ borderRadius: '16px' }} />
+      <div className="eb-content">
+        <div className="sk-box" style={{ height: 24, width: 100, borderRadius: 100, marginBottom: 16 }} />
+        <div className="sk-box" style={{ height: 32, width: '85%', marginBottom: 16 }} />
+        <div className="sk-box" style={{ height: 14, width: '100%', marginBottom: 8 }} />
+        <div className="sk-box" style={{ height: 14, width: '80%', marginBottom: 24 }} />
       </div>
     </div>
   );
 }
 
-// --- BLOG CARD COMPONENT ---
+// --- ELITE BLOG CARD COMPONENT ---
 function BlogPostCard({ post, index }) {
   const {
     title = "Blog Post Title",
@@ -219,32 +228,36 @@ function BlogPostCard({ post, index }) {
   } = post || {};
 
   const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
+    year: 'numeric', month: 'short', day: 'numeric',
   });
 
   return (
-    <Link to={`/blog/${slug}`} className="bl-card" style={{ animationDelay: `${index * 0.1}s` }}>
-      {featuredImage && (
-        <div className="bl-image-wrap">
-          <img
-            src={featuredImage}
-            alt={title}
-            className="bl-image"
-            onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/05070a/1e293b?text=Image+Error"; }}
-          />
+    <Link to={`/blog/${slug}`} className="eb-card" style={{ animationDelay: `${index * 0.1}s` }}>
+      <div className="eb-image-wrap">
+        <img
+          src={featuredImage || "https://placehold.co/800x600/020406/1e293b?text=Article"}
+          alt={title}
+          className="eb-image"
+          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/800x600/020406/1e293b?text=Image+Error"; }}
+        />
+      </div>
+      
+      <div className="eb-content">
+        <div className="eb-meta-bar">
+          <div className="eb-meta-pill">
+            <Clock size={12} strokeWidth={2.5} />
+            {formattedDate}
+          </div>
         </div>
-      )}
-      <div className="bl-content">
-        <time dateTime={createdAt} className="bl-meta">
-          {formattedDate}
-        </time>
-        <h3 className="bl-card-title">{title}</h3>
         
-        {/* CSS handles the truncation elegantly now */}
-        <p className="bl-card-desc">{content}</p>
+        <h3 className="eb-card-title">{title}</h3>
+        <p className="eb-card-desc">{content}</p>
         
-        <div className="bl-read-more">
-          Read Article <ArrowRight size={16} />
+        <div className="eb-read-trigger">
+          Read Story
+          <div className="eb-read-icon">
+            <ArrowRight size={14} strokeWidth={2.5} />
+          </div>
         </div>
       </div>
     </Link>
@@ -252,7 +265,7 @@ function BlogPostCard({ post, index }) {
 }
 
 // --- MAIN PAGE COMPONENT ---
-function BlogPage() {
+export default function BlogPage() {
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -292,71 +305,79 @@ function BlogPage() {
 
   return (
     <>
-      <style>{proBlogStyles}</style>
+      <style>{eliteBlogStyles}</style>
 
-      <div className="bl-wrapper">
-        {/* Ambient Background Elements */}
-        <div className="bl-ambient-bg">
-          <div className="bl-glow" />
-          <div className="bl-grid-overlay" />
+      <div className="eb-wrapper">
+        
+        {/* Ambient Background */}
+        <div className="eb-ambient">
+          <div className="eb-glow-top" />
+          <div className="eb-noise" />
         </div>
 
-        <div className="bl-container">
+        <div className="eb-container">
           
-          {/* Header & Search */}
-          <header className="bl-header">
-            <h2 className="bl-title">Engineering <span style={{ color: 'var(--primary)' }}>Insights</span></h2>
-            <p className="bl-subtitle">Thoughts, experiments, and technical deep-dives.</p>
+          {/* Editorial Header & Search */}
+          <header className="eb-header">
+            <h1 className="eb-massive-text">
+              <span className="eb-text-outline">ENGINEERING</span>
+              <span className="eb-text-solid">INSIGHTS.</span>
+            </h1>
+            <p className="eb-subtitle">Deep dives into software architecture, MERN stack scaling, and thoughts on building the modern web.</p>
             
-            <div className="bl-search-wrapper">
+            <div className="eb-search-wrapper">
               <input
                 type="text"
                 placeholder="Search articles, topics, or keywords..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bl-search-input"
+                className="eb-search-input"
                 aria-label="Search blog posts"
               />
-              <Search className="bl-search-icon" size={20} />
+              <Search className="eb-search-icon" size={20} />
             </div>
           </header>
 
-          {/* Loading State */}
+          {/* Loading State: Asymmetrical Skeletons */}
           {loading && (
-            <div className="bl-grid">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <BlogSkeleton key={i} index={i} />
+            <div className="eb-grid">
+              {[1, 2, 3, 4, 5, 6].map((i, index) => (
+                <BlogSkeleton key={i} index={index} />
               ))}
             </div>
           )}
 
           {/* Error State */}
           {error && !loading && (
-            <div className="bl-state" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
-              <AlertCircle style={{ color: '#ef4444' }} />
-              <h3 className="bl-state-title" style={{ color: '#fca5a5' }}>Connection Error</h3>
-              <p className="bl-state-desc">{error}</p>
+            <div className="eb-grid">
+              <div className="eb-state" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <AlertCircle style={{ color: '#ef4444' }} />
+                <h3 className="eb-state-title" style={{ color: '#fca5a5' }}>Connection Error</h3>
+                <p style={{ color: 'var(--text-muted)' }}>{error}</p>
+              </div>
             </div>
           )}
 
           {/* Empty / No Results State */}
           {!loading && !error && filteredPosts.length === 0 && (
-            <div className="bl-state">
-              <FileText />
-              <h3 className="bl-state-title">
-                {searchQuery ? "No Matches Found" : "No Publications Yet"}
-              </h3>
-              <p className="bl-state-desc">
-                {searchQuery 
-                  ? `We couldn't find any articles matching "${searchQuery}". Try adjusting your keywords.`
-                  : "The connection is established, but no content has been published yet. Check back soon."}
-              </p>
+            <div className="eb-grid">
+              <div className="eb-state">
+                <FileText />
+                <h3 className="eb-state-title">
+                  {searchQuery ? "No Matches Found" : "No Publications Yet"}
+                </h3>
+                <p style={{ color: 'var(--text-muted)' }}>
+                  {searchQuery 
+                    ? `We couldn't find any articles matching "${searchQuery}". Try adjusting your keywords.`
+                    : "The connection is established, but no content has been published yet. Check back soon."}
+                </p>
+              </div>
             </div>
           )}
 
-          {/* Success State: Blog Grid */}
+          {/* Success State: Elite Editorial Grid */}
           {!loading && !error && filteredPosts.length > 0 && (
-            <div className="bl-grid">
+            <div className="eb-grid">
               {filteredPosts.map((post, index) => (
                 <BlogPostCard key={post._id || index} post={post} index={index} />
               ))}
@@ -368,5 +389,3 @@ function BlogPage() {
     </>
   );
 }
-
-export default BlogPage;
