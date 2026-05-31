@@ -1,234 +1,272 @@
 import React, { useState, useEffect } from 'react';
-import { Github, ExternalLink, AlertCircle, FolderOpen } from 'lucide-react';
+import { Github, ExternalLink, AlertCircle, FolderOpen, ArrowUpRight } from 'lucide-react';
 import api from '../api/axios'; // Tumhara custom Axios instance
 
-
-const proProjectStyles = `
+/* ─── ULTRA-PREMIUM STYLES ────────────────────────────────────────────────── */
+const eliteProjectStyles = `
   :root {
-    --bg-dark: #05070a;
+    --bg-ultra-dark: #020406;
     --primary: #00d2b4;
     --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-muted: rgba(255, 255, 255, 0.45);
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-hover: rgba(255, 255, 255, 0.05);
-    --easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .pj-wrapper {
+  .ep-wrapper {
+    background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
-    background-color: var(--bg-dark);
     min-height: 100vh;
-    padding: 100px 24px 120px;
+    padding: 120px 24px 120px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
     color: var(--text-main);
   }
 
-  /* Hardware Accelerated Animations */
-  @keyframes pjFadeUp {
-    from { opacity: 0; transform: translate3d(0, 30px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  /* --- Ambient Background --- */
+  .ep-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .ep-glow {
+    position: absolute; width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,210,180,0.04) 0%, transparent 60%);
+    top: -200px; right: -200px;
+    animation: floatSlow 15s ease-in-out infinite;
   }
-  @keyframes pjPulse {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.4; }
-  }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  /* Ambient Background */
-  .pj-ambient-bg {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  }
-  .pj-grid-overlay {
+  .ep-noise {
     position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(var(--glass-bg) 1px, transparent 1px),
-      linear-gradient(90deg, var(--glass-bg) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 10%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 10%, transparent 100%);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+  @keyframes floatSlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 40px); }
+  }
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
   }
 
-  /* Layout */
-  .pj-container {
+  .ep-container {
     position: relative; z-index: 2;
-    max-width: 1100px; margin: 0 auto;
+    max-width: 1200px; margin: 0 auto;
   }
 
-  /* Header */
-  .pj-header { text-align: center; margin-bottom: 64px; opacity: 0; animation: pjFadeUp 0.8s var(--easing) forwards; }
-  .pj-title {
-    font-family: 'Syne', sans-serif; font-weight: 800;
-    font-size: clamp(40px, 6vw, 64px); letter-spacing: -0.03em; margin: 0 0 16px;
+  /* --- Massive Header --- */
+  .ep-header { 
+    margin-bottom: 80px; opacity: 0; 
+    animation: revealUp 1s var(--easing-premium) forwards; 
   }
-  .pj-subtitle {
-    font-size: 16px; color: var(--text-muted); font-weight: 300; letter-spacing: 0.05em;
+  .ep-massive-text {
+    font-family: 'Syne', sans-serif; font-size: clamp(50px, 10vw, 120px);
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px;
+    display: flex; flex-direction: column;
+  }
+  .ep-text-outline {
+    color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+  }
+  .ep-text-solid { color: var(--text-main); }
+  .ep-subtitle {
+    font-size: 18px; color: var(--text-muted); font-weight: 300; letter-spacing: 0.05em;
+    max-width: 500px; margin-top: 24px;
   }
 
-  /* Grid System */
-  .pj-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* --- Asymmetrical Elite Grid --- */
+  .ep-grid {
+    display: grid; 
+    grid-template-columns: repeat(12, 1fr);
     gap: 32px;
   }
 
-  /* Glassmorphism Project Card */
-  .pj-card {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
-    transition: all 0.4s var(--easing); opacity: 0;
-    animation: pjFadeUp 0.8s var(--easing) forwards;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  }
-  .pj-card:hover {
-    transform: translateY(-8px); border-color: rgba(0,210,180,0.3);
-    background: var(--glass-hover);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 32px rgba(0,210,180,0.05);
+  /* --- The Cinematic Project Card --- */
+  .ep-card {
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px; overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative; opacity: 0;
+    animation: revealUp 1s var(--easing-premium) forwards;
+    transition: all 0.5s var(--easing-premium);
   }
 
-  /* Card Image */
-  .pj-image-wrap {
-    position: relative; height: 200px; overflow: hidden;
+  /* Grid Hierarchy Logic (The Magic) */
+  .ep-card { grid-column: span 12; } /* Mobile default */
+  
+  @media (min-width: 1024px) {
+    /* 1st project: Massive Full Width (Case Study Style) */
+    .ep-card:nth-child(1) { grid-column: span 12; flex-direction: row; align-items: center; }
+    .ep-card:nth-child(1) .ep-image-wrap { width: 60%; height: 500px; border-bottom: none; border-right: 1px solid var(--glass-border); }
+    .ep-card:nth-child(1) .ep-content { width: 40%; padding: 48px; }
+    .ep-card:nth-child(1) .ep-card-title { font-size: 48px; }
+    
+    /* 2nd & 3rd projects: Half Width */
+    .ep-card:nth-child(2), .ep-card:nth-child(3) { grid-column: span 6; }
+    .ep-card:nth-child(2) .ep-image-wrap, .ep-card:nth-child(3) .ep-image-wrap { height: 320px; }
+    
+    /* 4th+ projects: One-Third Width (Standard) */
+    .ep-card:nth-child(n+4) { grid-column: span 4; }
+  }
+
+  .ep-card:hover {
+    background: rgba(255,255,255,0.03); border-color: rgba(0,210,180,0.3);
+    transform: translateY(-8px);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,210,180,0.1);
+  }
+
+  /* Image Wrap & Hover Overlay */
+  .ep-image-wrap {
+    position: relative; height: 260px; overflow: hidden;
     border-bottom: 1px solid var(--glass-border);
   }
-  .pj-image {
+  .ep-image {
     width: 100%; height: 100%; object-fit: cover;
-    transition: transform 0.6s var(--easing); filter: grayscale(20%) contrast(1.1);
+    transition: transform 0.8s var(--easing-premium), filter 0.8s;
+    filter: grayscale(40%) contrast(1.1);
   }
-  .pj-card:hover .pj-image {
-    transform: scale(1.05); filter: grayscale(0%) contrast(1);
-  }
-  .pj-image-overlay {
+  .ep-card:hover .ep-image { transform: scale(1.05); filter: grayscale(0%) contrast(1); }
+  .ep-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 40%, rgba(5,7,10,0.9) 100%);
+    background: linear-gradient(0deg, rgba(2,4,6,0.9) 0%, transparent 60%);
+    opacity: 0.8; transition: opacity 0.5s;
   }
+  .ep-card:hover .ep-overlay { opacity: 0.4; }
 
-  /* Card Content */
-  .pj-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
-  .pj-card-title {
-    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
-    color: var(--text-main); margin: 0 0 12px; letter-spacing: -0.01em;
+  /* Content & Watermark */
+  .ep-content {
+    padding: 32px; display: flex; flex-direction: column; flex-grow: 1; position: relative;
   }
-  .pj-card-desc {
-    font-size: 14px; font-weight: 300; line-height: 1.6;
-    color: var(--text-muted); margin: 0 0 24px; flex-grow: 1;
+  .ep-watermark {
+    position: absolute; top: 16px; right: 24px;
+    font-family: 'Syne', sans-serif; font-size: 80px; font-weight: 800;
+    color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none;
+    transition: color 0.5s;
+  }
+  .ep-card:hover .ep-watermark { color: rgba(0,210,180,0.08); }
+
+  .ep-card-title {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    color: var(--text-main); margin: 0 0 16px; letter-spacing: -0.02em;
+    z-index: 1;
+  }
+  .ep-card-desc {
+    font-size: 15px; font-weight: 300; line-height: 1.6;
+    color: var(--text-muted); margin: 0 0 32px; flex-grow: 1; z-index: 1;
   }
 
   /* Tags */
-  .pj-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-  .pj-tag {
-    background: rgba(0,210,180,0.06); border: 0.5px solid rgba(0,210,180,0.2);
-    color: var(--primary); font-size: 11px; font-weight: 500;
-    padding: 4px 12px; border-radius: 100px; letter-spacing: 0.05em;
+  .ep-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; z-index: 1; }
+  .ep-tag {
+    background: transparent; border: 1px solid rgba(0,210,180,0.3);
+    color: var(--primary); font-size: 11px; font-weight: 600; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 100px; letter-spacing: 0.1em;
   }
 
-  /* Card Actions */
-  .pj-actions {
-    display: flex; gap: 16px; padding-top: 20px;
-    border-top: 1px solid var(--glass-border);
+  /* Liquid Action Links */
+  .ep-actions {
+    display: flex; gap: 16px; align-items: center; z-index: 1; flex-wrap: wrap;
   }
-  .pj-link {
-    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;
-    color: var(--text-muted); text-decoration: none; transition: color 0.2s;
+  .ep-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-main); text-decoration: none; padding: 12px 20px;
+    border-radius: 100px; border: 1px solid var(--glass-border);
+    position: relative; overflow: hidden; transition: all 0.4s var(--easing-premium);
   }
-  .pj-link:hover { color: var(--primary); }
-  .pj-link svg { transition: transform 0.2s; }
-  .pj-link:hover svg { transform: translateY(-2px) scale(1.05); }
+  .ep-link::before {
+    content: ''; position: absolute; inset: 0; background: var(--primary);
+    transform: translateY(100%); transition: transform 0.4s var(--easing-premium); z-index: -1;
+  }
+  .ep-link:hover { color: #000; border-color: var(--primary); }
+  .ep-link:hover::before { transform: translateY(0); }
+  .ep-link svg { transition: transform 0.3s; }
+  .ep-link:hover svg { transform: translate(3px, -3px); }
 
   /* Skeletons */
-  .skeleton-box {
-    background: rgba(255,255,255,0.03); position: relative; overflow: hidden;
-  }
-  .skeleton-box::after {
+  .sk-box { background: rgba(255,255,255,0.03); position: relative; overflow: hidden; }
+  .sk-box::after {
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
     animation: shimmer 2s infinite;
   }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
   /* States */
-  .pj-state {
-    text-align: center; padding: 80px 24px; border-radius: 16px;
-    background: var(--glass-bg); border: 1px dashed var(--glass-border);
-    animation: pjFadeUp 0.6s var(--easing) forwards;
+  .ep-state {
+    grid-column: span 12; text-align: center; padding: 100px 24px; border-radius: 24px;
+    background: rgba(255,255,255,0.01); border: 1px dashed var(--glass-border);
   }
-  .pj-state svg { color: var(--text-muted); margin: 0 auto 16px; width: 48px; height: 48px; }
-  .pj-state-title { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
-  .pj-state-desc { font-size: 15px; color: var(--text-muted); }
-
-  @media (max-width: 768px) {
-    .pj-wrapper { padding: 80px 20px; }
-    .pj-grid { grid-template-columns: 1fr; }
-  }
+  .ep-state svg { color: var(--text-muted); margin: 0 auto 20px; width: 56px; height: 56px; }
+  .ep-state-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
 `;
 
-// --- SKELETON LOADER COMPONENT ---
+// --- ASYMMETRICAL SKELETON LOADER ---
 function ProjectSkeleton({ index }) {
+  // Skeleton mimics the exact CSS grid layout logic
   return (
-    <div className="pj-card" style={{ animationDelay: `${index * 0.1}s` }}>
-      <div className="pj-image-wrap skeleton-box" />
-      <div className="pj-content">
-        <div className="skeleton-box" style={{ height: 28, width: '70%', borderRadius: 4, marginBottom: 16 }} />
-        <div className="skeleton-box" style={{ height: 14, width: '100%', borderRadius: 4, marginBottom: 8 }} />
-        <div className="skeleton-box" style={{ height: 14, width: '80%', borderRadius: 4, marginBottom: 24, flexGrow: 1 }} />
-        <div className="pj-tags">
-          <div className="skeleton-box" style={{ height: 24, width: 60, borderRadius: 100 }} />
-          <div className="skeleton-box" style={{ height: 24, width: 80, borderRadius: 100 }} />
-        </div>
-        <div className="pj-actions">
-          <div className="skeleton-box" style={{ height: 20, width: 80, borderRadius: 4 }} />
+    <div className="ep-card" style={{ animationDelay: `${index * 0.1}s` }}>
+      <div className="ep-image-wrap sk-box" />
+      <div className="ep-content">
+        <div className="sk-box" style={{ height: 32, width: '60%', borderRadius: 4, margin: '16px 0' }} />
+        <div className="sk-box" style={{ height: 14, width: '100%', borderRadius: 4, marginBottom: 8 }} />
+        <div className="sk-box" style={{ height: 14, width: '80%', borderRadius: 4, marginBottom: 32, flexGrow: 1 }} />
+        <div className="ep-tags">
+          <div className="sk-box" style={{ height: 26, width: 80, borderRadius: 100 }} />
+          <div className="sk-box" style={{ height: 26, width: 100, borderRadius: 100 }} />
         </div>
       </div>
     </div>
   );
 }
 
-// --- PROJECT CARD COMPONENT ---
+// --- ELITE PROJECT CARD ---
 function ProjectCard({ project, index }) {
   const { title, description, imageUrl, tags = [], demoUrl, repoUrl } = project || {};
+  // Format index as 01, 02, etc.
+  const watermarkNum = String(index + 1).padStart(2, '0');
 
   return (
-    <div className="pj-card" style={{ animationDelay: `${index * 0.1}s` }}>
-      <div className="pj-image-wrap">
+    <div className="ep-card" style={{ animationDelay: `${index * 0.1}s` }}>
+      
+      <div className="ep-image-wrap">
         <img
-          src={imageUrl || "https://placehold.co/600x400/05070a/1e293b?text=Project"}
+          src={imageUrl || "https://placehold.co/1200x800/020406/1e293b?text=Project"}
           alt={title}
-          className="pj-image"
-          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/600x400/05070a/1e293b?text=Image+Error"; }}
+          className="ep-image"
+          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/1200x800/020406/1e293b?text=Image+Error"; }}
         />
-        <div className="pj-image-overlay" />
+        <div className="ep-overlay" />
       </div>
       
-      <div className="pj-content">
-        <h3 className="pj-card-title">{title}</h3>
-        <p className="pj-card-desc">{description || "No description provided."}</p>
+      <div className="ep-content">
+        <div className="ep-watermark">{watermarkNum}</div>
+        
+        <h3 className="ep-card-title">{title}</h3>
+        <p className="ep-card-desc">{description || "No description provided."}</p>
         
         {tags.length > 0 && (
-          <div className="pj-tags">
+          <div className="ep-tags">
             {tags.map(tag => (
-              <span key={tag} className="pj-tag">{tag}</span>
+              <span key={tag} className="ep-tag">{tag}</span>
             ))}
           </div>
         )}
         
-        <div className="pj-actions">
-          {repoUrl && (
-            <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={`View code for ${title}`}>
-              <Github size={16} /> <span>Code</span>
+        <div className="ep-actions">
+          {demoUrl && (
+            <a href={demoUrl} target="_blank" rel="noopener noreferrer" className="ep-link" aria-label={`Live demo: ${title}`}>
+              Live Preview <ArrowUpRight size={16} />
             </a>
           )}
-          {demoUrl && (
-            <a href={demoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={`View live demo for ${title}`}>
-              <ExternalLink size={16} /> <span>Live Demo</span>
+          {repoUrl && (
+            <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="ep-link" aria-label={`Source code: ${title}`}>
+              Source Code <Github size={16} />
             </a>
           )}
         </div>
       </div>
+
     </div>
   );
 }
@@ -257,50 +295,58 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <style>{proProjectStyles}</style>
+      <style>{eliteProjectStyles}</style>
 
-      <div className="pj-wrapper">
-        <div className="pj-ambient-bg">
-          <div className="pj-grid-overlay" />
+      <div className="ep-wrapper">
+        <div className="ep-ambient">
+          <div className="ep-glow" />
+          <div className="ep-noise" />
         </div>
 
-        <div className="pj-container">
+        <div className="ep-container">
           
-          <header className="pj-header">
-            <h2 className="pj-title">Featured Work</h2>
-            <p className="pj-subtitle">Digital products, architectures, and experiments.</p>
+          <header className="ep-header">
+            <h1 className="ep-massive-text">
+              <span className="ep-text-outline">SELECTED</span>
+              <span className="ep-text-solid">WORKS.</span>
+            </h1>
+            <p className="ep-subtitle">An archive of digital experiences, full-stack architectures, and production-grade applications.</p>
           </header>
 
-          {/* Loading State: Skeleton Grid */}
+          {/* Loading State: Asymmetrical Skeleton Grid */}
           {loading && (
-            <div className="pj-grid">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <ProjectSkeleton key={i} index={i} />
+            <div className="ep-grid">
+              {[1, 2, 3, 4, 5, 6].map((i, index) => (
+                <ProjectSkeleton key={i} index={index} />
               ))}
             </div>
           )}
 
           {/* Error State */}
           {error && !loading && (
-            <div className="pj-state" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
-              <AlertCircle style={{ color: '#ef4444' }} />
-              <h3 className="pj-state-title" style={{ color: '#fca5a5' }}>System Error</h3>
-              <p className="pj-state-desc">{error}</p>
+            <div className="ep-grid">
+              <div className="ep-state" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+                <AlertCircle style={{ color: '#ef4444' }} />
+                <h3 className="ep-state-title" style={{ color: '#fca5a5' }}>System Failure</h3>
+                <p style={{ color: 'var(--text-muted)' }}>{error}</p>
+              </div>
             </div>
           )}
 
           {/* Empty State */}
           {!loading && !error && projects.length === 0 && (
-            <div className="pj-state">
-              <FolderOpen />
-              <h3 className="pj-state-title">No Projects Found</h3>
-              <p className="pj-state-desc">The database is connected, but no entries exist yet. Add some via the admin panel.</p>
+            <div className="ep-grid">
+              <div className="ep-state">
+                <FolderOpen />
+                <h3 className="ep-state-title">Archive Empty</h3>
+                <p style={{ color: 'var(--text-muted)' }}>The connection is secure, but no projects are currently deployed to the portfolio.</p>
+              </div>
             </div>
           )}
 
-          {/* Success State: Project Grid */}
+          {/* Success State: Elite Grid */}
           {!loading && !error && projects.length > 0 && (
-            <div className="pj-grid">
+            <div className="ep-grid">
               {projects.map((project, index) => (
                 <ProjectCard key={project._id} project={project} index={index} />
               ))}
