@@ -1,320 +1,305 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, Download, Sparkles, Code2, Star } from 'lucide-react';
 
-const proStyles = `
+/* ─── ULTRA-PREMIUM STYLES ────────────────────────────────────────────────── */
+const eliteHomeStyles = `
   :root {
-    --bg-dark: #05070a;
+    --bg-ultra-dark: #020406;
     --primary: #00d2b4;
     --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-muted: rgba(255, 255, 255, 0.45);
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Core Reset & Typography */
-  .hp-wrapper {
-    background-color: var(--bg-dark);
+  .eh-wrapper {
+    background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     position: relative;
     overflow: hidden;
-    padding: 80px 24px;
-    box-sizing: border-box;
     color: var(--text-main);
+    padding: 120px 24px 60px;
   }
 
-  /* Hardware Accelerated Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translate3d(0, 30px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  /* --- Ambient Light & Grid --- */
+  .eh-ambient {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+  .eh-glow-1 {
+    position: absolute; width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,210,180,0.05) 0%, transparent 60%);
+    top: -300px; right: -200px;
+    animation: floatSlow 15s ease-in-out infinite;
   }
-  @keyframes float1 {
-    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-    50%      { transform: translate3d(-30px, 40px, 0) scale(1.05); }
+  .eh-glow-2 {
+    position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 60%);
+    bottom: -200px; left: -200px;
+    animation: floatSlow 18s ease-in-out infinite reverse;
   }
-  @keyframes float2 {
-    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-    50%      { transform: translate3d(40px, -30px, 0) scale(0.95); }
-  }
-  @keyframes pulseGlow {
-    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--primary); }
-    50%      { opacity: 0.5; box-shadow: 0 0 2px var(--primary); }
-  }
-
-  /* Staggered Animations */
-  .reveal { opacity: 0; animation: fadeUp 0.9s var(--easing) forwards; }
-  .delay-1 { animation-delay: 0.1s; }
-  .delay-2 { animation-delay: 0.2s; }
-  .delay-3 { animation-delay: 0.3s; }
-  .delay-4 { animation-delay: 0.4s; }
-  .delay-5 { animation-delay: 0.5s; }
-  .delay-6 { animation-delay: 0.6s; }
-
-  /* Ambient Background System */
-  .hp-ambient-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    will-change: transform;
-  }
-  .orb-teal {
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(0,210,180,0.08) 0%, transparent 60%);
-    top: -150px; right: -100px;
-    animation: float1 12s ease-in-out infinite;
-  }
-  .orb-indigo {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 60%);
-    bottom: -150px; left: -100px;
-    animation: float2 15s ease-in-out infinite;
-  }
-  .grid-overlay {
+  .eh-noise {
     position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(var(--glass-bg) 1px, transparent 1px),
-      linear-gradient(90deg, var(--glass-bg) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, black 20%, transparent 100%);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
   }
 
-  /* Top Corners */
-  .hp-corner-badge {
-    position: absolute; top: 32px; z-index: 10;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--text-muted);
-    opacity: 0; animation: fadeIn 1s 1s ease forwards;
+  /* --- Animations --- */
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
   }
-  .corner-left { left: 40px; }
-  .corner-right { right: 40px; }
-  .status-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--primary);
-    animation: pulseGlow 2.5s infinite;
+  @keyframes floatSlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 40px); }
+  }
+  @keyframes rotateBadge {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 
-  /* Main Content Layout */
-  .hp-content {
+  .reveal-1 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.1s; }
+  .reveal-2 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.2s; }
+  .reveal-3 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.3s; }
+  .reveal-4 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.5s; }
+
+  /* --- Container & Layout --- */
+  .eh-container {
     position: relative; z-index: 2;
-    display: flex; flex-direction: column;
-    align-items: center; text-align: center;
-    max-width: 800px; width: 100%;
+    width: 100%; max-width: 1200px;
+    display: flex; flex-direction: column; gap: 60px;
   }
 
-  /* Typography Polish */
-  .hp-role-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid rgba(0,210,180,0.3);
-    background: rgba(0,210,180,0.03);
-    border-radius: 100px;
-    padding: 8px 20px; margin-bottom: 32px;
-    font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
-    color: var(--primary); text-transform: uppercase;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  /* --- Massive Editorial Typography --- */
+  .eh-hero-section {
+    display: flex; flex-direction: column; position: relative;
   }
-  .hp-eyebrow {
-    font-size: 14px; font-weight: 400; letter-spacing: 0.2em;
-    color: var(--text-muted); text-transform: uppercase;
-    margin: 0 0 16px;
+  
+  .eh-status-pill {
+    display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+    padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(0,210,180,0.3);
+    background: rgba(0,210,180,0.05); color: var(--primary);
+    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 32px; backdrop-filter: blur(8px);
   }
-  .hp-title {
+  .eh-status-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
+    box-shadow: 0 0 10px var(--primary); animation: blink 2s infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.4; box-shadow: none; } }
+
+  .eh-massive-text {
     font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(48px, 8vw, 100px);
-    line-height: 0.95; letter-spacing: -0.04em;
-    margin: 0 0 12px;
+    font-size: clamp(60px, 11vw, 160px);
+    font-weight: 800; line-height: 0.9;
+    letter-spacing: -0.04em; margin: 0 0 24px 0;
+    display: flex; flex-direction: column;
   }
-  .text-gradient {
-    background: linear-gradient(135deg, var(--primary) 0%, #00f0cc 40%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .eh-text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
+    transition: all 0.5s var(--easing-premium);
   }
-  .hp-tagline {
-    font-size: clamp(16px, 2.5vw, 22px);
-    font-weight: 300; font-style: italic;
-    color: var(--text-muted); margin: 0 0 40px;
+  .eh-text-outline:hover {
+    color: var(--primary); -webkit-text-stroke: 1.5px transparent;
+    text-shadow: 0 0 60px rgba(0,210,180,0.3);
   }
-  .hp-divider {
-    width: 64px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    margin: 0 auto 40px; opacity: 0.5;
-  }
-  .hp-bio {
-    font-size: 18px; font-weight: 300; line-height: 1.7;
-    color: var(--text-muted); max-width: 580px; margin: 0 auto 48px;
-  }
-  .hp-bio strong {
-    color: var(--text-main); font-weight: 500;
+  .eh-text-solid {
+    background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
 
-  /* Buttons */
-  .hp-actions {
-    display: flex; gap: 20px; align-items: center;
-    flex-wrap: wrap; justify-content: center; margin-bottom: 72px;
+  .eh-hero-bottom {
+    display: flex; flex-direction: column; gap: 32px;
   }
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 36px; border-radius: 8px;
-    font-size: 15px; font-weight: 500; letter-spacing: 0.03em;
-    text-decoration: none; transition: all 0.3s var(--easing);
-    cursor: pointer; position: relative; overflow: hidden;
+  @media (min-width: 768px) {
+    .eh-hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; }
   }
-  .btn-primary {
-    background: var(--primary); color: var(--bg-dark);
+
+  .eh-bio {
+    font-size: 18px; font-weight: 300; line-height: 1.6;
+    color: var(--text-muted); max-width: 480px; margin: 0;
+  }
+  .eh-bio strong { color: #fff; font-weight: 500; }
+
+  /* --- Liquid Hover Buttons --- */
+  .eh-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  
+  .eh-btn {
+    position: relative; display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 600;
+    text-decoration: none; overflow: hidden; transition: color 0.4s; z-index: 1;
+  }
+  .eh-btn::before {
+    content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%;
+    transition: transform 0.5s var(--easing-premium); z-index: -1;
+    border-radius: 100px;
+  }
+  
+  .eh-btn-primary {
+    background: var(--primary); color: var(--bg-ultra-dark);
     border: 1px solid var(--primary);
-    box-shadow: 0 4px 24px rgba(0, 210, 180, 0.15);
   }
-  .btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 210, 180, 0.3);
-  }
-  .btn-secondary {
-    background: var(--glass-bg); color: var(--text-main);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  }
-  .btn-secondary:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.2);
-    transform: translateY(-3px);
-  }
-  .btn-secondary:hover i {
-    transform: translateX(4px);
-  }
-  .btn i { transition: transform 0.3s var(--easing); font-size: 18px; }
+  .eh-btn-primary::before { background: #fff; }
+  .eh-btn-primary:hover { color: var(--bg-ultra-dark); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,210,180,0.2); }
+  .eh-btn-primary:hover::before { transform: translateY(-100%); }
 
-  /* Stats Grid (Glassmorphism + Responsive Grid) */
-  .hp-stats-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-    background: var(--glass-border);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px; overflow: hidden;
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  .eh-btn-secondary {
+    background: var(--glass-bg); color: #fff;
+    border: 1px solid var(--glass-border); backdrop-filter: blur(12px);
   }
-  .hp-stat-card {
-    background: rgba(5, 7, 10, 0.7); /* creates hairline border effect using gap */
-    padding: 24px 40px; text-align: center;
-    transition: background 0.3s;
+  .eh-btn-secondary::before { background: rgba(255,255,255,0.1); }
+  .eh-btn-secondary:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+  .eh-btn-secondary:hover::before { transform: translateY(-100%); }
+  .eh-btn-secondary:hover svg { transform: translateX(4px); }
+  .eh-btn svg { transition: transform 0.3s; }
+
+  /* --- Rotating SVG Badge --- */
+  .eh-rotating-badge {
+    position: absolute; top: 40px; right: 0;
+    width: 140px; height: 140px;
+    display: none; /* Hide on small mobile */
   }
-  .hp-stat-card:hover { background: rgba(255, 255, 255, 0.02); }
-  .hp-stat-num {
-    font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
-    letter-spacing: -0.02em; line-height: 1; margin-bottom: 8px; display: block;
-  }
-  .hp-stat-unit { color: var(--primary); font-size: 24px; }
-  .hp-stat-label {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--text-muted); display: block;
+  @media (min-width: 1024px) { .eh-rotating-badge { display: block; } }
+  
+  .eh-badge-svg { animation: rotateBadge 12s linear infinite; width: 100%; height: 100%; }
+  .eh-badge-icon {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: var(--primary);
   }
 
-  /* Responsive Design adjustments */
-  @media (max-width: 768px) {
-    .hp-wrapper { padding: 100px 20px 60px; }
-    .hp-corner-badge { display: none; } /* Hide on small screens for clean look */
-    .hp-stats-grid { grid-template-columns: 1fr; border-radius: 12px; width: 100%; max-width: 320px; }
-    .hp-stat-card { padding: 20px; }
-    .hp-actions { flex-direction: column; width: 100%; max-width: 320px; gap: 16px; }
-    .btn { width: 100%; justify-content: center; }
+  /* --- Asymmetrical Bento Grid Stats --- */
+  .eh-bento-grid {
+    display: grid; grid-template-columns: 1fr; gap: 16px;
+    margin-top: 40px;
+  }
+  @media (min-width: 768px) {
+    .eh-bento-grid { grid-template-columns: 1.5fr 1fr 1fr; }
+  }
+
+  .eh-bento-card {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 32px; position: relative; overflow: hidden;
+    backdrop-filter: blur(12px); transition: all 0.4s var(--easing-premium);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .eh-bento-card:hover {
+    background: rgba(255,255,255,0.03); border-color: rgba(0,210,180,0.3);
+    transform: translateY(-4px);
+  }
+  /* Specific styling for the first featured box */
+  .eh-bento-featured {
+    background: linear-gradient(145deg, rgba(0,210,180,0.08) 0%, rgba(5,7,10,0) 100%);
+  }
+  
+  .eh-bento-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(255,255,255,0.05); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
+  }
+  .eh-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800;
+    line-height: 1; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em;
+  }
+  .eh-stat-label {
+    font-size: 14px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em;
   }
 `;
 
 export default function HomePage() {
-  const stats = [
-    { num: '2', unit: '+', label: 'Years XP' },
-    { num: '15', unit: '+', label: 'Projects' },
-    { num: '5', unit: '★', label: 'Client Rating' },
-  ];
-
   return (
     <>
-      <style>{proStyles}</style>
+      <style>{eliteHomeStyles}</style>
 
-      <section className="hp-wrapper">
+      <section className="eh-wrapper">
         
-        {/* ─── Ambient Background ────────────────────────────────────────── */}
-        <div className="hp-ambient-bg">
-          <div className="orb orb-teal" />
-          <div className="orb orb-indigo" />
-          <div className="grid-overlay" />
+        {/* --- Ambient Background --- */}
+        <div className="eh-ambient">
+          <div className="eh-glow-1" />
+          <div className="eh-glow-2" />
+          <div className="eh-noise" />
         </div>
 
-        {/* ─── Top Badges (Desktop Only) ─────────────────────────────────── */}
-        <div className="hp-corner-badge corner-left">
-          <div className="status-dot" />
-          <span>Available for work</span>
-        </div>
-        <div className="hp-corner-badge corner-right">
-          <span>Portfolio v1.0</span>
-        </div>
-
-        {/* ─── Main Content ──────────────────────────────────────────────── */}
-        <div className="hp-content">
+        <div className="eh-container">
           
-          <div className="hp-role-badge reveal">
-            <div className="status-dot" />
-            MERN Stack Developer
-          </div>
+          {/* --- Massive Editorial Hero --- */}
+          <div className="eh-hero-section">
+            
+            {/* Elite Rotating Badge (Desktop absolute positioned) */}
+            <div className="eh-rotating-badge reveal-1">
+              <svg viewBox="0 0 100 100" className="eh-badge-svg">
+                <path id="circlePath" fill="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
+                <text>
+                  <textPath href="#circlePath" fill="rgba(255,255,255,0.4)" fontSize="10" letterSpacing="1.5px" fontWeight="600">
+                    CREATIVE DEVELOPER • FULL STACK •
+                  </textPath>
+                </text>
+              </svg>
+              <div className="eh-badge-icon"><Sparkles size={24} /></div>
+            </div>
 
-          <p className="hp-eyebrow reveal delay-1">
-            Full-Stack Engineer & Web Innovator
-          </p>
+            <div className="eh-status-pill reveal-1">
+              <div className="eh-status-dot" />
+              Available for New Projects
+            </div>
 
-          <h1 className="hp-title reveal delay-2">
-            Hey, I'm<br />
-            <span className="text-gradient">Darsh</span>
-          </h1>
+            <h1 className="eh-massive-text reveal-2">
+              <span className="eh-text-outline">DARSH</span>
+              <span className="eh-text-solid">PRAJAPATI.</span>
+            </h1>
 
-          <p className="hp-tagline reveal delay-3">
-            crafting experiences that live on the web.
-          </p>
+            <div className="eh-hero-bottom reveal-3">
+              <p className="eh-bio">
+                I engineer <strong>high-performance</strong>, aesthetic digital architectures. 
+                Specializing in the MERN stack to bridge the gap between heavy-duty backends and pixel-perfect frontends.
+              </p>
 
-          <div className="hp-divider reveal delay-4" />
-
-          <p className="hp-bio reveal delay-4">
-            I build <strong>high-performance</strong>, accessible digital products for modern brands and startups — bridging the gap between interactive frontends and scalable MERN-stack architectures.
-          </p>
-
-          <div className="hp-actions reveal delay-5">
-            <a href="/Darsh_resume.pdf" download className="btn btn-primary">
-              <i className="ti ti-download" aria-hidden="true" />
-              Download CV
-            </a>
-            <Link to="/projects" className="btn btn-secondary">
-              View Projects
-              <i className="ti ti-arrow-right" aria-hidden="true" />
-            </Link>
-          </div>
-
-          <div className="hp-stats-grid reveal delay-6">
-            {stats.map((stat, i) => (
-              <div key={i} className="hp-stat-card">
-                <span className="hp-stat-num">
-                  {stat.num}<span className="hp-stat-unit">{stat.unit}</span>
-                </span>
-                <span className="hp-stat-label">{stat.label}</span>
+              <div className="eh-actions">
+                <a href="/Darsh_resume.pdf" download className="eh-btn eh-btn-primary">
+                  Download CV <Download size={18} />
+                </a>
+                <Link to="/projects" className="eh-btn eh-btn-secondary">
+                  Explore Work <ArrowRight size={18} />
+                </Link>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* --- The Bento Stats Grid --- */}
+          <div className="eh-bento-grid reveal-4">
+            
+            {/* Featured Wide Box */}
+            <div className="eh-bento-card eh-bento-featured">
+              <div className="eh-bento-icon"><Code2 size={24} /></div>
+              <div>
+                <div className="eh-stat-num">MERN</div>
+                <div className="eh-stat-label">Core Architecture Stack</div>
+              </div>
+            </div>
+
+            <div className="eh-bento-card">
+              <div className="eh-bento-icon"><Sparkles size={24} /></div>
+              <div>
+                <div className="eh-stat-num">15<span style={{color: 'var(--primary)', fontSize: '32px'}}>+</span></div>
+                <div className="eh-stat-label">Projects Shipped</div>
+              </div>
+            </div>
+
+            <div className="eh-bento-card">
+              <div className="eh-bento-icon"><Star size={24} /></div>
+              <div>
+                <div className="eh-stat-num">2<span style={{color: 'var(--primary)', fontSize: '32px'}}>yrs</span></div>
+                <div className="eh-stat-label">Production Exp.</div>
+              </div>
+            </div>
+
           </div>
 
         </div>
