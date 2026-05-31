@@ -1,354 +1,301 @@
 import React from 'react';
-const proAboutStyles = `
+import { Calendar, Rocket, Layers, ShieldCheck, Code2 } from 'lucide-react';
+
+/* ─── ULTRA-PREMIUM EDITORIAL STYLES ──────────────────────────────────────── */
+const eliteAboutStyles = `
   :root {
-    --bg-dark: #05070a;
+    --bg-ultra-dark: #020406;
     --primary: #00d2b4;
+    --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.55);
+    --text-muted: rgba(255, 255, 255, 0.45);
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --easing: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .ab-wrapper {
+  .ea-wrapper {
+    background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
-    background-color: var(--bg-dark);
     min-height: 100vh;
-    padding: 100px 24px;
+    padding: 120px 24px 120px;
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
     color: var(--text-main);
   }
 
-  /* Hardware Accelerated Animations */
-  @keyframes abFadeUp {
-    from { opacity: 0; transform: translate3d(0, 30px, 0); }
-    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  /* --- Ambient Background --- */
+  .ea-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .ea-glow-1 {
+    position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,210,180,0.05) 0%, transparent 60%);
+    top: 10%; right: -10%; animation: floatSlow 15s ease-in-out infinite;
   }
-  @keyframes abFloat1 {
-    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-    50%      { transform: translate3d(-30px, 40px, 0) scale(1.05); }
+  .ea-glow-2 {
+    position: absolute; width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 60%);
+    bottom: -20%; left: -20%; animation: floatSlow 18s ease-in-out infinite reverse;
   }
-  @keyframes abFloat2 {
-    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-    50%      { transform: translate3d(40px, -30px, 0) scale(0.95); }
+  .ea-noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
   }
-  @keyframes abPulseGlow {
-    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--primary); }
-    50%      { opacity: 0.5; box-shadow: 0 0 2px var(--primary); }
+
+  @keyframes floatSlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30px, 40px); }
   }
-  @keyframes abScaleX {
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes lineFill {
     from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+    to { transform: scaleX(1); }
   }
 
-  .ab-reveal { opacity: 0; animation: abFadeUp 0.8s var(--easing) forwards; }
-  .ab-delay-1 { animation-delay: 0.1s; }
-  .ab-delay-2 { animation-delay: 0.2s; }
-  .ab-delay-3 { animation-delay: 0.3s; }
-  .ab-delay-4 { animation-delay: 0.4s; }
+  .reveal-1 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.1s; }
+  .reveal-2 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.2s; }
+  .reveal-3 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.4s; }
+  .reveal-4 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.6s; }
 
-  /* Ambient Background */
-  .ab-ambient-bg {
-    position: absolute; inset: 0; z-index: 0;
-    pointer-events: none; overflow: hidden;
-  }
-  .ab-orb {
-    position: absolute; border-radius: 50%;
-    filter: blur(80px); will-change: transform;
-  }
-  .ab-orb-teal {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(0,210,180,0.06) 0%, transparent 60%);
-    top: -100px; right: -50px; animation: abFloat1 14s ease-in-out infinite;
-  }
-  .ab-orb-indigo {
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 60%);
-    bottom: 50px; left: -50px; animation: abFloat2 18s ease-in-out infinite;
-  }
-  .ab-grid-overlay {
-    position: absolute; inset: 0;
-    background-image: 
-      linear-gradient(var(--glass-bg) 1px, transparent 1px),
-      linear-gradient(90deg, var(--glass-bg) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 80% 60% at 70% 40%, black 10%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 70% 40%, black 10%, transparent 100%);
-  }
-
-  /* Layout Container */
-  .ab-container {
+  .ea-container {
     position: relative; z-index: 2;
-    max-width: 900px; margin: 0 auto;
+    max-width: 1200px; margin: 0 auto;
   }
 
-  /* Typography */
-  .ab-eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--primary); margin-bottom: 24px;
+  /* --- Massive Header --- */
+  .ea-header { margin-bottom: 80px; }
+  .ea-massive-text {
+    font-family: 'Syne', sans-serif; font-size: clamp(50px, 9vw, 110px);
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0;
+    display: flex; flex-direction: column;
   }
-  .ab-status-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--primary); animation: abPulseGlow 2.5s infinite;
+  .ea-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); }
+  .ea-text-solid { color: var(--text-main); }
+
+  /* --- Editorial Grid (Arch Image + Bio) --- */
+  .ea-content-grid {
+    display: grid; grid-template-columns: 1fr; gap: 64px; align-items: center;
+    margin-bottom: 120px;
   }
-  .ab-title {
-    font-family: 'Syne', sans-serif; font-weight: 800;
-    font-size: clamp(40px, 6vw, 72px); line-height: 1;
-    letter-spacing: -0.03em; margin: 0 0 64px;
-  }
-  .ab-text-gradient {
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
+  @media (min-width: 1024px) {
+    .ea-content-grid { grid-template-columns: 4fr 6fr; gap: 100px; }
   }
 
-  /* Bio & Photo Grid */
-  .ab-bio-grid {
-    display: grid; grid-template-columns: 280px 1fr;
-    gap: 64px; align-items: start; margin-bottom: 80px;
-  }
-  
-  .ab-photo-wrapper {
-    position: relative; border-radius: 16px;
+  /* The Arch Image */
+  .ea-image-col { position: relative; }
+  .ea-arch-wrapper {
+    width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 3/4;
+    border-radius: 200px 200px 16px 16px; /* The Signature Arch */
+    overflow: hidden; position: relative;
     border: 1px solid var(--glass-border);
-    overflow: hidden; background: var(--glass-bg);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
   }
-  .ab-photo {
-    width: 100%; display: block;
-    filter: grayscale(15%) contrast(1.1);
-    transition: filter 0.4s var(--easing), transform 0.4s var(--easing);
+  .ea-arch-image {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: grayscale(20%) contrast(1.1); transition: filter 0.5s, transform 0.8s var(--easing-premium);
   }
-  .ab-photo-wrapper:hover .ab-photo {
-    filter: grayscale(0%) contrast(1);
-    transform: scale(1.02);
+  .ea-arch-wrapper:hover .ea-arch-image {
+    filter: grayscale(0%) contrast(1); transform: scale(1.05);
   }
-  .ab-photo-overlay {
+  .ea-image-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(5,7,10,0.9) 100%);
+    background: linear-gradient(0deg, rgba(2,4,6,0.8) 0%, transparent 40%);
   }
-  .ab-photo-label {
-    position: absolute; bottom: 20px; left: 0; right: 0;
-    text-align: center; font-size: 12px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--text-muted);
+
+  /* Floating Branding Element */
+  .ea-floating-badge {
+    position: absolute; bottom: 40px; right: -20px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(5,7,10,0.8); border: 1px solid rgba(0,210,180,0.3);
+    backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
+    color: var(--primary); font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4); z-index: 3;
   }
+
+  /* Bio Typography */
+  .ea-bio-col { display: flex; flex-direction: column; gap: 32px; }
+  .ea-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--primary); display: flex; align-items: center; gap: 12px;
+  }
+  .ea-label::before { content: ''; width: 24px; height: 1px; background: var(--primary); }
+
+  .ea-bio-lead {
+    font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 32px);
+    font-weight: 700; line-height: 1.3; color: var(--text-main); letter-spacing: -0.02em;
+  }
+  .ea-bio-text {
+    font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--text-muted);
+  }
+  .ea-bio-text strong { color: var(--text-main); font-weight: 500; }
+
+  /* --- Asymmetrical Stats Row --- */
+  .ea-stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
+    background: var(--glass-border); border: 1px solid var(--glass-border);
+    border-radius: 20px; overflow: hidden;
+  }
+  @media (min-width: 768px) { .ea-stats-row { grid-template-columns: repeat(4, 1fr); } }
   
-  /* Branding Mark D */
-  .ab-brand-mark {
-    position: absolute; top: -12px; right: -12px;
-    width: 48px; height: 48px; border-radius: 12px;
-    background: rgba(5, 7, 10, 0.8);
-    border: 1px solid rgba(0,210,180,0.3);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
-    color: var(--primary); box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  .ea-stat-box {
+    background: rgba(5,7,10,0.8); padding: 32px 24px; text-align: center;
+    transition: background 0.4s;
   }
+  .ea-stat-box:hover { background: rgba(255,255,255,0.02); }
+  .ea-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
+    color: var(--text-main); margin-bottom: 8px; display: block;
+  }
+  .ea-stat-desc {
+    font-size: 12px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em;
+  }
+  .ea-stat-icon { color: var(--primary); margin: 0 auto 16px; display: block; }
 
-  .ab-bio-content p {
-    font-size: 17px; font-weight: 300; line-height: 1.8;
-    color: var(--text-muted); margin: 0 0 24px;
+  /* --- Ultra-Sharp Tech Arsenal (Skills) --- */
+  .ea-skills-section { margin-top: 120px; }
+  .ea-skills-grid {
+    display: grid; grid-template-columns: 1fr; gap: 32px;
   }
-  .ab-bio-content strong { color: var(--text-main); font-weight: 500; }
+  @media (min-width: 768px) { .ea-skills-grid { grid-template-columns: 1fr 1fr; gap: 64px; } }
 
-  /* Mini Stats */
-  .ab-mini-stats {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 16px; margin-top: 32px;
-  }
-  .ab-mini-card {
-    border: 1px solid var(--glass-border); border-radius: 12px;
-    padding: 16px 20px; background: var(--glass-bg);
-    display: flex; align-items: center; gap: 16px;
-    transition: all 0.3s var(--easing);
-  }
-  .ab-mini-card:hover {
-    border-color: rgba(0,210,180,0.3); background: rgba(0,210,180,0.05);
-    transform: translateY(-2px);
-  }
-  .ab-mini-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: rgba(0,210,180,0.1); color: var(--primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .ab-mini-num {
-    font-family: 'Syne', sans-serif; font-size: 20px;
-    font-weight: 700; color: #fff; line-height: 1.2; display: block;
-  }
-  .ab-mini-label {
-    font-size: 12px; color: var(--text-muted); display: block;
-  }
-
-  /* Skills Grid */
-  .ab-section-divider {
-    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 32px;
-    display: flex; align-items: center; gap: 16px;
-  }
-  .ab-section-divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--glass-border);
-  }
-  .ab-skills-container {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;
-  }
-  .ab-skill-card {
-    border: 1px solid var(--glass-border); border-radius: 12px;
-    padding: 20px; background: var(--glass-bg);
-    display: flex; flex-direction: column; gap: 12px;
-    transition: all 0.3s var(--easing); cursor: default;
-  }
-  .ab-skill-card:hover {
-    border-color: rgba(0,210,180,0.4); background: rgba(0,210,180,0.05);
-    box-shadow: 0 8px 24px rgba(0,210,180,0.08);
-  }
-  .ab-skill-header {
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .ab-skill-name { font-size: 14px; font-weight: 500; color: var(--text-main); }
-  .ab-skill-pct { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--primary); }
+  .ea-skill-item { display: flex; flex-direction: column; gap: 12px; }
+  .ea-skill-header { display: flex; justify-content: space-between; align-items: flex-end; }
+  .ea-skill-name { font-size: 15px; font-weight: 500; color: var(--text-main); letter-spacing: 0.02em; }
+  .ea-skill-pct { font-family: 'Fira Code', monospace; font-size: 14px; color: var(--primary); font-weight: 500; }
   
-  /* Pro Progress Bar using scaleX */
-  .ab-skill-track {
-    height: 3px; background: rgba(255,255,255,0.06);
-    border-radius: 4px; overflow: hidden; position: relative;
+  /* The Sci-Fi 1px Line Tracker */
+  .ea-skill-track {
+    width: 100%; height: 1px; background: rgba(255,255,255,0.1);
+    position: relative; border-radius: 2px;
   }
-  .ab-skill-fill {
-    position: absolute; top: 0; left: 0; height: 100%; width: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
-    transform-origin: left;
-    transform: scaleX(0); /* Default state */
-    animation: abScaleX 1.2s 0.8s var(--easing) forwards;
+  .ea-skill-fill {
+    position: absolute; top: -1px; left: 0; height: 3px;
+    background: var(--primary); border-radius: 2px;
+    transform-origin: left; transform: scaleX(0);
+    animation: lineFill 1.5s var(--easing-premium) forwards; animation-delay: 0.8s;
+    box-shadow: 0 0 10px rgba(0,210,180,0.5);
   }
-
-  /* Responsive Adjustments */
-  @media (max-width: 768px) {
-    .ab-wrapper { padding: 100px 20px 60px; }
-    .ab-bio-grid { grid-template-columns: 1fr; gap: 40px; }
-    .ab-photo-wrapper { max-width: 320px; margin: 0 auto; }
-    .ab-mini-stats { grid-template-columns: 1fr; }
+  .ea-skill-fill::after {
+    content: ''; position: absolute; right: 0; top: -2px;
+    width: 7px; height: 7px; border-radius: 50%; background: #fff;
+    box-shadow: 0 0 12px 2px var(--primary);
   }
 `;
 
 const SKILLS = [
   { name: 'JavaScript/ES6+', pct: 92 },
   { name: 'React & Redux', pct: 88 },
-  { name: 'React Native', pct: 85 },
+  { name: 'React Native & Expo', pct: 85 },
   { name: 'Node.js & Express', pct: 84 },
   { name: 'Python & FastAPI', pct: 80 },
-  { name: 'MongoDB', pct: 78 },
-  { name: 'Tailwind CSS', pct: 90 },
-  { name: 'Security Fundamentals', pct: 70 },
+  { name: 'MongoDB Architecture', pct: 78 },
+  { name: 'Tailwind CSS & UI', pct: 90 },
+  { name: 'Cybersecurity / Forensics', pct: 70 },
 ];
 
-const MINI_CARDS = [
-  { icon: 'ti-calendar', num: '6th Sem', label: 'B.Sc. CA & IT' },
-  { icon: 'ti-rocket', num: '15+', label: 'Projects Shipped' },
-  { icon: 'ti-stack-2', num: 'MERN', label: 'Primary Stack' },
-  { icon: 'ti-shield-check', num: 'Active', label: 'Cybersec Interest' },
+const STATS = [
+  { icon: Calendar, num: '6th Sem', label: 'B.Sc. CA & IT' },
+  { icon: Rocket, num: '15+', label: 'Projects Shipped' },
+  { icon: Layers, num: 'MERN', label: 'Primary Architecture' },
+  { icon: ShieldCheck, num: 'Active', label: 'Cybersec Interest' },
 ];
 
 export default function AboutPage() {
   return (
     <>
-      <style>{proAboutStyles}</style>
+      <style>{eliteAboutStyles}</style>
 
-      <div className="ab-wrapper">
+      <div className="ea-wrapper">
         
-        {/* ─── Ambient Background ────────────────────────────────────────── */}
-        <div className="ab-ambient-bg">
-          <div className="ab-orb ab-orb-teal" />
-          <div className="ab-orb ab-orb-indigo" />
-          <div className="ab-grid-overlay" />
+        {/* --- Ambient Background --- */}
+        <div className="ea-ambient">
+          <div className="ea-glow-1" />
+          <div className="ea-glow-2" />
+          <div className="ea-noise" />
         </div>
 
-        {/* ─── Main Content ──────────────────────────────────────────────── */}
-        <div className="ab-container">
+        <div className="ea-container">
           
-          <div className="ab-eyebrow ab-reveal">
-            <div className="ab-status-dot" />
-            Get to know me
-          </div>
+          {/* --- Massive Editorial Header --- */}
+          <header className="ea-header reveal-1">
+            <h1 className="ea-massive-text">
+              <span className="ea-text-outline">THE</span>
+              <span className="ea-text-solid">ENGINEER.</span>
+            </h1>
+          </header>
 
-          <h2 className="ab-title ab-reveal ab-delay-1">
-            About <span className="ab-text-gradient">Me</span>
-          </h2>
-
-          {/* ─── Bio & Photo Grid ────────────────────────────────────────── */}
-          <div className="ab-bio-grid ab-reveal ab-delay-2">
+          {/* --- The Arch & Bio Grid --- */}
+          <div className="ea-content-grid">
             
-            {/* Photo Column */}
-            <div className="ab-photo-wrapper">
-              <img
-                src="/d2d.png"
-                alt="Darsh"
-                className="ab-photo"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://placehold.co/400x480/05070a/1e293b?text=Image';
-                }}
-              />
-              <div className="ab-photo-overlay" />
-              <div className="ab-photo-label">Darsh Prajapati</div>
-              
-              {/* Branding D Mark */}
-              <div className="ab-brand-mark">D</div>
-            </div>
-
-            {/* Bio Column */}
-            <div className="ab-bio-content">
-              <div className="ab-section-divider">Biography</div>
-              
-              <p>
-                Hello! I'm a <strong>Full Stack Developer</strong> currently pursuing my B.Sc. in Computer Applications & Information Technology. I am passionate about building clean, performant, and scalable software architecture.
-              </p>
-              <p>
-                While my core expertise lies in crafting web and mobile experiences using the <strong>MERN stack and React Native</strong>, I am deeply curious about backend infrastructure. I am currently building tools ranging from real-time financial tracking systems to complete digital service platforms.
-              </p>
-              <p>
-                Beyond standard web development, I am actively exploring the intersections of <strong>Cybersecurity, Digital Forensics, and AI/ML architectures</strong> — constantly learning and pushing the boundaries of what I can build.
-              </p>
-
-              {/* Mini Stats */}
-              <div className="ab-mini-stats">
-                {MINI_CARDS.map((c) => (
-                  <div key={c.label} className="ab-mini-card">
-                    <div className="ab-mini-icon">
-                      <i className={`ti ${c.icon}`} aria-hidden="true" />
-                    </div>
-                    <div>
-                      <span className="ab-mini-num">{c.num}</span>
-                      <span className="ab-mini-label">{c.label}</span>
-                    </div>
-                  </div>
-                ))}
+            {/* Left: Arch Image */}
+            <div className="ea-image-col reveal-2">
+              <div className="ea-arch-wrapper">
+                <img
+                  src="/d2d.png"
+                  alt="Darsh"
+                  className="ea-arch-image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://placehold.co/600x800/020406/1e293b?text=Portrait';
+                  }}
+                />
+                <div className="ea-image-overlay" />
               </div>
+              <div className="ea-floating-badge">D</div>
             </div>
+
+            {/* Right: Editorial Bio */}
+            <div className="ea-bio-col reveal-3">
+              <div className="ea-label">Biography</div>
+              
+              <div className="ea-bio-lead">
+                I am a Full Stack Developer passionate about building clean, performant, and scalable software architecture.
+              </div>
+              
+              <p className="ea-bio-text">
+                Currently pursuing my B.Sc. in Computer Applications & Information Technology. While my core expertise lies in crafting seamless web and mobile experiences using the <strong>MERN stack and React Native</strong>, I am deeply curious about backend infrastructure.
+              </p>
+              
+              <p className="ea-bio-text">
+                I am actively engineering tools ranging from real-time financial tracking systems to complete digital service platforms. Beyond standard web development, I am exploring the critical intersections of <strong>Cybersecurity, Digital Forensics, and AI/ML architectures</strong> — constantly pushing the boundaries of what I can build.
+              </p>
+            </div>
+
           </div>
 
-          {/* ─── Skills Section ──────────────────────────────────────────── */}
-          <div className="ab-reveal ab-delay-3">
-            <div className="ab-section-divider" style={{ marginBottom: '40px' }}>
-              Technical Arsenal
-            </div>
+          {/* --- Asymmetrical Stats Row --- */}
+          <div className="ea-stats-row reveal-4">
+            {STATS.map((stat, i) => (
+              <div key={i} className="ea-stat-box">
+                <stat.icon size={24} className="ea-stat-icon" strokeWidth={1.5} />
+                <span className="ea-stat-num">{stat.num}</span>
+                <span className="ea-stat-desc">{stat.label}</span>
+              </div>
+            ))}
+          </div>
 
-            <div className="ab-skills-container">
-              {SKILLS.map((skill) => (
-                <div key={skill.name} className="ab-skill-card">
-                  <div className="ab-skill-header">
-                    <span className="ab-skill-name">{skill.name}</span>
-                    <span className="ab-skill-pct">{skill.pct}%</span>
+          {/* --- Ultra-Sharp Tech Arsenal --- */}
+          <div className="ea-skills-section reveal-4">
+            <div className="ea-label" style={{ marginBottom: '48px' }}>Technical Arsenal</div>
+            
+            <div className="ea-skills-grid">
+              {SKILLS.map((skill, index) => (
+                <div key={skill.name} className="ea-skill-item">
+                  <div className="ea-skill-header">
+                    <span className="ea-skill-name">{skill.name}</span>
+                    <span className="ea-skill-pct">{skill.pct}%</span>
                   </div>
                   
-                  {/* Hardware Accelerated Progress Bar */}
-                  <div className="ab-skill-track">
+                  {/* The Sci-Fi 1px Line Tracker */}
+                  <div className="ea-skill-track">
                     <div
-                      className="ab-skill-fill"
-                      style={{ transform: `scaleX(${skill.pct / 100})` }}
+                      className="ea-skill-fill"
+                      style={{ transform: `scaleX(${skill.pct / 100})`, animationDelay: `${0.6 + (index * 0.1)}s` }}
                     />
                   </div>
                 </div>
