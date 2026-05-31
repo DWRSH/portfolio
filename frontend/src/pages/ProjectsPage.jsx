@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Github, ExternalLink, AlertCircle, FolderOpen } from 'lucide-react';
 import api from '../api/axios'; // Tumhara custom Axios instance
 
+
 const proProjectStyles = `
   :root {
     --bg-dark: #05070a;
@@ -41,7 +42,7 @@ const proProjectStyles = `
     100% { transform: translateX(100%); }
   }
 
-  /* Ambient Background (Consistent with other pages) */
+  /* Ambient Background */
   .pj-ambient-bg {
     position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   }
@@ -169,7 +170,7 @@ const proProjectStyles = `
 // --- SKELETON LOADER COMPONENT ---
 function ProjectSkeleton({ index }) {
   return (
-    <div className="pj-card" style={{ animationDelay: \`\${index * 0.1}s\` }}>
+    <div className="pj-card" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="pj-image-wrap skeleton-box" />
       <div className="pj-content">
         <div className="skeleton-box" style={{ height: 28, width: '70%', borderRadius: 4, marginBottom: 16 }} />
@@ -192,7 +193,7 @@ function ProjectCard({ project, index }) {
   const { title, description, imageUrl, tags = [], demoUrl, repoUrl } = project || {};
 
   return (
-    <div className="pj-card" style={{ animationDelay: \`\${index * 0.1}s\` }}>
+    <div className="pj-card" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="pj-image-wrap">
         <img
           src={imageUrl || "https://placehold.co/600x400/05070a/1e293b?text=Project"}
@@ -217,12 +218,12 @@ function ProjectCard({ project, index }) {
         
         <div className="pj-actions">
           {repoUrl && (
-            <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={\`View code for \${title}\`}>
+            <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={`View code for ${title}`}>
               <Github size={16} /> <span>Code</span>
             </a>
           )}
           {demoUrl && (
-            <a href={demoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={\`View live demo for \${title}\`}>
+            <a href={demoUrl} target="_blank" rel="noopener noreferrer" className="pj-link" aria-label={`View live demo for ${title}`}>
               <ExternalLink size={16} /> <span>Live Demo</span>
             </a>
           )}
