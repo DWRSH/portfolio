@@ -6,6 +6,7 @@ const proFooterStyles = `
   :root {
     --bg-dark: #05070a;
     --primary: #00d2b4;
+    --primary-hover: #00f0cc;
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.55);
     --glass-bg: rgba(255, 255, 255, 0.02);
@@ -65,7 +66,7 @@ const proFooterStyles = `
     font-size: 15px; color: var(--text-muted); line-height: 1.6; font-weight: 300;
   }
 
-  /* Contact & Socials */
+  /* Contact Column */
   .ftr-contact-col {
     display: flex; flex-direction: column; align-items: flex-start;
   }
@@ -78,33 +79,46 @@ const proFooterStyles = `
     color: var(--text-main); margin: 0 0 8px;
   }
   .ftr-status {
-    font-size: 14px; color: var(--text-muted); margin-bottom: 20px; font-weight: 300;
+    font-size: 14px; color: var(--text-muted); margin-bottom: 24px; font-weight: 300;
   }
   
-  .ftr-email {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-size: 16px; font-weight: 500; color: var(--primary);
-    text-decoration: none; padding: 12px 20px;
-    background: rgba(0,210,180,0.05); border: 1px solid rgba(0,210,180,0.2);
-    border-radius: 100px; transition: all 0.3s var(--easing);
-    margin-bottom: 32px;
+  /* Action Buttons Wrapper (Aligns Email and Social Dock) */
+  .ftr-actions {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   }
-  .ftr-email:hover {
-    background: rgba(0,210,180,0.1); border-color: rgba(0,210,180,0.4);
-    transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,210,180,0.1);
+  @media (min-width: 768px) {
+    .ftr-actions { justify-content: flex-end; }
   }
 
-  /* Social Icons */
-  .ftr-socials { display: flex; gap: 16px; }
+  /* Solid Email Button */
+  .ftr-email {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 600; color: #05070a;
+    text-decoration: none; padding: 12px 24px;
+    background: var(--primary); border-radius: 100px; 
+    transition: all 0.3s var(--easing);
+  }
+  .ftr-email:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,210,180,0.25);
+  }
+
+  /* Premium Social Dock Layout */
+  .ftr-socials-dock {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    padding: 6px; border-radius: 100px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
   .ftr-social-link {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     color: var(--text-muted); transition: all 0.3s var(--easing);
+    text-decoration: none;
   }
   .ftr-social-link:hover {
-    background: rgba(255,255,255,0.05); color: var(--primary);
-    border-color: rgba(0,210,180,0.3); transform: translateY(-4px);
+    background: rgba(0,210,180,0.1); color: var(--primary);
+    transform: translateY(-2px);
   }
 
   /* Bottom Copyright Bar */
@@ -141,28 +155,32 @@ export default function Footer() {
               </p>
             </div>
 
-            {/* Right Col: Contact & Socials */}
+            {/* Right Col: Contact & Socials Layout Fix */}
             <div className="ftr-contact-col">
               <h4 className="ftr-subtitle">Let's Connect</h4>
               <p className="ftr-status">Currently open for freelance & full-time roles.</p>
               
-              <a href="mailto:darshprajapati1510@gmail.com" className="ftr-email">
-                <Mail size={18} />
-                darshprajapati1510@gmail.com
-              </a>
+              {/* Perfectly Aligned Action Row */}
+              <div className="ftr-actions">
+                <a href="mailto:darshprajapati1510@gmail.com" className="ftr-email">
+                  <Mail size={18} strokeWidth={2.5} />
+                  Say Hello
+                </a>
 
-              <div className="ftr-socials">
-                <a href="https://github.com/DWRSH" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="GitHub">
-                  <Github size={20} />
-                </a>
-                <a href="https://www.linkedin.com/in/darshprajapati15" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="LinkedIn">
-                  <Linkedin size={20} />
-                </a>
-                {/* Add your Twitter/X URL in the href below */}
-                <a href="#" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="Twitter">
-                  <Twitter size={20} />
-                </a>
+                {/* Premium Pill-Shaped Dock for Socials */}
+                <div className="ftr-socials-dock">
+                  <a href="https://github.com/DWRSH" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="GitHub">
+                    <Github size={18} />
+                  </a>
+                  <a href="https://www.linkedin.com/in/darshprajapati15" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="LinkedIn">
+                    <Linkedin size={18} />
+                  </a>
+                  <a href="#" target="_blank" rel="noopener noreferrer" className="ftr-social-link" aria-label="Twitter">
+                    <Twitter size={18} />
+                  </a>
+                </div>
               </div>
+
             </div>
 
           </div>
