@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Search, FileText, AlertCircle, Clock } from 'lucide-react';
 import api from '../api/axios';
 
-/* ─── ULTRA-PREMIUM EDITORIAL & 3D STYLES ───────────────────────────────── */
+/* ─── ULTRA-PREMIUM EDITORIAL & ADVANCED SEARCH STYLES ───────────────────── */
 const eliteBlogStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -55,12 +55,16 @@ const eliteBlogStyles = `
     text-align: center; margin-bottom: 64px; 
     opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; 
   }
+  
   .eb-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(38px, 9vw, 110px);
-    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px;
+    font-family: 'Syne', sans-serif; 
+    /* Force single line scale: min 26px, scales with viewport, max 110px */
+    font-size: clamp(26px, 8vw, 110px); 
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.02em; margin: 0 0 16px;
     display: flex; flex-direction: column; align-items: center;
-    word-break: break-word; /* Prevents overflow on tiny screens */
+    white-space: nowrap; /* ABSOLUTE FORCE for single line */
   }
+  
   .eb-text-outline {
     color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
   }
@@ -70,37 +74,56 @@ const eliteBlogStyles = `
     max-width: 600px; margin: 24px auto 48px;
   }
 
-  /* --- Elite Search Bar --- */
+  /* --- Advanced Pro Search Bar --- */
   .eb-search-wrapper {
-    position: relative; max-width: 600px; margin: 0 auto;
-    transition: transform 0.4s var(--easing-premium);
+    position: relative; max-width: 640px; margin: 0 auto;
+    border-radius: 100px; padding: 2px; /* For gradient border effect */
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+    transition: all 0.4s var(--easing-premium);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
-  .eb-search-wrapper:focus-within { transform: scale(1.02); }
+  
+  .eb-search-wrapper:focus-within { 
+    transform: scale(1.02) translateY(-2px); 
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    box-shadow: 0 20px 40px rgba(0,210,180,0.2);
+  }
+  
   .eb-search-input {
-    width: 100%; padding: 20px 24px 20px 60px;
-    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
-    border-radius: 100px; color: var(--text-main); font-family: inherit; font-size: 16px;
+    width: 100%; padding: 20px 80px 20px 60px; /* Space for shortcut hint */
+    background: #05070a; /* True dark interior */
+    border: none; border-radius: 100px; 
+    color: var(--text-main); font-family: inherit; font-size: 16px;
     transition: all 0.4s var(--easing-premium); outline: none;
-    backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     box-sizing: border-box;
   }
   .eb-search-input::placeholder { color: rgba(255,255,255,0.3); font-weight: 300; }
-  .eb-search-input:focus {
-    background: rgba(255,255,255,0.05); border-color: rgba(0,210,180,0.4);
-    box-shadow: 0 10px 40px rgba(0,210,180,0.1);
-  }
+  
   .eb-search-icon {
-    position: absolute; left: 24px; top: 50%; transform: translateY(-50%);
-    color: rgba(255,255,255,0.3); transition: color 0.4s;
+    position: absolute; left: 26px; top: 50%; transform: translateY(-50%);
+    color: rgba(255,255,255,0.3); transition: color 0.4s; z-index: 2;
   }
-  .eb-search-input:focus + .eb-search-icon { color: var(--primary); }
+  .eb-search-wrapper:focus-within .eb-search-icon { color: var(--primary); }
+
+  /* Keyboard Shortcut Hint (Cmd/Ctrl + K) */
+  .eb-search-shortcut {
+    position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 4px;
+    padding: 6px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600; font-family: 'Fira Code', monospace;
+    pointer-events: none; transition: all 0.4s var(--easing-premium); z-index: 2;
+  }
+  .eb-search-wrapper:focus-within .eb-search-shortcut {
+    color: #000; border-color: var(--primary); background: var(--primary);
+  }
 
   /* --- Asymmetrical 3D Magazine Grid --- */
   .eb-grid {
     display: grid; 
     grid-template-columns: repeat(12, 1fr);
     gap: 32px;
-    perspective: 1200px; /* Activates 3D space */
+    perspective: 1200px;
   }
 
   /* The Cinematic Blog Card */
@@ -114,24 +137,19 @@ const eliteBlogStyles = `
     will-change: transform;
   }
   
-  /* 3D Hover Tilt Effect */
-  .eb-card:hover {
-    transform: translateY(-8px) scale(1.02) rotateX(2deg) rotateY(-2deg);
-  }
+  .eb-card:hover { transform: translateY(-8px) scale(1.02) rotateX(2deg) rotateY(-2deg); }
   .eb-card:hover .eb-image { transform: scale(1.08); filter: grayscale(0%) contrast(1.1); }
   .eb-card:hover .eb-card-title { color: var(--primary); transform: translateZ(10px); }
 
   /* Grid Hierarchy Logic (Editorial Flow) */
-  .eb-card { grid-column: span 12; } /* Mobile default */
+  .eb-card { grid-column: span 12; }
   
   @media (min-width: 768px) and (max-width: 1023px) {
-    /* Tablet View Fix */
     .eb-card:nth-child(1) { grid-column: span 12; } 
     .eb-card:nth-child(n+2) { grid-column: span 6; } 
   }
 
   @media (min-width: 1024px) {
-    /* Desktop Cover Story View */
     .eb-card:nth-child(1) { grid-column: span 12; flex-direction: row; gap: 48px; align-items: center; }
     .eb-card:nth-child(1) .eb-image-wrap { width: 60%; height: 480px; border-radius: 24px; }
     .eb-card:nth-child(1) .eb-content { width: 40%; padding: 0; }
@@ -164,9 +182,7 @@ const eliteBlogStyles = `
   /* Content */
   .eb-content { display: flex; flex-direction: column; flex-grow: 1; transition: transform 0.6s; }
   
-  .eb-meta-bar {
-    display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
-  }
+  .eb-meta-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
   .eb-meta-pill {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(0,210,180,0.08); border: 1px solid rgba(0,210,180,0.2);
@@ -224,6 +240,8 @@ const eliteBlogStyles = `
     .eb-wrapper { padding: 100px 16px 80px; }
     .eb-header { margin-bottom: 48px; }
     .eb-search-wrapper { max-width: 100%; }
+    .eb-search-shortcut { display: none; } /* Hide shortcut hint on mobile */
+    .eb-search-input { padding-right: 24px; } /* Adjust padding for mobile */
     .eb-image-wrap { height: 220px; }
   }
 `;
@@ -297,6 +315,9 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Reference for the search input to handle keyboard shortcuts
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -313,6 +334,19 @@ export default function BlogPage() {
     };
 
     fetchPosts();
+  }, []);
+
+  // Keyboard Shortcut Listener (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -353,6 +387,7 @@ export default function BlogPage() {
             
             <div className="eb-search-wrapper">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search articles, topics, or keywords..."
                 value={searchQuery}
@@ -361,6 +396,9 @@ export default function BlogPage() {
                 aria-label="Search blog posts"
               />
               <Search className="eb-search-icon" size={20} />
+              <div className="eb-search-shortcut">
+                <kbd>⌘</kbd> <kbd>K</kbd>
+              </div>
             </div>
           </header>
 
