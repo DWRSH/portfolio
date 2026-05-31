@@ -1,12 +1,184 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Image as ImageIcon, Github, ExternalLink, Loader2, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Image as ImageIcon, Github, ExternalLink, Loader2, Trash2, X, AlertCircle } from 'lucide-react';
 import api from '../../api/axios'; 
 
-// Helper to get the auth token
 const getAuthToken = () => localStorage.getItem('adminAuthToken');
 
-// --- Project Modal Component (Add/Edit) ---
-// ... (Aapka ProjectModal component yahan hai - KOI BADLAAV NAHI)
+/* ─── ULTRA-PREMIUM ADMIN PROJECTS STYLES ───────────────────────────────── */
+const eliteAdminProjectsStyles = `
+  :root {
+    --bg-ultra-dark: #020406;
+    --bg-surface: #0a0e14;
+    --primary: #00d2b4;
+    --accent: #6366f1;
+    --danger: #ef4444;
+    --text-main: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ap-wrapper {
+    background-color: var(--bg-ultra-dark);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 100px 24px 120px;
+    box-sizing: border-box;
+    position: relative;
+    color: var(--text-main);
+  }
+
+  /* --- Ambient Background --- */
+  .ap-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .ap-glow {
+    position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,210,180,0.04) 0%, transparent 60%);
+    top: -100px; left: -100px; filter: blur(80px);
+  }
+
+  .ap-container {
+    position: relative; z-index: 2;
+    max-width: 1200px; margin: 0 auto;
+    width: 100%;
+  }
+
+  /* --- Header --- */
+  .ap-header {
+    display: flex; flex-direction: column; gap: 20px;
+    margin-bottom: 48px; opacity: 0; animation: fadeIn 0.8s forwards;
+  }
+  @media (min-width: 768px) {
+    .ap-header { flex-direction: row; justify-content: space-between; align-items: flex-end; }
+  }
+  .ap-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800; letter-spacing: -0.02em; margin: 0 0 8px;
+  }
+  .ap-subtitle { color: var(--text-muted); font-size: 15px; margin: 0; }
+
+  /* --- Buttons --- */
+  .ap-btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--primary); color: #000; font-weight: 700; font-size: 14px;
+    padding: 12px 24px; border-radius: 100px; border: none; cursor: pointer;
+    transition: all 0.3s var(--easing-premium); box-shadow: 0 10px 20px rgba(0,210,180,0.15);
+  }
+  .ap-btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(0,210,180,0.3); }
+  .ap-btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+  .ap-btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; color: var(--text-main); font-weight: 600; font-size: 14px;
+    padding: 12px 24px; border-radius: 100px; border: 1px solid var(--glass-border);
+    cursor: pointer; transition: all 0.3s;
+  }
+  .ap-btn-secondary:hover:not(:disabled) { background: var(--glass-bg); border-color: rgba(255,255,255,0.2); }
+
+  .ap-btn-danger { background: var(--danger); color: #fff; box-shadow: 0 10px 20px rgba(239,68,68,0.15); }
+  .ap-btn-danger:hover:not(:disabled) { box-shadow: 0 15px 30px rgba(239,68,68,0.3); }
+
+  /* --- Glass Table (Desktop) --- */
+  .ap-table-wrap {
+    background: var(--bg-surface); border: 1px solid var(--glass-border);
+    border-radius: 24px; overflow-x: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    opacity: 0; animation: fadeIn 0.8s 0.2s forwards;
+  }
+  .ap-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 800px; }
+  .ap-th {
+    padding: 20px 24px; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-muted); border-bottom: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.2); white-space: nowrap;
+  }
+  .ap-td {
+    padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 14px; color: var(--text-main); transition: background 0.3s;
+  }
+  .ap-tr:hover .ap-td { background: rgba(255,255,255,0.02); }
+  .ap-tr:last-child .ap-td { border-bottom: none; }
+
+  /* Image Thumbnail */
+  .ap-thumb {
+    width: 80px; height: 48px; border-radius: 8px; object-fit: cover;
+    border: 1px solid var(--glass-border); background: #000;
+  }
+  .ap-thumb-empty {
+    width: 80px; height: 48px; border-radius: 8px; background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+  }
+
+  /* Table Actions */
+  .ap-action-btn {
+    background: none; border: none; padding: 6px 12px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px; margin-right: 8px;
+  }
+  .ap-edit-btn { color: var(--primary); }
+  .ap-edit-btn:hover { background: rgba(0,210,180,0.1); }
+  .ap-del-btn { color: var(--danger); }
+  .ap-del-btn:hover { background: rgba(239,68,68,0.1); }
+
+  /* --- Mobile Cards --- */
+  .ap-mobile-grid { display: grid; gap: 20px; opacity: 0; animation: fadeIn 0.8s 0.2s forwards; }
+  .ap-mobile-card {
+    background: var(--bg-surface); border: 1px solid var(--glass-border);
+    border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .ap-mc-img { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid var(--glass-border); }
+  .ap-mc-body { padding: 20px; }
+  .ap-mc-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+  .ap-mc-tags { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; }
+  .ap-mc-actions { display: flex; gap: 12px; padding-top: 16px; border-top: 1px solid var(--glass-border); }
+  .ap-mc-btn { flex: 1; justify-content: center; }
+
+  /* --- Elite Modals --- */
+  .ap-modal-overlay {
+    position: fixed; inset: 0; background: rgba(2,4,6,0.85); backdrop-filter: blur(12px);
+    z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; animation: fadeIn 0.3s forwards;
+  }
+  .ap-modal-box {
+    background: var(--bg-surface); border: 1px solid var(--glass-border);
+    border-radius: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+    padding: 32px; box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    transform: translateY(20px); animation: slideUp 0.4s var(--easing-premium) forwards;
+  }
+  
+  .ap-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+  .ap-modal-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; margin: 0; }
+  .ap-close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+  .ap-close-btn:hover { color: #fff; }
+
+  /* Forms */
+  .ap-form-group { margin-bottom: 20px; }
+  .ap-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ap-input, .ap-textarea {
+    width: 100%; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+    padding: 14px 20px; border-radius: 12px; color: #fff; font-family: inherit; font-size: 15px;
+    transition: all 0.3s var(--easing-premium); box-sizing: border-box; outline: none;
+  }
+  .ap-input:focus, .ap-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,210,180,0.1); background: rgba(255,255,255,0.05); }
+  .ap-textarea { resize: vertical; min-height: 100px; }
+  
+  /* File Input Styling */
+  .ap-file-input::file-selector-button {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-right: 16px;
+  }
+  .ap-file-input::file-selector-button:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+
+  .ap-modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--glass-border); }
+
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes slideUp { to { transform: translateY(0); opacity: 1; } }
+
+  /* Utilities */
+  .ap-link-icon { color: var(--text-muted); transition: color 0.2s; }
+  .ap-link-icon:hover { color: var(--primary); }
+`;
+
+// --- MODALS ---
 const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   const [formData, setFormData] = useState({ title: '', description: '', technologies: '', demoUrl: '', repoUrl: '' });
   const [file, setFile] = useState(null);
@@ -22,8 +194,8 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
         title: project.title || '',
         description: project.description || '',
         technologies: Array.isArray(project.tags) ? project.tags.join(', ') : '',
-            demoUrl: project.demoUrl || '',
-            repoUrl: project.repoUrl || '',
+        demoUrl: project.demoUrl || '',
+        repoUrl: project.repoUrl || '',
       });
       setCurrentImage(project.imageUrl || null);
       setFile(null);
@@ -35,27 +207,18 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   }, [isOpen, project, isEditMode]);
 
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleFileChange = (e) => {
-      setFile(e.target.files[0]);
-      setCurrentImage(null);
-  };
+  const handleFileChange = (e) => { setFile(e.target.files[0]); setCurrentImage(null); };
 
   const handleSubmit = async (e) => {
       e.preventDefault();
       if (isEditMode && !file && !currentImage) {
-        if (!currentImage) {
-            setError('Please select an image file.');
-            return;
-        }
+        setError('Please select an image file.'); return;
       }
       if (!isEditMode && !file) {
-        setError('Please select an image file for the new project.');
-        return;
+        setError('Please select an image file for the new project.'); return;
       }
 
-      setLoading(true);
-      setError('');
-
+      setLoading(true); setError('');
       const projectFormData = new FormData();
       projectFormData.append('title', formData.title);
       projectFormData.append('description', formData.description);
@@ -63,33 +226,21 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
       projectFormData.append('tags', JSON.stringify(tags));
       projectFormData.append('demoUrl', formData.demoUrl || '');
       projectFormData.append('repoUrl', formData.repoUrl || '');
-      if (file) {
-        projectFormData.append('image', file);
-      }
+      if (file) projectFormData.append('image', file);
 
       try {
         const token = getAuthToken();
         if (!token) throw new Error('Authentication token not found.');
 
         const url = isEditMode ? `/projects/${project._id}` : '/projects';
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
-        };
+        const config = { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } };
         
-        const res = isEditMode
-        ? await api.put(url, projectFormData, config)
-        : await api.post(url, projectFormData, config);
+        const res = isEditMode ? await api.put(url, projectFormData, config) : await api.post(url, projectFormData, config);
+        if (!res.data) throw new Error(`Failed to ${isEditMode ? 'update' : 'add'} project`);
 
-        const responseData = res.data;
-        if (!responseData) throw new Error(`Failed to ${isEditMode ? 'update' : 'add'} project`);
-
-        onSave(responseData);
+        onSave(res.data);
         onClose();
       } catch (err) {
-      console.error("Save project error:", err);
         setError(err.response?.data?.msg || err.message);
       } finally {
         setLoading(false);
@@ -99,52 +250,59 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 animate-fade-in p-4">
-        <div className="bg-slate-800 p-8 rounded-lg shadow-xl w-full max-w-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">{isEditMode ? 'Edit Project' : 'Add New Project'}</h2>
-              <button onClick={onClose} className="text-slate-400 hover:text-white">
-                  <X size={24} />
-              </button>
+      <div className="ap-modal-overlay">
+        <div className="ap-modal-box">
+            <div className="ap-modal-header">
+              <h2 className="ap-modal-title">{isEditMode ? 'Edit Architecture' : 'Deploy New Project'}</h2>
+              <button onClick={onClose} className="ap-close-btn"><X size={24} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Title</label>
-                  <input name="title" value={formData.title} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+            
+            <form onSubmit={handleSubmit}>
+              <div className="ap-form-group">
+                  <label className="ap-label">Project Title</label>
+                  <input name="title" value={formData.title} onChange={handleInputChange} required className="ap-input" placeholder="e.g. NextGen E-Commerce" />
               </div>
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Description</label>
-                  <textarea name="description" value={formData.description} onChange={handleInputChange} required rows="3" className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+              <div className="ap-form-group">
+                  <label className="ap-label">Description</label>
+                  <textarea name="description" value={formData.description} onChange={handleInputChange} required className="ap-textarea" placeholder="Detail the problem, architecture, and solution..." />
               </div>
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Technologies (comma separated)</label>
-                  <input name="technologies" value={formData.technologies} onChange={handleInputChange} placeholder="React, Tailwind, Node.js" className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+              <div className="ap-form-group">
+                  <label className="ap-label">Tech Stack (Comma Separated)</label>
+                  <input name="technologies" value={formData.technologies} onChange={handleInputChange} className="ap-input" placeholder="React, Node.js, MongoDB" />
               </div>
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Project Image</label>
-                  <input type="file" name="image" onChange={handleFileChange} accept="image/png, image/jpeg, image/gif, image/webp" className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-500" />
+              <div className="ap-form-group">
+                  <label className="ap-label">Project Cover Image</label>
+                  <input type="file" name="image" onChange={handleFileChange} accept="image/*" className="ap-input ap-file-input" style={{padding: '10px'}} />
                   {isEditMode && currentImage && !file && (
-                    <div className="mt-2 text-sm text-slate-400">
-                        <p>Current image:</p>
-                        <img src={currentImage} alt="Current project" className="w-20 h-12 object-cover rounded-md mt-1" />
-                        <p className="mt-1">Select a new file above to replace it.</p>
+                    <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <img src={currentImage} alt="Current" className="ap-thumb" />
+                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Current cover active. Upload new to replace.</span>
                     </div>
                   )}
               </div>
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Demo URL</label>
-                  <input name="demoUrl" value={formData.demoUrl} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div className="ap-form-group">
+                    <label className="ap-label">Live Demo URL</label>
+                    <input name="demoUrl" value={formData.demoUrl} onChange={handleInputChange} className="ap-input" placeholder="https://..." />
+                </div>
+                <div className="ap-form-group">
+                    <label className="ap-label">GitHub Repo URL</label>
+                    <input name="repoUrl" value={formData.repoUrl} onChange={handleInputChange} className="ap-input" placeholder="https://github.com/..." />
+                </div>
               </div>
-              <div>
-                  <label className="block text-sm font-medium text-slate-300">Repository URL</label>
-                  <input name="repoUrl" value={formData.repoUrl} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-slate-700 bg-slate-900 px-3 py-2 text-white" />
-          </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-              <div className="flex justify-end space-x-4 pt-4">
-                  <button type="button" onClick={onClose} disabled={loading} className="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600">Cancel</button>
-                  <button type="submit" disabled={loading} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-500 disabled:bg-cyan-800 flex items-center gap-2">
-                    {loading && <Loader2 size={16} className="animate-spin" />}
-                    {loading ? (isEditMode ? 'Saving...' : 'Adding...') : (isEditMode ? 'Save Changes' : 'Add Project')}
+
+              {error && (
+                <div style={{ padding: '12px', background: 'rgba(239,68,68,0.1)', color: '#fca5a5', borderRadius: '8px', fontSize: '14px', marginTop: '10px' }}>
+                  {error}
+                </div>
+              )}
+
+              <div className="ap-modal-footer">
+                  <button type="button" onClick={onClose} disabled={loading} className="ap-btn-secondary">Cancel</button>
+                  <button type="submit" disabled={loading} className="ap-btn-primary">
+                    {loading && <Loader2 size={18} className="animate-spin" />}
+                    {loading ? 'Processing...' : (isEditMode ? 'Commit Changes' : 'Deploy Project')}
                   </button>
               </div>
             </form>
@@ -153,24 +311,27 @@ const ProjectModal = ({ isOpen, onClose, onSave, project }) => {
   );
 };
 
-// --- Delete Confirmation Modal ---
-// ... (Aapka DeleteConfirmModal component yahan hai - KOI BADLAAV NAHI)
 const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
   if (!isOpen) return null;
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 animate-fade-in p-4">
-        <div className="bg-slate-800 p-8 rounded-lg shadow-xl w-full max-w-md border border-slate-700">
-            <h2 className="text-2xl font-bold text-white mb-4">Are you sure?</h2>
-            <p className="text-slate-300 mb-6">
-              Do you really want to delete this project? This action cannot be undone.
+      <div className="ap-modal-overlay">
+        <div className="ap-modal-box" style={{ maxWidth: '440px', padding: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '12px', background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', borderRadius: '50%' }}>
+                <AlertCircle size={28} />
+              </div>
+              <h2 className="ap-modal-title" style={{ fontSize: '20px' }}>Confirm Deletion</h2>
+            </div>
+            
+            <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '32px' }}>
+              Are you absolute sure you want to drop this project from the database? This action is irreversible and the data will be lost forever.
             </p>
-            <div className="flex justify-end space-x-4">
-              <button onClick={onClose} disabled={loading} className="px-4 py-2 text-sm font-medium text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600">
-                  Cancel
-              </button>
-              <button onClick={onConfirm} disabled={loading} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-500 disabled:bg-red-800 flex items-center gap-2">
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={onClose} disabled={loading} className="ap-btn-secondary" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={onConfirm} disabled={loading} className="ap-btn-primary ap-btn-danger" style={{ flex: 1 }}>
                   {loading && <Loader2 size={16} className="animate-spin" />}
-                  {loading ? 'Deleting...' : 'Delete'}
+                  {loading ? 'Deleting...' : 'Yes, Delete'}
               </button>
             </div>
         </div>
@@ -178,105 +339,32 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, loading }) => {
   );
 };
 
-// --- [NEW] Naya Mobile Project Card Design ---
-const MobileProjectCard = ({ project, onEdit, onDelete }) => {
-  return (
-    <div className="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
-      
-      {/* 1. Image (Full-width) */}
-      {project.imageUrl ? (
-        <img 
-          src={project.imageUrl} 
-          alt={project.title} 
-          className="w-full h-32 object-cover" 
-        />
-      ) : (
-        <div className="w-full h-32 bg-slate-700 flex items-center justify-center">
-          <ImageIcon size={32} className="text-slate-500" />
-        </div>
-      )}
-
-      {/* 2. Content (Padding ke saath) */}
-      <div className="p-4">
-        
-        {/* 3. Title (Text wrap hoga) */}
-        <h3 className="font-semibold text-white text-lg break-words">{project.title}</h3>
-        
-        {/* 4. Tags (Text wrap hoga) */}
-        <p className="text-sm text-slate-400 mb-3 break-words">
-          {Array.isArray(project.tags) ? project.tags.join(', ') : ''}
-        </p>
-
-        {/* 5. Links (Side-by-side) */}
-        <div className="flex gap-4 mb-4">
-          {project.repoUrl && (
-            <a 
-              href={project.repoUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center gap-1 text-sm text-slate-300 hover:text-cyan-400"
-            >
-              <Github size={14} /> Code
-            </a>
-          )}
-          {project.demoUrl && (
-            <a 
-              href={project.demoUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center gap-1 text-sm text-slate-300 hover:text-cyan-400"
-            >
-              <ExternalLink size={14} /> Demo
-            </a>
-          )}
-        </div>
-
-        {/* 6. Buttons (Bade aur side-by-side) */}
-        <div className="flex gap-3">
-          <button 
-            onClick={() => onEdit(project)} 
-            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 px-3 py-2 rounded-md"
-          >
-            <Edit size={14} /> Edit
-          </button>
-          <button 
-            onClick={() => onDelete(project)} 
-            className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 px-3 py-2 rounded-md"
-          >
-            <Trash2 size={14} /> Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-// --- Main Admin Page Component ---
+// --- MAIN ADMIN PAGE COMPONENT ---
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState(null); // For edit/delete
+  const [currentProject, setCurrentProject] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Check window width for responsive render
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchProjects = async () => {
       try {
-        setLoading(true);
-        setError('');
+        setLoading(true); setError('');
         const res = await api.get('/projects');
-        const data = res.data;
-        if (!Array.isArray(data)) {
-            throw new Error('Invalid response format from server');
-        }
-        setProjects(data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+        setProjects(res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
       } catch (err) {
-      console.error("Fetch projects error:", err);
-        setError(err.response?.data?.msg || err.message || 'Failed to load projects');
+        setError(err.response?.data?.msg || 'Failed to load database. Check connection.');
       } finally {
         setLoading(false);
       }
@@ -284,27 +372,11 @@ export default function AdminProjectsPage() {
 
   useEffect(() => { fetchProjects(); }, []);
 
-  // --- Modal Handlers (KOI BADLAAV NAHI) ---
-  const openAddModal = () => {
-      setCurrentProject(null);
-      setIsModalOpen(true);
-  };
-  const openEditModal = (project) => {
-      setCurrentProject(project);
-      setIsModalOpen(true);
-  };
-  const openDeleteModal = (project) => {
-      setCurrentProject(project);
-      setIsDeleteModalOpen(true);
-  };
-  const closeModal = () => {
-      setIsModalOpen(false);
-      setIsDeleteModalOpen(false);
-      setCurrentProject(null);
-      setModalLoading(false);
-  };
+  const openAddModal = () => { setCurrentProject(null); setIsModalOpen(true); };
+  const openEditModal = (project) => { setCurrentProject(project); setIsModalOpen(true); };
+  const openDeleteModal = (project) => { setCurrentProject(project); setIsDeleteModalOpen(true); };
+  const closeModal = () => { setIsModalOpen(false); setIsDeleteModalOpen(false); setCurrentProject(null); setModalLoading(false); };
 
-  // --- CRUD Operations (KOI BADLAAV NAHI) ---
   const handleSaveProject = (savedProject) => {
       if (currentProject) {
         setProjects(projects.map(p => p._id === savedProject._id ? savedProject : p));
@@ -312,135 +384,139 @@ export default function AdminProjectsPage() {
         setProjects([savedProject, ...projects]);
       }
   };
+
   const handleDeleteProject = async () => {
       if (!currentProject) return;
       setModalLoading(true);
       try {
         const token = getAuthToken();
-        if (!token) throw new Error('Authentication token not found.');
-        
-        const config = {
-          headers: { 'Authorization': `Bearer ${token}` }
-        };
-        await api.delete(`/projects/${currentProject._id}`, config);
-        const data = res.data;
-        if (!data) throw new Error('Failed to delete project');
-
+        await api.delete(`/projects/${currentProject._id}`, { headers: { 'Authorization': `Bearer ${token}` } });
         setProjects(projects.filter(p => p._id !== currentProject._id));
         closeModal();
       } catch (err) {
-      console.error("Delete project error:", err);
-        setError(err.response?.data?.msg || err.message);
+        setError(err.response?.data?.msg || 'Failed to delete project');
         closeModal();
       }
   };
 
   return (
-      <div className="animate-fade-in">
-        {/* === Responsive Header === */}
-        <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <h1 className="text-4xl font-bold text-white">Manage Projects</h1>
-            <button 
-              onClick={openAddModal} 
-              className="flex items-center justify-center gap-2 rounded-md bg-cyan-600 px-4 py-2 font-semibold text-white hover:bg-cyan-500 w-full md:w-auto"
-            >
-              <Plus size={20} />
-              Add New Project
-            </button>
-        </div>
+      <>
+        <style>{eliteAdminProjectsStyles}</style>
 
-        {error && <p className="p-4 mb-4 text-red-400 bg-red-900/20 rounded-md">{error}</p>}
+        <div className="ap-wrapper">
+          <div className="ap-ambient"><div className="ap-glow" /></div>
 
-        {/* === [NEW] Responsive List Container === */}
-        <div>
-          {loading ? (
-            <p className="p-6 text-slate-400 text-center">Loading projects...</p>
-          ) : !projects.length ? (
-            <div className="p-12 text-center bg-slate-800 rounded-lg">
-              <p className="text-lg text-slate-400">No projects found. Add one to get started!</p>
-            </div>
-          ) : (
-            <>
-              {/* === Mobile Card View (Hides on 'md' and up) === */}
-              <div className="md:hidden space-y-4 max-h-[70vh] overflow-y-auto p-1">
-                {projects.map(project => (
-                  <MobileProjectCard
-                    key={project._id}
-                    project={project}
-                    onEdit={openEditModal}
-                    onDelete={openDeleteModal}
-                  />
-                ))}
+          <div className="ap-container">
+            
+            <div className="ap-header">
+              <div>
+                <h1 className="ap-title">Manage Projects</h1>
+                <p className="ap-subtitle">System database for portfolio architectures.</p>
               </div>
+              <button onClick={openAddModal} className="ap-btn-primary">
+                <Plus size={18} strokeWidth={2.5} /> Deploy New
+              </button>
+            </div>
 
-              {/* === Desktop Table View (Hidden below 'md') === */}
-              <div className="hidden md:block rounded-lg bg-slate-800 shadow-lg overflow-auto max-h-[70vh]">
-                <table className="w-full text-left min-w-[640px]">
-                  <thead className="bg-slate-900 sticky top-0">
-                    <tr>
-                        <th className="p-4 text-sm font-semibold text-slate-300">Image</th>
-                        <th className="p-4 text-sm font-semibold text-slate-300">Title</th>
-                        <th className="p-4 text-sm font-semibold text-slate-300">Technologies</th>
-                        <th className="p-4 text-sm font-semibold text-slate-300">Links</th>
-                        <th className="p-4 text-sm font-semibold text-slate-300">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-700">
-                    {projects.map(project => (
-                        <tr key={project._id} className="hover:bg-slate-700/50">
-                          <td className="p-4">
-                              {project.imageUrl ? (
-                                <img src={project.imageUrl} alt={project.title} className="w-20 h-12 object-cover rounded-md bg-slate-700" />
-                              ) : (
-                                <div className="w-20 h-12 rounded-md bg-slate-700 flex items-center justify-center"><ImageIcon size={20} className="text-slate-500" /></div>
-                              )}
-                          </td>
-                          <td className="p-4 font-medium text-white whitespace-nowrap">{project.title}</td>
-                          
-                          <td className="p-4 text-sm text-slate-400">
-                              {Array.isArray(project.tags) ? project.tags.join(', ') : ''}
-                          </td>
+            {error && (
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', padding: '16px 20px', borderRadius: '12px', color: '#fca5a5', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <AlertCircle size={20} /> {error}
+              </div>
+            )}
 
-                          <td className="p-4">
-                              <div className="flex space-x-3">
-                                {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400"><ExternalLink size={18} /></a>}
-                                {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400"><Github size={18} /></a>}
-                              </div>
-                          </td>
-                          
-                          <td className="p-4">
-                              <div className="flex gap-4">
-                                <button onClick={() => openEditModal(project)} className="flex items-center gap-1 text-sm text-cyan-400 hover:underline">
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+                <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 16px', color: 'var(--primary)' }} />
+                Initializing database connection...
+              </div>
+            ) : !projects.length ? (
+              <div style={{ textAlign: 'center', padding: '80px 20px', background: 'var(--bg-surface)', border: '1px dashed var(--glass-border)', borderRadius: '24px' }}>
+                <ImageIcon size={48} style={{ margin: '0 auto 16px', color: 'var(--text-muted)' }} />
+                <h3 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 8px' }}>Archive Empty</h3>
+                <p style={{ color: 'var(--text-muted)', margin: 0 }}>No projects deployed yet. Click 'Deploy New' to start.</p>
+              </div>
+            ) : (
+              isMobile ? (
+                /* --- MOBILE CARD VIEW --- */
+                <div className="ap-mobile-grid">
+                  {projects.map(project => (
+                    <div key={project._id} className="ap-mobile-card">
+                      {project.imageUrl ? (
+                        <img src={project.imageUrl} alt={project.title} className="ap-mc-img" />
+                      ) : (
+                        <div className="ap-mc-img" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'#1e293b' }}><ImageIcon size={32} color="#475569" /></div>
+                      )}
+                      <div className="ap-mc-body">
+                        <h3 className="ap-mc-title">{project.title}</h3>
+                        <p className="ap-mc-tags">{Array.isArray(project.tags) ? project.tags.join(' • ') : ''}</p>
+                        
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+                          {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noreferrer" className="ap-link-icon"><ExternalLink size={18}/></a>}
+                          {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noreferrer" className="ap-link-icon"><Github size={18}/></a>}
+                        </div>
+
+                        <div className="ap-mc-actions">
+                          <button onClick={() => openEditModal(project)} className="ap-btn-secondary ap-mc-btn"><Edit size={14}/> Edit</button>
+                          <button onClick={() => openDeleteModal(project)} className="ap-btn-secondary ap-mc-btn" style={{ borderColor: 'rgba(239,68,68,0.3)', color: 'var(--danger)' }}><Trash2 size={14}/> Drop</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* --- DESKTOP TABLE VIEW --- */
+                <div className="ap-table-wrap">
+                  <table className="ap-table">
+                    <thead>
+                      <tr>
+                          <th className="ap-th">Cover</th>
+                          <th className="ap-th">Project Matrix</th>
+                          <th className="ap-th">Tech Stack</th>
+                          <th className="ap-th">Live Nodes</th>
+                          <th className="ap-th">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projects.map(project => (
+                          <tr key={project._id} className="ap-tr">
+                            <td className="ap-td" style={{ width: '100px' }}>
+                                {project.imageUrl ? (
+                                  <img src={project.imageUrl} alt="cover" className="ap-thumb" />
+                                ) : (
+                                  <div className="ap-thumb-empty"><ImageIcon size={20} /></div>
+                                )}
+                            </td>
+                            <td className="ap-td" style={{ fontWeight: 700 }}>{project.title}</td>
+                            <td className="ap-td" style={{ color: 'var(--text-muted)' }}>
+                                {Array.isArray(project.tags) ? project.tags.join(', ') : ''}
+                            </td>
+                            <td className="ap-td">
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                  {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noreferrer" className="ap-link-icon" title="Live Demo"><ExternalLink size={18} /></a>}
+                                  {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noreferrer" className="ap-link-icon" title="Source Code"><Github size={18} /></a>}
+                                </div>
+                            </td>
+                            <td className="ap-td">
+                                <button onClick={() => openEditModal(project)} className="ap-action-btn ap-edit-btn">
                                     <Edit size={14} /> Edit
                                 </button>
-                                <button onClick={() => openDeleteModal(project)} className="flex items-center gap-1 text-sm text-red-400 hover:underline">
-                                    <Trash2 size={14} /> Delete
+                                <button onClick={() => openDeleteModal(project)} className="ap-action-btn ap-del-btn">
+                                    <Trash2 size={14} /> Drop
                                 </button>
-                              </div>
-                          </td>
-                        </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
+                            </td>
+                          </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            )}
+
+          </div>
+
+          <ProjectModal isOpen={isModalOpen} onClose={closeModal} onSave={handleSaveProject} project={currentProject} />
+          <DeleteConfirmModal isOpen={isDeleteModalOpen} onClose={closeModal} onConfirm={handleDeleteProject} loading={modalLoading} />
         </div>
-        {/* === End Responsive List Container === */}
-
-
-        <ProjectModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            onSave={handleSaveProject}
-            project={currentProject}
-        />
-        <DeleteConfirmModal
-            isOpen={isDeleteModalOpen}
-            onClose={closeModal}
-            onConfirm={handleDeleteProject}
-            loading={modalLoading}
-        />
-      </div>
+      </>
   );
 }
