@@ -20,10 +20,10 @@ const eliteAboutStyles = `
     background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    padding: 140px 24px 100px;
+    padding: 140px 24px 100px; /* Adjusted padding for better fit */
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Only hides background glow, not the content */
     color: var(--text-main);
   }
 
@@ -69,12 +69,10 @@ const eliteAboutStyles = `
   .ea-header { margin-bottom: 60px; }
   .ea-massive-text {
     font-family: 'Syne', sans-serif; 
-    /* The Fix: Dropped lower bound to 28px, added 12vw for perfect mobile scaling */
-    font-size: clamp(28px, 12vw, 110px); 
-    font-weight: 800; line-height: 0.9; letter-spacing: -0.02em; margin: 0;
+    font-size: clamp(40px, 10vw, 110px); /* True fluid typography */
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0;
     display: flex; flex-direction: column;
-    word-break: break-word;
-    hyphens: auto;
+    word-break: break-word; /* Fixes mobile overflow */
   }
   .ea-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); }
   .ea-text-solid { color: var(--text-main); }
@@ -92,28 +90,29 @@ const eliteAboutStyles = `
   
   .ea-image-col { 
     position: relative; 
-    perspective: 1000px; 
-    padding: 20px 0; 
+    perspective: 1000px; /* Creates the 3D camera depth */
+    padding: 20px 0; /* Breathing room for pop-out */
   }
 
   .ea-arch-wrapper {
     width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 3/4;
     position: relative;
-    transform-style: preserve-3d;
+    transform-style: preserve-3d; /* Crucial: Allows children to pop out */
     transition: transform 0.6s var(--easing-premium);
+    /* NO OVERFLOW HIDDEN HERE! That breaks the 3D effect. */
   }
 
   .ea-arch-wrapper:hover {
-    transform: rotateX(10deg) rotateY(-15deg); 
+    transform: rotateX(10deg) rotateY(-15deg); /* Tilts the whole setup */
   }
 
-  /* LAYER 1: The Glass Frame */
+  /* LAYER 1: The Glass Frame (Pushed Back) */
   .ea-arch-frame {
     position: absolute; inset: 0;
     border-radius: 200px 200px 16px 16px;
     border: 1px solid var(--glass-border);
     background: rgba(255,255,255,0.02);
-    transform: translateZ(-20px); 
+    transform: translateZ(-20px); /* Pushed into the screen */
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transition: all 0.6s var(--easing-premium);
   }
@@ -121,16 +120,16 @@ const eliteAboutStyles = `
     background: rgba(0,210,180,0.05); border-color: rgba(0,210,180,0.3);
   }
 
-  /* LAYER 2: The Image Container */
+  /* LAYER 2: The Image (Pops OUT and UP) */
   .ea-image-inner {
     position: absolute; inset: 0;
     border-radius: 200px 200px 16px 16px;
-    overflow: hidden; 
-    transform: translateZ(10px); 
+    overflow: hidden; /* Hides image overflow WITHIN the arch shape only */
+    transform: translateZ(10px); /* Slightly forward by default */
     transition: transform 0.6s var(--easing-bounce), box-shadow 0.6s var(--easing-premium);
   }
   .ea-arch-wrapper:hover .ea-image-inner {
-    transform: translateZ(60px) translateY(-25px); 
+    transform: translateZ(60px) translateY(-25px); /* POPS OUT AND FLOATS UP */
     box-shadow: -20px 40px 50px rgba(0,0,0,0.7);
   }
 
@@ -139,10 +138,10 @@ const eliteAboutStyles = `
     filter: grayscale(20%) contrast(1.1); transition: filter 0.6s, transform 0.6s;
   }
   .ea-arch-wrapper:hover .ea-arch-image {
-    filter: grayscale(0%) contrast(1); transform: scale(1.05);
+    filter: grayscale(0%) contrast(1); transform: scale(1.05); /* Slight internal zoom */
   }
 
-  /* LAYER 3: The Floating Badge */
+  /* LAYER 3: The Floating Badge (Pops out the furthest) */
   .ea-floating-badge {
     position: absolute; bottom: 20px; right: -15px;
     width: 70px; height: 70px; border-radius: 50%;
@@ -153,7 +152,7 @@ const eliteAboutStyles = `
     transition: transform 0.6s var(--easing-bounce);
   }
   .ea-arch-wrapper:hover .ea-floating-badge {
-    transform: translateZ(100px) scale(1.1) rotate(15deg); 
+    transform: translateZ(100px) scale(1.1) rotate(15deg); /* Super pop-out */
   }
   /* ───────────────────────────────────────────────────────────────────────── */
 
@@ -183,24 +182,16 @@ const eliteAboutStyles = `
   @media (min-width: 1024px) { .ea-stats-row { grid-template-columns: repeat(4, 1fr); } }
   
   .ea-stat-box {
-    background: rgba(5,7,10,0.8); 
-    padding: 32px 16px; 
-    text-align: center;
+    background: rgba(5,7,10,0.8); padding: 32px 16px; text-align: center;
     transition: background 0.4s; display: flex; flex-direction: column; align-items: center;
-    justify-content: center;
   }
   .ea-stat-box:hover { background: rgba(255,255,255,0.02); }
   .ea-stat-num {
-    font-family: 'Syne', sans-serif; 
-    /* The Fix: More fluid boundaries for the numbers/text so "Active" doesn't cut */
-    font-size: clamp(18px, 5vw, 32px); 
-    font-weight: 800;
+    font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 32px); font-weight: 800;
     color: var(--text-main); margin-bottom: 8px;
-    word-break: break-word;
   }
   .ea-stat-desc {
     font-size: 12px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em;
-    line-height: 1.4;
   }
   .ea-stat-icon { color: var(--primary); margin-bottom: 12px; }
 
@@ -234,33 +225,27 @@ const eliteAboutStyles = `
     box-shadow: 0 0 8px 2px var(--primary);
   }
 
-  /* --- MOBILE SPECIFIC OVERRIDES (THE FIXES) --- */
+  /* --- MOBILE SPECIFIC OVERRIDES --- */
   @media (max-width: 768px) {
     .ea-wrapper { padding: 100px 16px 80px; }
-    .ea-header { margin-bottom: 40px; }
+    .ea-header { margin-bottom: 48px; }
+    .ea-content-grid { gap: 48px; margin-bottom: 64px; }
+    .ea-arch-wrapper { max-width: 280px; } /* Slightly smaller for phones */
     
-    /* Reduced margin and gap to save space */
-    .ea-content-grid { gap: 40px; margin-bottom: 60px; }
-    .ea-arch-wrapper { max-width: 260px; } 
-    
-    /* Pre-tilt the 3D element slightly on mobile to show off the effect */
-    .ea-image-inner { transform: translateZ(15px) translateY(-8px); box-shadow: -8px 16px 24px rgba(0,0,0,0.4); }
+    /* Make 3D effect pop slightly on mobile even without hover for visual flair */
+    .ea-image-inner { transform: translateZ(20px) translateY(-10px); box-shadow: -10px 20px 30px rgba(0,0,0,0.4); }
     .ea-arch-frame { border-color: rgba(0,210,180,0.2); }
     
-    /* Reduced padding on the stat boxes so text has room */
     .ea-stats-row { border-radius: 16px; }
-    .ea-stat-box { padding: 20px 8px; }
-    
+    .ea-stat-box { padding: 24px 12px; }
     .ea-skills-section { margin-top: 80px; }
     .ea-skills-grid { gap: 24px; }
   }
 
-  /* Very Small Devices (e.g. iPhone SE/Fold) */
-  @media (max-width: 400px) {
-    .ea-stat-box { padding: 16px 4px; }
-    .ea-stat-icon { transform: scale(0.85); margin-bottom: 8px; }
-    .ea-stat-num { font-size: 18px; }
-    .ea-stat-desc { font-size: 10px; }
+  /* Very Small Devices (e.g. iPhone SE) */
+  @media (max-width: 380px) {
+    .ea-massive-text { font-size: 38px; }
+    .ea-stats-row { grid-template-columns: 1fr; } /* Stack completely */
   }
 `;
 
