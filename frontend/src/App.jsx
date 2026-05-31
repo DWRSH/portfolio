@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'; // <-- useEffect import karein
-import { Routes, Route, Outlet, useLocation } from 'react-router-dom'; // <-- useLocation import karein
+import React, { useEffect } from 'react';
+import { Routes, Route, Outlet, useLocation } from 'react-router-dom';
 
 // Import Public Layout Components
 import Header from './components/Header.jsx';
@@ -18,73 +18,90 @@ import AdminLayout from './components/admin/AdminLayout.jsx';
 import AdminLoginPage from './pages/admin/AdminLoginPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import AdminProjectsPage from './pages/admin/AdminProjectsPage.jsx';
-import AdminBlogPage from './pages/admin/AdminBlogPage.jsx'; 
+import AdminBlogPage from './pages/admin/AdminBlogPage.jsx'; 
 
-// --- YEH TRACKING COMPONENT ADD KAREIN ---
-// Yeh component har page change ko track karega
+/* ─── PRO FEATURE 1: GOOGLE ANALYTICS TRACKER ────────────────────────────── */
 function TrackPageViews() {
   const location = useLocation();
 
   useEffect(() => {
-    // Check karein ki gtag function maujood hai (jo index.html se aa raha hai)
-    if (window.gtag) {
-      window.gtag("config", "G-ZK8PEXLXQW", { // Aapki specific ID
+    // Make sure gtag is available (loaded in index.html)
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag("config", "G-ZK8PEXLXQW", {
         page_path: location.pathname + location.search,
       });
     }
-  }, [location]); // Har baar location badalne par yeh run hoga
+  }, [location]);
 
-  return null; // Yeh screen par kuch nahi dikhata
+  return null; // Invisible component
 }
-// --- END TRACKING COMPONENT ---
 
+/* ─── PRO FEATURE 2: SCROLL RESTORATION ────────────────────────────────────
+   Ensures that navigating to a new page always starts at the very top, 
+   fixing the classic SPA "stuck at the bottom" scroll bug. 
+──────────────────────────────────────────────────────────────────────────── */
+function ScrollToTop() {
+  const { pathname } = useLocation();
 
-// Public-facing layout (Ismein koi badlaav nahi hai)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+}
+
+/* ─── PUBLIC LAYOUT ────────────────────────────────────────────────────────
+   Removed restrictive max-width and padding constraints from <main>. 
+   Now, individual pages can dictate their own edge-to-edge layouts and 
+   ambient background effects perfectly.
+──────────────────────────────────────────────────────────────────────────── */
 const PublicLayout = () => (
-  <div className="flex flex-col min-h-screen bg-slate-900 text-white">
-    <Header />
-    <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-      <Outlet /> {/* Public pages will be rendered here */}
-    </main>
-    <Footer />
-  </div>
+  // Using our exact theme background color instead of standard slate
+  <div style={{ backgroundColor: '#05070a', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Header />
+    <main style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', width: '100%', position: 'relative' }}>
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
 );
 
+// --- MAIN APP ENTRY POINT ---
 function App() {
-  return (
-    <> {/* Ek Fragment use karein taaki 2 components return kar sakein */}
-      {/* --- TRACKER KO YAHAN CALL KAREIN --- */}
+  return (
+    <>
+      {/* Invisible Utility Components */}
       <TrackPageViews />
+      <ScrollToTop />
 
-      {/* Aapka Routes component jaisa tha waisa hi hai */}
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<PublicLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="projects" element={<ProjectsPage />} />
-          <Route path="blog" element={<BlogPage />} />
-          <Route path="blog/:slug" element={<BlogPostDetailPage />} />
-        </Route>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<PublicLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="blog" element={<BlogPage />} />
+          <Route path="blog/:slug" element={<BlogPostDetailPage />} />
+        </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="dashboard" element={<AdminDashboardPage />} />
-          <Route path="projects" element={<AdminProjectsPage />} />
-          <Route path="blog" element={<AdminBlogPage />} />
-        </Route>
-      </Routes>
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="projects" element={<AdminProjectsPage />} />
+          <Route path="blog" element={<AdminBlogPage />} />
+        </Route>
+      </Routes>
     </>
-  );
+  );
 }
 
 export default App;
