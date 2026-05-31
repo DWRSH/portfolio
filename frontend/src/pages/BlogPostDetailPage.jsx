@@ -62,19 +62,29 @@ const eliteDetailStyles = `
     border-color: var(--glass-border); transform: translateX(-4px); 
   }
 
-  /* --- Cinematic Hero Image --- */
+  /* --- Cinematic 3D Hero Image --- */
   .ebd-hero-wrap {
     width: 100%; 
     height: clamp(250px, 40vh, 480px); /* Fluid height based on screen */
     border-radius: 24px; overflow: hidden; margin-bottom: 48px;
     border: 1px solid var(--glass-border); position: relative;
     box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    transform-style: preserve-3d;
+    transition: transform 0.6s var(--easing-premium), box-shadow 0.6s;
+    perspective: 1000px;
+  }
+  .ebd-hero-wrap:hover {
+    transform: translateY(-5px) rotateX(2deg) rotateY(-2deg);
+    box-shadow: -10px 30px 60px rgba(0,0,0,0.6), 0 0 30px rgba(0,210,180,0.1);
+    border-color: rgba(0,210,180,0.3);
   }
   .ebd-hero-img {
     width: 100%; height: 100%; object-fit: cover;
-    filter: grayscale(15%) contrast(1.1); transition: transform 10s ease-out;
+    filter: grayscale(15%) contrast(1.1); transition: transform 10s ease-out, filter 0.6s;
   }
-  .ebd-hero-wrap:hover .ebd-hero-img { transform: scale(1.05); }
+  .ebd-hero-wrap:hover .ebd-hero-img { 
+    transform: scale(1.08); filter: grayscale(0%) contrast(1);
+  }
   .ebd-hero-overlay {
     position: absolute; inset: 0;
     background: linear-gradient(180deg, transparent 40%, rgba(2,4,6,0.9) 100%);
@@ -83,9 +93,10 @@ const eliteDetailStyles = `
   /* --- Editorial Header & Meta --- */
   .ebd-title {
     font-family: 'Syne', sans-serif; 
-    font-size: clamp(32px, 6vw, 64px); /* Fluid Typography */
+    font-size: clamp(32px, 5vw, 64px); /* Fluid Typography */
     font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
     margin: 0 0 32px; color: var(--text-main);
+    word-break: break-word;
   }
 
   .ebd-meta-bar {
@@ -184,6 +195,7 @@ const eliteDetailStyles = `
     .ebd-meta-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
     .ebd-meta-stats { width: 100%; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;}
     .ebd-content blockquote { padding: 20px; }
+    .ebd-hero-wrap { transform: none !important; } /* Disable 3D tilt on mobile for better scrolling */
   }
 `;
 
@@ -235,7 +247,7 @@ export default function BlogPostDetailPage() {
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollTop;
       const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scroll = `${totalScroll / windowHeight}`;
+      const scroll = windowHeight > 0 ? totalScroll / windowHeight : 0;
       setScrollProgress(scroll);
     }
     window.addEventListener('scroll', handleScroll);
@@ -246,6 +258,14 @@ export default function BlogPostDetailPage() {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
     });
+  };
+
+  // Dynamic Reading Time Calculator
+  const calculateReadingTime = (text) => {
+    const wordsPerMinute = 200;
+    const words = text ? text.trim().split(/\s+/).length : 0;
+    const minutes = Math.ceil(words / wordsPerMinute);
+    return minutes > 0 ? minutes : 1;
   };
 
   // 1. Loading State
@@ -313,7 +333,7 @@ export default function BlogPostDetailPage() {
                 <div className="ebd-brand-mark">D</div>
                 <div className="ebd-author-info">
                   <span className="ebd-author-name">Darsh Prajapati</span>
-                  <span className="ebd-author-title">Software Engineer</span>
+                  <span className="ebd-author-title">MERN Stack Developer</span>
                 </div>
               </div>
               
@@ -324,8 +344,7 @@ export default function BlogPostDetailPage() {
                 </div>
                 <div className="ebd-meta-item">
                   <Clock size={14} strokeWidth={2.5} />
-                  {/* Assuming 5 min read statically, but you can dynamically calculate based on content length */}
-                  <span>5 Min Read</span>
+                  <span>{calculateReadingTime(post.content)} Min Read</span>
                 </div>
               </div>
             </div>
