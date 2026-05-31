@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Search, FileText, AlertCircle, Clock } from 'lucide-react';
 import api from '../api/axios';
 
-/* ─── ULTRA-PREMIUM EDITORIAL STYLES ──────────────────────────────────────── */
+/* ─── ULTRA-PREMIUM EDITORIAL & 3D STYLES ───────────────────────────────── */
 const eliteBlogStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -29,7 +29,7 @@ const eliteBlogStyles = `
   }
 
   /* --- Ambient Background --- */
-  .eb-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .eb-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .eb-glow-top {
     position: absolute; width: 1000px; height: 500px; border-radius: 50%;
     background: radial-gradient(ellipse, rgba(99,102,241,0.06) 0%, transparent 60%);
@@ -56,9 +56,10 @@ const eliteBlogStyles = `
     opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; 
   }
   .eb-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(50px, 9vw, 110px);
+    font-family: 'Syne', sans-serif; font-size: clamp(38px, 9vw, 110px);
     font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px;
     display: flex; flex-direction: column; align-items: center;
+    word-break: break-word; /* Prevents overflow on tiny screens */
   }
   .eb-text-outline {
     color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
@@ -81,6 +82,7 @@ const eliteBlogStyles = `
     border-radius: 100px; color: var(--text-main); font-family: inherit; font-size: 16px;
     transition: all 0.4s var(--easing-premium); outline: none;
     backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-sizing: border-box;
   }
   .eb-search-input::placeholder { color: rgba(255,255,255,0.3); font-weight: 300; }
   .eb-search-input:focus {
@@ -93,11 +95,12 @@ const eliteBlogStyles = `
   }
   .eb-search-input:focus + .eb-search-icon { color: var(--primary); }
 
-  /* --- Asymmetrical Magazine Grid --- */
+  /* --- Asymmetrical 3D Magazine Grid --- */
   .eb-grid {
     display: grid; 
     grid-template-columns: repeat(12, 1fr);
     gap: 32px;
+    perspective: 1200px; /* Activates 3D space */
   }
 
   /* The Cinematic Blog Card */
@@ -106,26 +109,38 @@ const eliteBlogStyles = `
     display: flex; flex-direction: column; position: relative;
     opacity: 0; animation: revealUp 1s var(--easing-premium) forwards;
     text-decoration: none; cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s var(--easing-premium);
+    will-change: transform;
   }
-  .eb-card:hover .eb-image { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
-  .eb-card:hover .eb-card-title { color: var(--primary); }
+  
+  /* 3D Hover Tilt Effect */
+  .eb-card:hover {
+    transform: translateY(-8px) scale(1.02) rotateX(2deg) rotateY(-2deg);
+  }
+  .eb-card:hover .eb-image { transform: scale(1.08); filter: grayscale(0%) contrast(1.1); }
+  .eb-card:hover .eb-card-title { color: var(--primary); transform: translateZ(10px); }
 
   /* Grid Hierarchy Logic (Editorial Flow) */
   .eb-card { grid-column: span 12; } /* Mobile default */
   
+  @media (min-width: 768px) and (max-width: 1023px) {
+    /* Tablet View Fix */
+    .eb-card:nth-child(1) { grid-column: span 12; } 
+    .eb-card:nth-child(n+2) { grid-column: span 6; } 
+  }
+
   @media (min-width: 1024px) {
-    /* 1st Article: The Cover Story */
+    /* Desktop Cover Story View */
     .eb-card:nth-child(1) { grid-column: span 12; flex-direction: row; gap: 48px; align-items: center; }
     .eb-card:nth-child(1) .eb-image-wrap { width: 60%; height: 480px; border-radius: 24px; }
     .eb-card:nth-child(1) .eb-content { width: 40%; padding: 0; }
     .eb-card:nth-child(1) .eb-card-title { font-size: 40px; line-height: 1.1; }
     .eb-card:nth-child(1) .eb-card-desc { -webkit-line-clamp: 4; font-size: 16px; }
     
-    /* 2nd & 3rd Articles: Secondary Features */
     .eb-card:nth-child(2), .eb-card:nth-child(3) { grid-column: span 6; }
     .eb-card:nth-child(2) .eb-image-wrap, .eb-card:nth-child(3) .eb-image-wrap { height: 320px; }
     
-    /* 4th+ Articles: The Feed */
     .eb-card:nth-child(n+4) { grid-column: span 4; }
   }
 
@@ -133,9 +148,13 @@ const eliteBlogStyles = `
   .eb-image-wrap {
     position: relative; height: 260px; width: 100%; overflow: hidden;
     border-radius: 16px; border: 1px solid var(--glass-border);
-    margin-bottom: 24px; transition: border-color 0.4s;
+    margin-bottom: 24px; transition: border-color 0.4s, box-shadow 0.6s;
+    background: var(--glass-bg);
   }
-  .eb-card:hover .eb-image-wrap { border-color: rgba(0,210,180,0.3); }
+  .eb-card:hover .eb-image-wrap { 
+    border-color: rgba(0,210,180,0.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(0,210,180,0.1); 
+  }
   .eb-image {
     width: 100%; height: 100%; object-fit: cover;
     transition: transform 0.8s var(--easing-premium), filter 0.8s;
@@ -143,7 +162,7 @@ const eliteBlogStyles = `
   }
 
   /* Content */
-  .eb-content { display: flex; flex-direction: column; flex-grow: 1; }
+  .eb-content { display: flex; flex-direction: column; flex-grow: 1; transition: transform 0.6s; }
   
   .eb-meta-bar {
     display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
@@ -158,7 +177,7 @@ const eliteBlogStyles = `
   .eb-card-title {
     font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700;
     color: var(--text-main); margin: 0 0 16px; line-height: 1.2; letter-spacing: -0.02em;
-    transition: color 0.4s var(--easing-premium);
+    transition: color 0.4s var(--easing-premium), transform 0.6s var(--easing-premium);
   }
   .eb-card-desc {
     font-size: 15px; font-weight: 300; line-height: 1.7; color: var(--text-muted);
@@ -199,19 +218,26 @@ const eliteBlogStyles = `
   }
   .eb-state svg { color: var(--text-muted); margin: 0 auto 20px; width: 56px; height: 56px; }
   .eb-state-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+
+  /* Mobile Adjustments */
+  @media (max-width: 768px) {
+    .eb-wrapper { padding: 100px 16px 80px; }
+    .eb-header { margin-bottom: 48px; }
+    .eb-search-wrapper { max-width: 100%; }
+    .eb-image-wrap { height: 220px; }
+  }
 `;
 
 // --- ASYMMETRICAL SKELETON LOADER ---
 function BlogSkeleton({ index }) {
-  // Skeleton mimics the exact CSS grid layout logic
   return (
     <div className="eb-card" style={{ animationDelay: `${index * 0.1}s` }}>
       <div className="eb-image-wrap sk-box" style={{ borderRadius: '16px' }} />
       <div className="eb-content">
-        <div className="sk-box" style={{ height: 24, width: 100, borderRadius: 100, marginBottom: 16 }} />
-        <div className="sk-box" style={{ height: 32, width: '85%', marginBottom: 16 }} />
-        <div className="sk-box" style={{ height: 14, width: '100%', marginBottom: 8 }} />
-        <div className="sk-box" style={{ height: 14, width: '80%', marginBottom: 24 }} />
+        <div className="sk-box" style={{ height: 24, width: 100, borderRadius: 100, margin: '0 0 16px 0' }} />
+        <div className="sk-box" style={{ height: 32, width: '85%', margin: '0 0 16px 0' }} />
+        <div className="sk-box" style={{ height: 14, width: '100%', margin: '0 0 8px 0' }} />
+        <div className="sk-box" style={{ height: 14, width: '80%', margin: '0 0 24px 0' }} />
       </div>
     </div>
   );
