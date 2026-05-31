@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar, Rocket, Layers, ShieldCheck } from 'lucide-react';
 
-/* ─── ULTRA-PREMIUM EDITORIAL & 3D STYLES ───────────────────────────────── */
+/* ─── 100% RESPONSIVE & TRUE 3D POP-OUT STYLES ──────────────────────────── */
 const eliteAboutStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -9,35 +9,35 @@ const eliteAboutStyles = `
     --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.45);
+    --text-muted: rgba(255, 255, 255, 0.5);
     --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
     --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
-    --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* For the 3D Pop effect */
+    --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .ea-wrapper {
     background-color: var(--bg-ultra-dark);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
-    padding: 120px 24px;
+    padding: 140px 24px 100px; /* Adjusted padding for better fit */
     box-sizing: border-box;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Only hides background glow, not the content */
     color: var(--text-main);
   }
 
   /* --- Ambient Background --- */
-  .ea-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .ea-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .ea-glow-1 {
-    position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    position: absolute; width: 50vw; height: 50vw; border-radius: 50%;
     background: radial-gradient(circle, rgba(0,210,180,0.05) 0%, transparent 60%);
-    top: 10%; right: -10%; animation: floatSlow 15s ease-in-out infinite;
+    top: 0; right: -20%; filter: blur(60px);
   }
   .ea-glow-2 {
-    position: absolute; width: 800px; height: 800px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 60%);
-    bottom: -20%; left: -20%; animation: floatSlow 18s ease-in-out infinite reverse;
+    position: absolute; width: 60vw; height: 60vw; border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 60%);
+    bottom: -20%; left: -20%; filter: blur(60px);
   }
   .ea-noise {
     position: absolute; inset: 0;
@@ -45,10 +45,6 @@ const eliteAboutStyles = `
     mix-blend-mode: overlay;
   }
 
-  @keyframes floatSlow {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-30px, 40px); }
-  }
   @keyframes revealUp {
     from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
     to   { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -66,14 +62,17 @@ const eliteAboutStyles = `
   .ea-container {
     position: relative; z-index: 2;
     max-width: 1200px; margin: 0 auto;
+    width: 100%;
   }
 
   /* --- Massive Header --- */
-  .ea-header { margin-bottom: 80px; }
+  .ea-header { margin-bottom: 60px; }
   .ea-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(48px, 9vw, 110px);
+    font-family: 'Syne', sans-serif; 
+    font-size: clamp(40px, 10vw, 110px); /* True fluid typography */
     font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0;
     display: flex; flex-direction: column;
+    word-break: break-word; /* Fixes mobile overflow */
   }
   .ea-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); }
   .ea-text-solid { color: var(--text-main); }
@@ -81,94 +80,84 @@ const eliteAboutStyles = `
   /* --- Editorial Grid --- */
   .ea-content-grid {
     display: grid; grid-template-columns: 1fr; gap: 64px; align-items: center;
-    margin-bottom: 120px;
+    margin-bottom: 100px;
   }
   @media (min-width: 1024px) {
-    .ea-content-grid { grid-template-columns: 4.5fr 5.5fr; gap: 80px; }
+    .ea-content-grid { grid-template-columns: 4fr 6fr; gap: 80px; }
   }
 
-  /* ─── THE 3D POP-OUT IMAGE ARCHITECTURE ─────────────────────────────────── */
+  /* ─── THE FLAWLESS 3D POP-OUT LOGIC ─────────────────────────────────────── */
   
-  /* 1. Perspective Camera */
   .ea-image-col { 
     position: relative; 
-    perspective: 1200px; /* Creates the 3D space */
+    perspective: 1000px; /* Creates the 3D camera depth */
+    padding: 20px 0; /* Breathing room for pop-out */
   }
 
-  /* 2. The Rotating Wrapper */
   .ea-arch-wrapper {
-    width: 100%; max-width: 380px; margin: 0 auto; aspect-ratio: 3/4;
+    width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 3/4;
     position: relative;
-    transform-style: preserve-3d; /* Allows children to pop out in Z space */
+    transform-style: preserve-3d; /* Crucial: Allows children to pop out */
     transition: transform 0.6s var(--easing-premium);
+    /* NO OVERFLOW HIDDEN HERE! That breaks the 3D effect. */
   }
 
-  /* Hover triggers the 3D tilt */
   .ea-arch-wrapper:hover {
-    transform: rotateX(8deg) rotateY(-12deg);
+    transform: rotateX(10deg) rotateY(-15deg); /* Tilts the whole setup */
   }
 
-  /* 3. The Glass Frame (Stays flat at the back) */
+  /* LAYER 1: The Glass Frame (Pushed Back) */
   .ea-arch-frame {
     position: absolute; inset: 0;
     border-radius: 200px 200px 16px 16px;
     border: 1px solid var(--glass-border);
-    background: rgba(255,255,255,0.01);
-    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    background: rgba(255,255,255,0.02);
+    transform: translateZ(-20px); /* Pushed into the screen */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     transition: all 0.6s var(--easing-premium);
-    transform: translateZ(0); 
   }
   .ea-arch-wrapper:hover .ea-arch-frame {
-    border-color: rgba(0,210,180,0.3);
-    background: rgba(0,210,180,0.05);
+    background: rgba(0,210,180,0.05); border-color: rgba(0,210,180,0.3);
   }
 
-  /* 4. The Image Layer (Pops out on hover) */
+  /* LAYER 2: The Image (Pops OUT and UP) */
   .ea-image-inner {
     position: absolute; inset: 0;
     border-radius: 200px 200px 16px 16px;
-    overflow: hidden;
-    transform: translateZ(1px); /* Slightly above frame to prevent glitching */
+    overflow: hidden; /* Hides image overflow WITHIN the arch shape only */
+    transform: translateZ(10px); /* Slightly forward by default */
     transition: transform 0.6s var(--easing-bounce), box-shadow 0.6s var(--easing-premium);
   }
   .ea-arch-wrapper:hover .ea-image-inner {
-    /* Pop out towards the screen (translateZ) and scale up slightly */
-    transform: translateZ(80px) translateY(-20px) scale(1.05);
-    box-shadow: -20px 40px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,210,180,0.1);
+    transform: translateZ(60px) translateY(-25px); /* POPS OUT AND FLOATS UP */
+    box-shadow: -20px 40px 50px rgba(0,0,0,0.7);
   }
 
   .ea-arch-image {
     width: 100%; height: 100%; object-fit: cover;
-    filter: grayscale(20%) contrast(1.1); transition: filter 0.6s;
+    filter: grayscale(20%) contrast(1.1); transition: filter 0.6s, transform 0.6s;
   }
   .ea-arch-wrapper:hover .ea-arch-image {
-    filter: grayscale(0%) contrast(1);
+    filter: grayscale(0%) contrast(1); transform: scale(1.05); /* Slight internal zoom */
   }
 
-  .ea-image-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(0deg, rgba(2,4,6,0.9) 0%, transparent 40%);
-  }
-
-  /* 5. Floating Branding Badge (Pops out EVEN further) */
+  /* LAYER 3: The Floating Badge (Pops out the furthest) */
   .ea-floating-badge {
-    position: absolute; bottom: 30px; right: -10px;
+    position: absolute; bottom: 20px; right: -15px;
     width: 70px; height: 70px; border-radius: 50%;
     background: rgba(5,7,10,0.9); border: 1px solid rgba(0,210,180,0.4);
-    backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     color: var(--primary); font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    transform: translateZ(10px);
+    transform: translateZ(20px);
     transition: transform 0.6s var(--easing-bounce);
   }
   .ea-arch-wrapper:hover .ea-floating-badge {
-    /* Flies out to the front and rotates */
-    transform: translateZ(120px) scale(1.1) rotate(15deg);
+    transform: translateZ(100px) scale(1.1) rotate(15deg); /* Super pop-out */
   }
   /* ───────────────────────────────────────────────────────────────────────── */
 
   /* Bio Typography */
-  .ea-bio-col { display: flex; flex-direction: column; gap: 32px; }
+  .ea-bio-col { display: flex; flex-direction: column; gap: 24px; }
   .ea-label {
     font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--primary); display: flex; align-items: center; gap: 12px;
@@ -176,11 +165,11 @@ const eliteAboutStyles = `
   .ea-label::before { content: ''; width: 24px; height: 1px; background: var(--primary); }
 
   .ea-bio-lead {
-    font-family: 'Syne', sans-serif; font-size: clamp(22px, 3.5vw, 32px);
+    font-family: 'Syne', sans-serif; font-size: clamp(20px, 4vw, 32px);
     font-weight: 700; line-height: 1.3; color: var(--text-main); letter-spacing: -0.02em;
   }
   .ea-bio-text {
-    font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--text-muted);
+    font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--text-muted); margin: 0;
   }
   .ea-bio-text strong { color: var(--text-main); font-weight: 500; }
 
@@ -188,43 +177,43 @@ const eliteAboutStyles = `
   .ea-stats-row {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
     background: var(--glass-border); border: 1px solid var(--glass-border);
-    border-radius: 20px; overflow: hidden;
+    border-radius: 20px; overflow: hidden; width: 100%;
   }
-  @media (min-width: 768px) { .ea-stats-row { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1024px) { .ea-stats-row { grid-template-columns: repeat(4, 1fr); } }
   
   .ea-stat-box {
-    background: rgba(5,7,10,0.8); padding: 32px 24px; text-align: center;
-    transition: background 0.4s;
+    background: rgba(5,7,10,0.8); padding: 32px 16px; text-align: center;
+    transition: background 0.4s; display: flex; flex-direction: column; align-items: center;
   }
   .ea-stat-box:hover { background: rgba(255,255,255,0.02); }
   .ea-stat-num {
-    font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
-    color: var(--text-main); margin-bottom: 8px; display: block;
+    font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 32px); font-weight: 800;
+    color: var(--text-main); margin-bottom: 8px;
   }
   .ea-stat-desc {
     font-size: 12px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em;
   }
-  .ea-stat-icon { color: var(--primary); margin: 0 auto 16px; display: block; }
+  .ea-stat-icon { color: var(--primary); margin-bottom: 12px; }
 
-  /* --- Ultra-Sharp Tech Arsenal (Skills) --- */
-  .ea-skills-section { margin-top: 120px; }
+  /* --- Ultra-Sharp Tech Arsenal --- */
+  .ea-skills-section { margin-top: 100px; width: 100%; }
   .ea-skills-grid {
     display: grid; grid-template-columns: 1fr; gap: 32px;
   }
-  @media (min-width: 768px) { .ea-skills-grid { grid-template-columns: 1fr 1fr; gap: 64px; } }
+  @media (min-width: 768px) { .ea-skills-grid { grid-template-columns: 1fr 1fr; gap: 48px; } }
 
-  .ea-skill-item { display: flex; flex-direction: column; gap: 12px; }
+  .ea-skill-item { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   .ea-skill-header { display: flex; justify-content: space-between; align-items: flex-end; }
-  .ea-skill-name { font-size: 15px; font-weight: 500; color: var(--text-main); letter-spacing: 0.02em; }
-  .ea-skill-pct { font-family: 'Fira Code', monospace; font-size: 14px; color: var(--primary); font-weight: 500; }
+  .ea-skill-name { font-size: 14px; font-weight: 500; color: var(--text-main); letter-spacing: 0.02em; }
+  .ea-skill-pct { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--primary); font-weight: 500; }
   
-  /* The Sci-Fi 1px Line Tracker */
+  /* Sci-Fi 1px Tracker */
   .ea-skill-track {
-    width: 100%; height: 1px; background: rgba(255,255,255,0.1);
+    width: 100%; height: 2px; background: rgba(255,255,255,0.08);
     position: relative; border-radius: 2px;
   }
   .ea-skill-fill {
-    position: absolute; top: -1px; left: 0; height: 3px;
+    position: absolute; top: 0; left: 0; height: 100%;
     background: var(--primary); border-radius: 2px;
     transform-origin: left; transform: scaleX(0);
     animation: lineFill 1.5s var(--easing-premium) forwards; animation-delay: 0.8s;
@@ -232,18 +221,31 @@ const eliteAboutStyles = `
   }
   .ea-skill-fill::after {
     content: ''; position: absolute; right: 0; top: -2px;
-    width: 7px; height: 7px; border-radius: 50%; background: #fff;
-    box-shadow: 0 0 12px 2px var(--primary);
+    width: 6px; height: 6px; border-radius: 50%; background: #fff;
+    box-shadow: 0 0 8px 2px var(--primary);
   }
 
-  /* --- MOBILE RESPONSIVENESS FIXES --- */
+  /* --- MOBILE SPECIFIC OVERRIDES --- */
   @media (max-width: 768px) {
-    .ea-wrapper { padding: 90px 16px 80px; }
-    .ea-header { margin-bottom: 50px; }
-    .ea-content-grid { gap: 48px; margin-bottom: 80px; }
-    .ea-arch-wrapper { max-width: 300px; }
+    .ea-wrapper { padding: 100px 16px 80px; }
+    .ea-header { margin-bottom: 48px; }
+    .ea-content-grid { gap: 48px; margin-bottom: 64px; }
+    .ea-arch-wrapper { max-width: 280px; } /* Slightly smaller for phones */
+    
+    /* Make 3D effect pop slightly on mobile even without hover for visual flair */
+    .ea-image-inner { transform: translateZ(20px) translateY(-10px); box-shadow: -10px 20px 30px rgba(0,0,0,0.4); }
+    .ea-arch-frame { border-color: rgba(0,210,180,0.2); }
+    
+    .ea-stats-row { border-radius: 16px; }
+    .ea-stat-box { padding: 24px 12px; }
     .ea-skills-section { margin-top: 80px; }
     .ea-skills-grid { gap: 24px; }
+  }
+
+  /* Very Small Devices (e.g. iPhone SE) */
+  @media (max-width: 380px) {
+    .ea-massive-text { font-size: 38px; }
+    .ea-stats-row { grid-template-columns: 1fr; } /* Stack completely */
   }
 `;
 
@@ -351,7 +353,7 @@ export default function AboutPage() {
 
           {/* --- Ultra-Sharp Tech Arsenal --- */}
           <div className="ea-skills-section reveal-4">
-            <div className="ea-label" style={{ marginBottom: '48px' }}>Technical Arsenal</div>
+            <div className="ea-label" style={{ marginBottom: '32px' }}>Technical Arsenal</div>
             
             <div className="ea-skills-grid">
               {SKILLS.map((skill, index) => (
