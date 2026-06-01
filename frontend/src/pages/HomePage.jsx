@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Sparkles, Code2, Star } from 'lucide-react';
+import { ArrowRight, Download, Sparkles, Code2, Star, Github } from 'lucide-react';
+import GitHubCalendar from 'react-github-calendar';
 
 /* ─── ULTRA-PREMIUM STYLES ────────────────────────────────────────────────── */
 const eliteHomeStyles = `
@@ -165,7 +166,7 @@ const eliteHomeStyles = `
   .eh-rotating-badge {
     position: absolute; top: 40px; right: 0;
     width: 140px; height: 140px;
-    display: none; /* Hide on small mobile */
+    display: none;
   }
   @media (min-width: 1024px) { .eh-rotating-badge { display: block; } }
   
@@ -181,7 +182,8 @@ const eliteHomeStyles = `
     margin-top: 40px;
   }
   @media (min-width: 768px) {
-    .eh-bento-grid { grid-template-columns: 1.5fr 1fr 1fr; }
+    /* 3 columns on desktop */
+    .eh-bento-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
   .eh-bento-card {
@@ -194,10 +196,23 @@ const eliteHomeStyles = `
     background: rgba(255,255,255,0.03); border-color: rgba(0,210,180,0.3);
     transform: translateY(-4px);
   }
-  /* Specific styling for the first featured box */
+  
   .eh-bento-featured {
     background: linear-gradient(145deg, rgba(0,210,180,0.08) 0%, rgba(5,7,10,0) 100%);
   }
+
+  /* Make the GitHub Calendar span full width on desktop */
+  .eh-bento-full {
+    grid-column: 1 / -1; 
+    display: flex; flex-direction: column; gap: 24px;
+    overflow-x: auto; /* Allows horizontal scroll on very small mobile devices */
+  }
+  
+  .eh-bento-header {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 18px; font-weight: 600; color: #fff;
+  }
+  .eh-bento-header svg { color: var(--primary); }
   
   .eh-bento-icon {
     width: 48px; height: 48px; border-radius: 12px;
@@ -211,9 +226,24 @@ const eliteHomeStyles = `
   .eh-stat-label {
     font-size: 14px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em;
   }
+
+  /* Styling overrides for the GitHub Calendar text */
+  .react-activity-calendar { color: var(--text-muted) !important; font-family: 'Fira Code', monospace; font-size: 12px; }
 `;
 
 export default function HomePage() {
+  
+  // Custom Elite Theme for GitHub Calendar matching our Primary Color (#00d2b4)
+  const eliteCalendarTheme = {
+    dark: [
+      'rgba(255,255,255,0.05)', // Empty blocks
+      'rgba(0,210,180,0.3)',    // Level 1
+      'rgba(0,210,180,0.6)',    // Level 2
+      'rgba(0,210,180,0.8)',    // Level 3
+      '#00d2b4'                 // Level 4 (Highest activity)
+    ],
+  };
+
   return (
     <>
       <style>{eliteHomeStyles}</style>
@@ -232,7 +262,6 @@ export default function HomePage() {
           {/* --- Massive Editorial Hero --- */}
           <div className="eh-hero-section">
             
-            {/* Elite Rotating Badge (Desktop absolute positioned) */}
             <div className="eh-rotating-badge reveal-1">
               <svg viewBox="0 0 100 100" className="eh-badge-svg">
                 <path id="circlePath" fill="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
@@ -274,7 +303,7 @@ export default function HomePage() {
           {/* --- The Bento Stats Grid --- */}
           <div className="eh-bento-grid reveal-4">
             
-            {/* Featured Wide Box */}
+            {/* Box 1 */}
             <div className="eh-bento-card eh-bento-featured">
               <div className="eh-bento-icon"><Code2 size={24} /></div>
               <div>
@@ -283,6 +312,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Box 2 */}
             <div className="eh-bento-card">
               <div className="eh-bento-icon"><Sparkles size={24} /></div>
               <div>
@@ -291,11 +321,32 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Box 3 */}
             <div className="eh-bento-card">
               <div className="eh-bento-icon"><Star size={24} /></div>
               <div>
                 <div className="eh-stat-num">2<span style={{color: 'var(--primary)', fontSize: '32px'}}>yrs</span></div>
                 <div className="eh-stat-label">Production Exp.</div>
+              </div>
+            </div>
+
+            {/* LIVE GITHUB CONTRIBUTIONS CALENDAR (Full Width) */}
+            <div className="eh-bento-card eh-bento-full">
+              <div className="eh-bento-header">
+                <Github size={20} />
+                <span>GitHub Contributions</span>
+              </div>
+              
+              <div style={{ padding: '10px 0', display: 'flex', justifyContent: 'center' }}>
+                <GitHubCalendar 
+                  username="princep4423d" 
+                  colorScheme="dark"
+                  theme={eliteCalendarTheme}
+                  blockSize={12}
+                  blockMargin={5}
+                  fontSize={14}
+                  hideTotalCount={false}
+                />
               </div>
             </div>
 
