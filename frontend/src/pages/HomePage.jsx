@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Sparkles, Code2, Star, MapPin, Music, Trophy, Wrench, BookOpen, Layers } from 'lucide-react';
+import { ArrowRight, Download, Sparkles, MapPin, Music, Trophy, PenTool, Github, Linkedin, Wrench, BookOpen, Layers } from 'lucide-react';
 import GitHubCalendar from 'react-github-calendar';
 
 /* ─── 20-YOE PREMIUM BENTO GRID ARCHITECTURE ────────────────────────────── */
