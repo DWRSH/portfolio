@@ -537,7 +537,7 @@ export default function HomePage() {
                     <svg className="w-5 h-5 text-orange-500 fill-current" viewBox="0 0 20 20"><g><path d="M17.17,9a2.31,2.31,0,0,0-2.32,2.31,2.44,2.44,0,0,0,.08,0,5.65,5.65,0,0,1-3.66-1.5,5.72,5.72,0,0,1-1-1.63,2.48,2.48,0,0,0,.43-1.39,2.31,2.31,0,0,0-4.62,0,2.41,2.41,0,0,0,.48,1.44,5.83,5.83,0,0,1-4.72,3.12,2.42,2.42,0,0,0,.08-.54A2.31,2.31,0,0,0,4.52,8.52a2.34,2.34,0,0,0-1.47.53,10.66,10.66,0,0,1,.1-1.8A4.14,4.14,0,0,1,6,3.61a1.21,1.21,0,0,0,.34.05,1.15,1.15,0,1,0-1.15-1.15,1.13,1.13,0,0,0,.1.48A6.33,6.33,0,0,0,2,6.91a13.3,13.3,0,0,0-.14,2.32,2.3,2.3,0,0,0-1.14,2,2.32,2.32,0,0,0,3.77,1.8,7.92,7.92,0,0,0,5.4,1.88,8,8,0,0,0,5.44-1.89,2.32,2.32,0,0,0,3.74-1.79A2.3,2.3,0,0,0,17.17,9Z"/></g></svg>
                     <span className="eh-soc-title">Reddit</span>
                   </div>
-                  <span className="eh-soc-desc">princep4423d <br/> Join technical open-source discussions and share engineering insights on subreddits.</span>
+                  <span className="eh-soc-desc">DWRSH <br/> Join technical open-source discussions and share engineering insights on subreddits.</span>
                 </a>
 
               </div>
