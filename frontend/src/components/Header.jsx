@@ -184,7 +184,7 @@ export default function Header() {
           </nav>
 
           {/* 3. Right: Elite CTA Button */}
-          <a href="mailto:darshprajapati1510@gmail.com" className="eh-cta-btn">
+          <a href="mailto:contact@darshprajapati.dev" className="eh-cta-btn">
             <span>Let's Talk</span>
             <ArrowUpRight size={16} />
           </a>
