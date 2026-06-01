@@ -1,8 +1,9 @@
 import React from 'react';
-import { MapPin, Music, Trophy, Pen, Github, Linkedin, Globe, Code, Rss, BookOpen, Layers } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, Music, Trophy, PenTool, Github, Rss, Linkedin, Facebook, Codepen, BookOpen, Layers } from 'lucide-react';
 import GitHubCalendar from 'react-github-calendar';
 
-/* ─── FULL BENTO GRID STYLES (NO SHORTCUTS & CRASH-FREE) ─────────────── */
+/* ─── FULL BENTO GRID STYLES (NO SHORTCUTS) ─────────────────────────────── */
 const eliteHomeStyles = `
   :root {
     --bg-ultra-dark: #020406;
@@ -44,9 +45,9 @@ const eliteHomeStyles = `
   }
   .eh-text-outline:hover { color: var(--text-main); -webkit-text-stroke: 2px transparent; }
 
-  /* --- Master Bento Wrapper (No Border, Grouping Container) --- */
+  /* --- Master Bento Wrapper (No Border) --- */
   .eh-bento-master {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.02); /* Subtle background to group them */
     border-radius: 32px;
     padding: 24px;
     display: grid;
@@ -76,11 +77,16 @@ const eliteHomeStyles = `
   .col-span-3 { grid-column: span 3; }
   .col-span-4 { grid-column: span 4; }
 
-  /* Grid Spans - Mobile */
+  /* Grid Spans - Mobile (Ensuring Bento layout stays, not just 1 column) */
   @media (max-width: 768px) {
     .eh-bento-master { grid-template-columns: repeat(2, 1fr); padding: 12px; gap: 12px; }
     .eh-card { padding: 16px; }
-    .col-span-1, .col-span-2, .col-span-3, .col-span-4 { grid-column: span 2; }
+    /* Force specific mobile spans */
+    .col-span-1 { grid-column: span 1; }
+    .col-span-2 { grid-column: span 2; }
+    .col-span-3 { grid-column: span 2; }
+    .col-span-4 { grid-column: span 2; }
+    .mob-span-2 { grid-column: span 2; } /* Useful to force full width on mobile */
   }
 
   /* --- Widget Specifics --- */
@@ -115,7 +121,7 @@ const eliteHomeStyles = `
   .eh-social-name { font-weight: 700; font-size: 13px; }
   .eh-social-sub { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 
-  /* GitHub Calendar - Scaling to fit perfectly */
+  /* GitHub Calendar - Scaling to fit 100% perfectly */
   .eh-git-wrapper {
     width: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center;
   }
@@ -147,13 +153,12 @@ const eliteHomeStyles = `
     border-radius: 12px; border: 1px solid var(--glass-border); transition: 0.3s;
   }
   .eh-skill-icon:hover { transform: scale(1.1); border-color: var(--primary); background: rgba(0,210,180,0.1); }
-  .icon-invert { filter: invert(1); }
+  .icon-invert { filter: invert(1); } /* For dark icons like Github/Nextjs */
 `;
 
 export default function HomePage() {
-  // Safe, fully-defined theme object to prevent crashes
+  
   const eliteCalendarTheme = {
-    light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
     dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
   };
 
@@ -184,18 +189,22 @@ export default function HomePage() {
 
         <div className="eh-container">
           
+          {/* Exact Text as requested */}
           <h1 className="eh-massive-text">
             <span className="eh-text-outline">DARSH</span>
           </h1>
 
+          {/* Master Box wrapping the entire grid without its own border */}
           <div className="eh-bento-master">
             
             {/* ROW 1 */}
-            <div className="eh-card col-span-2 eh-mern-bg">
+            {/* 1. Full Stack MERN */}
+            <div className="eh-card col-span-2 eh-mern-bg mob-span-2">
               <h2 className="text-3xl font-bold text-white mb-2">Full-Stack</h2>
               <p className="text-lg text-teal-400 font-semibold tracking-widest uppercase">MERN Architecture</p>
             </div>
 
+            {/* 2. Blog Snippet */}
             <div className="eh-card col-span-1">
               <h3 className="text-lg font-bold text-white mb-2 leading-snug">Is MERN Stack Dead? A Fresher's Struggle...</h3>
               <p className="text-sm text-gray-400 mb-4">A real and honest story of a fresher visiting 30+ software...</p>
@@ -205,6 +214,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* 3. Achievements */}
             <div className="eh-card col-span-1">
               <div className="eh-widget-title"><Trophy size={16} /> Achievements</div>
               <ul className="text-sm text-gray-400 space-y-2 mt-2">
@@ -215,12 +225,14 @@ export default function HomePage() {
             </div>
 
             {/* ROW 2 */}
+            {/* 4. Location */}
             <div className="eh-card col-span-1">
               <div className="eh-widget-title"><MapPin size={16} /> Location</div>
               <p className="text-sm text-gray-400">Idar, Gujarat, India</p>
               <div className="eh-map-img" />
             </div>
 
+            {/* 5. Music: Alone */}
             <div className="eh-card col-span-1">
               <div className="eh-widget-title"><Music size={16} /> Alone</div>
               <div className="flex gap-4 items-start mb-4">
@@ -230,7 +242,8 @@ export default function HomePage() {
               <p className="text-[11px] text-gray-500 italic mt-auto">"This track captures the feeling of being completely immersed..."</p>
             </div>
 
-            <div className="eh-card col-span-2">
+            {/* 6. GitHub Contributions (Fully Visible & Scaled) */}
+            <div className="eh-card col-span-2 mob-span-2">
               <div className="eh-widget-title"><Github size={16} /> GitHub Contributions</div>
               <div className="eh-git-wrapper">
                 <div className="eh-git-scale">
@@ -241,6 +254,7 @@ export default function HomePage() {
                     blockSize={12}
                     blockMargin={4}
                     fontSize={12}
+                    hideTotalCount={true}
                   />
                 </div>
               </div>
@@ -252,6 +266,7 @@ export default function HomePage() {
             </div>
 
             {/* ROW 3 */}
+            {/* 7. Book */}
             <div className="eh-card col-span-1" style={{ padding: '16px' }}>
               <div className="flex h-full">
                 <div className="writing-vertical text-xs font-semibold text-gray-400 border-r border-white/10 pr-2 flex items-center justify-center" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
@@ -263,14 +278,17 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* 8. Marquee Skills */}
             <div className="eh-card col-span-1">
               <div className="eh-widget-title"><Layers size={16} /> Skills</div>
               <div className="eh-marquee-wrapper mt-auto mb-auto">
+                {/* Track 1 (Left) */}
                 <div className="eh-marquee-track eh-marquee-left">
                   {[...skillIconsRow1, ...skillIconsRow1].map((url, i) => (
                     <img key={`r1-${i}`} src={url} alt="Skill" className="eh-skill-icon" />
                   ))}
                 </div>
+                {/* Track 2 (Right) */}
                 <div className="eh-marquee-track eh-marquee-right">
                   {[...skillIconsRow2, ...skillIconsRow2].map((url, i) => (
                     <img key={`r2-${i}`} src={url} alt="Skill" className={`eh-skill-icon ${url.includes('github') ? 'icon-invert' : ''}`} />
@@ -279,7 +297,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="eh-card col-span-2" style={{ padding: '16px' }}>
+            {/* 9. Social Links & Tools (Combined to match layout) */}
+            <div className="eh-card col-span-2 mob-span-2" style={{ padding: '16px' }}>
               <div className="eh-social-grid">
                 
                 <a href="https://github.com/princep4423d" target="_blank" rel="noreferrer" className="eh-social-item">
@@ -299,7 +318,7 @@ export default function HomePage() {
                 </a>
                 
                 <div className="eh-social-item">
-                  <Pen size={20} className="mb-2 text-teal-400" />
+                  <PenTool size={20} className="mb-2 text-teal-400" />
                   <div>
                     <div className="eh-social-name">Tools</div>
                     <div className="eh-social-sub line-clamp-1">VS Code, Git, Vite</div>
@@ -307,7 +326,7 @@ export default function HomePage() {
                 </div>
 
                 <a href="#" className="eh-social-item">
-                  <Code size={20} className="mb-2" />
+                  <Codepen size={20} className="mb-2" />
                   <div>
                     <div className="eh-social-name">CodePen</div>
                     <div className="eh-social-sub line-clamp-1">Frontend UI</div>
@@ -318,7 +337,7 @@ export default function HomePage() {
                   <Rss size={20} className="mb-2 text-[#ff4500]" />
                   <div>
                     <div className="eh-social-name">Reddit</div>
-                    <div className="eh-social-sub line-clamp-1">DWRSH - Join discussions</div>
+                    <div className="eh-social-sub line-clamp-1">DWRSH - Join discussions and share insights</div>
                   </div>
                 </a>
 
