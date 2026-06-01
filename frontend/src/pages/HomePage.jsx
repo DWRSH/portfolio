@@ -1,18 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Sparkles, Code2, MapPin, Terminal, Activity, Github, Linkedin, Mail, Smartphone } from 'lucide-react';
+import { ArrowRight, Download, MapPin, Terminal, Activity, Github, Linkedin, Mail, Code2, Shield, BookOpen, Layers } from 'lucide-react';
 import GitHubCalendar from 'react-github-calendar';
 
-/* ─── ULTRA-PREMIUM BENTO GRID STYLES ─────────────────────────────────────── */
+/* ─── 20-YOE SENIOR ENGINEER BENTO GRID STYLES ──────────────────────────── */
 const eliteHomeStyles = `
   :root {
     --bg-ultra-dark: #020406;
+    --bg-card: #0a0e14;
     --primary: #00d2b4;
-    --primary-hover: #00f0cc;
     --accent: #6366f1;
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.45);
-    --glass-bg: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.08);
     --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -23,152 +22,153 @@ const eliteHomeStyles = `
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center;
     position: relative; overflow: hidden; color: var(--text-main);
-    padding: 120px 24px 80px;
+    padding: 100px 24px 80px;
   }
 
-  /* --- Ambient Light & Grid --- */
-  .eh-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  /* --- Premium Ambient Lighting --- */
+  .eh-ambient { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .eh-glow-1 {
-    position: absolute; width: 800px; height: 800px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,210,180,0.05) 0%, transparent 60%);
-    top: -300px; right: -200px; animation: floatSlow 15s ease-in-out infinite;
-  }
-  .eh-glow-2 {
-    position: absolute; width: 600px; height: 600px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 60%);
-    bottom: -200px; left: -200px; animation: floatSlow 18s ease-in-out infinite reverse;
+    position: absolute; width: 60vw; height: 60vw; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,210,180,0.03) 0%, transparent 60%);
+    top: -20%; right: -10%; filter: blur(100px);
   }
   .eh-noise {
     position: absolute; inset: 0; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
   }
 
-  /* --- Animations --- */
-  @keyframes revealUp { from { opacity: 0; transform: translateY(40px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-  @keyframes floatSlow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-30px, 40px); } }
-  @keyframes rotateBadge { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  
-  .reveal-1 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.1s; }
-  .reveal-2 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.2s; }
-  .reveal-3 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.3s; }
-  .reveal-4 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.4s; }
+  .eh-container { position: relative; z-index: 2; width: 100%; max-width: 1280px; margin: 0 auto; }
 
-  /* --- Container & Hero --- */
-  .eh-container { position: relative; z-index: 2; width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 60px; }
+  /* --- Massive Typography & Branding --- */
+  .eh-header { margin-bottom: 40px; animation: revealUp 0.8s var(--easing-premium) forwards; }
   
-  .eh-hero-section { display: flex; flex-direction: column; position: relative; }
-  
-  .eh-status-pill {
-    display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
-    padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(0,210,180,0.3);
+  .eh-status-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-radius: 100px; border: 1px solid rgba(0,210,180,0.2);
     background: rgba(0,210,180,0.05); color: var(--primary); font-size: 12px; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 32px; backdrop-filter: blur(8px);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px;
   }
-  .eh-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary); animation: blink 2s infinite; }
-  @keyframes blink { 50% { opacity: 0.4; box-shadow: none; } }
+  .eh-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: 0.4; box-shadow: 0 0 10px var(--primary); } }
 
   .eh-massive-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(60px, 11vw, 160px);
-    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 24px 0;
+    font-family: 'Syne', sans-serif; font-size: clamp(50px, 10vw, 120px);
+    font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0 0 16px 0;
     display: flex; flex-direction: column;
   }
-  .eh-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2); transition: all 0.5s; }
-  .eh-text-outline:hover { color: var(--primary); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 60px rgba(0,210,180,0.3); }
+  .eh-text-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.15); transition: all 0.4s; }
+  .eh-text-outline:hover { color: var(--text-main); -webkit-text-stroke: 1.5px transparent; }
+  .eh-text-solid { color: var(--text-main); }
 
-  .eh-hero-bottom { display: flex; flex-direction: column; gap: 32px; }
-  @media (min-width: 768px) { .eh-hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; } }
-
-  .eh-bio { font-size: 18px; font-weight: 300; line-height: 1.6; color: var(--text-muted); max-width: 500px; margin: 0; }
-  .eh-bio strong { color: #fff; font-weight: 500; }
-
-  /* Buttons */
-  .eh-actions { display: flex; gap: 16px; flex-wrap: wrap; }
-  .eh-btn {
-    position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 16px 32px;
-    border-radius: 100px; font-size: 15px; font-weight: 600; text-decoration: none; overflow: hidden;
-    transition: color 0.4s; z-index: 1;
-  }
-  .eh-btn::before { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; transition: transform 0.5s var(--easing-premium); z-index: -1; border-radius: 100px; }
-  .eh-btn-primary { background: var(--primary); color: var(--bg-ultra-dark); border: 1px solid var(--primary); }
-  .eh-btn-primary::before { background: #fff; }
-  .eh-btn-primary:hover { color: var(--bg-ultra-dark); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,210,180,0.2); }
-  .eh-btn-primary:hover::before { transform: translateY(-100%); }
-  .eh-btn-secondary { background: var(--glass-bg); color: #fff; border: 1px solid var(--glass-border); backdrop-filter: blur(12px); }
-  .eh-btn-secondary::before { background: rgba(255,255,255,0.1); }
-  .eh-btn-secondary:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
-  .eh-btn-secondary:hover::before { transform: translateY(-100%); }
-
-  /* Rotating Badge */
-  .eh-rotating-badge { position: absolute; top: 40px; right: 0; width: 140px; height: 140px; display: none; }
-  @media (min-width: 1024px) { .eh-rotating-badge { display: block; } }
-  .eh-badge-svg { animation: rotateBadge 12s linear infinite; width: 100%; height: 100%; }
-  .eh-badge-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--primary); }
-
-  /* --- 4-COLUMN BENTO GRID --- */
+  /* --- Ultimate Bento Grid Layout --- */
   .eh-bento-grid {
-    display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px;
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(12, 1fr);
     grid-auto-flow: dense;
   }
-  @media (min-width: 768px) { .eh-bento-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1024px) { .eh-bento-grid { grid-template-columns: repeat(4, 1fr); } }
 
-  .eh-span-2 { grid-column: span 1; }
-  .eh-span-4 { grid-column: span 1; }
-  
+  .eh-card {
+    background: var(--bg-card); border: 1px solid var(--glass-border);
+    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+    transition: all 0.4s var(--easing-premium); display: flex; flex-direction: column;
+    animation: revealUp 0.8s var(--easing-premium) forwards; opacity: 0;
+  }
+  .eh-card:hover {
+    border-color: rgba(255,255,255,0.15); transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  /* Grid Spans */
+  .col-span-12 { grid-column: span 12; }
   @media (min-width: 768px) {
-    .eh-span-2 { grid-column: span 2; }
-    .eh-span-4 { grid-column: span 2; }
+    .col-span-md-6 { grid-column: span 6; }
+    .col-span-md-8 { grid-column: span 8; }
+    .col-span-md-4 { grid-column: span 4; }
   }
   @media (min-width: 1024px) {
-    .eh-span-4 { grid-column: span 4; }
+    .col-span-lg-3 { grid-column: span 3; }
+    .col-span-lg-4 { grid-column: span 4; }
+    .col-span-lg-5 { grid-column: span 5; }
+    .col-span-lg-6 { grid-column: span 6; }
+    .col-span-lg-7 { grid-column: span 7; }
+    .col-span-lg-8 { grid-column: span 8; }
   }
 
-  .eh-bento-card {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
-    backdrop-filter: blur(12px); transition: all 0.4s var(--easing-premium);
-    display: flex; flex-direction: column; justify-content: space-between;
+  /* --- Widget Specifics --- */
+  
+  /* 1. Hero Bio Widget */
+  .eh-bio-card { justify-content: space-between; background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, transparent 100%); }
+  .eh-bio-text { font-size: 18px; line-height: 1.6; color: var(--text-muted); font-weight: 300; margin-bottom: 32px; max-width: 90%; }
+  .eh-bio-text strong { color: #fff; font-weight: 500; }
+  
+  .eh-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  .eh-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px;
+    border-radius: 100px; font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: all 0.3s; cursor: pointer;
   }
-  .eh-bento-card:hover { background: rgba(255,255,255,0.03); border-color: rgba(0,210,180,0.3); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-  
-  /* Widget Specifics */
-  .eh-featured-bg { background: linear-gradient(145deg, rgba(0,210,180,0.08) 0%, rgba(5,7,10,0) 100%); }
-  
-  .eh-bento-header { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 24px; }
-  .eh-bento-header svg { color: var(--primary); }
-  
-  .eh-bento-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--primary); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-  
-  .eh-stat-num { font-family: 'Syne', sans-serif; font-size: clamp(32px, 3vw, 48px); font-weight: 800; line-height: 1; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .eh-stat-label { font-size: 14px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.05em; line-height: 1.5; }
+  .eh-btn-primary { background: var(--text-main); color: #000; }
+  .eh-btn-primary:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,210,180,0.2); }
+  .eh-btn-secondary { background: transparent; color: #fff; border: 1px solid var(--glass-border); }
+  .eh-btn-secondary:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
 
-  /* Custom Tech Tags */
-  .eh-tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .eh-tech-tag { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-main); }
-  
-  /* Location Map Style */
+  /* 2. Common Widget Headers */
+  .eh-widget-header { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; }
+  .eh-widget-header svg { color: var(--primary); }
+
+  /* 3. Location Widget */
   .eh-map-bg {
-    position: absolute; right: -20%; bottom: -20%; width: 150px; height: 150px;
-    background: radial-gradient(circle, rgba(0,210,180,0.1) 0%, transparent 70%); border-radius: 50%;
+    position: absolute; inset: 0; opacity: 0.1;
+    background-image: radial-gradient(circle at center, var(--primary) 1px, transparent 1px);
+    background-size: 20px 20px; z-index: 0; transition: opacity 0.4s;
   }
+  .eh-card:hover .eh-map-bg { opacity: 0.2; }
+  .eh-loc-content { position: relative; z-index: 1; margin-top: auto; }
+  .eh-loc-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+  .eh-loc-sub { font-size: 14px; color: var(--text-muted); }
 
-  /* Social Mini-Grid */
-  .eh-social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; width: 100%; }
+  /* 4. Focus / Activity Widget */
+  .eh-focus-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 8px; }
+  .eh-focus-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+  
+  /* 5. GitHub Full Width */
+  .eh-git-scroll { overflow-x: auto; padding-bottom: 10px; width: 100%; }
+  
+  /* 6. Skills Grid */
+  .eh-skills-container { display: flex; flex-wrap: wrap; gap: 10px; }
+  .eh-skill-tag {
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    color: var(--text-main); display: flex; align-items: center; gap: 8px;
+  }
+  .eh-skill-tag:hover { border-color: var(--primary); background: rgba(0,210,180,0.05); }
+
+  /* 7. Achievements List */
+  .eh-achieve-list { display: flex; flex-direction: column; gap: 16px; }
+  .eh-achieve-item { display: flex; gap: 12px; align-items: flex-start; }
+  .eh-achieve-icon { color: var(--primary); margin-top: 2px; }
+  .eh-achieve-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+  .eh-achieve-text strong { color: #fff; font-weight: 500; }
+
+  /* 8. Social Links */
+  .eh-social-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; height: 100%; }
   .eh-social-btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.03);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.02);
     border: 1px solid var(--glass-border); color: var(--text-main);
-    text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.3s;
+    text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.3s; height: 100%;
   }
-  .eh-social-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-4px); }
+  .eh-social-btn:hover { background: var(--text-main); color: #000; border-color: var(--text-main); transform: translateY(-4px); }
 
+  @keyframes revealUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Custom GitHub Calendar Theme overrides */
   .react-activity-calendar { color: var(--text-muted) !important; font-family: 'Fira Code', monospace; font-size: 12px; }
 `;
 
 export default function HomePage() {
-  
   const eliteCalendarTheme = {
-    dark: ['rgba(255,255,255,0.05)', 'rgba(0,210,180,0.3)', 'rgba(0,210,180,0.6)', 'rgba(0,210,180,0.8)', '#00d2b4'],
+    dark: ['rgba(255,255,255,0.03)', 'rgba(0,210,180,0.2)', 'rgba(0,210,180,0.5)', 'rgba(0,210,180,0.8)', '#00d2b4'],
   };
 
   return (
@@ -178,147 +178,141 @@ export default function HomePage() {
       <section className="eh-wrapper">
         <div className="eh-ambient">
           <div className="eh-glow-1" />
-          <div className="eh-glow-2" />
           <div className="eh-noise" />
         </div>
 
         <div className="eh-container">
           
-          {/* --- HERO SECTION --- */}
-          <div className="eh-hero-section">
-            <div className="eh-rotating-badge reveal-1">
-              <svg viewBox="0 0 100 100" className="eh-badge-svg">
-                <path id="circlePath" fill="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
-                <text><textPath href="#circlePath" fill="rgba(255,255,255,0.4)" fontSize="10" letterSpacing="1.5px" fontWeight="600">CREATIVE DEVELOPER • FULL STACK •</textPath></text>
-              </svg>
-              <div className="eh-badge-icon"><Sparkles size={24} /></div>
+          {/* --- TOP BRANDING HEADER --- */}
+          <header className="eh-header">
+            <div className="eh-status-badge">
+              <div className="eh-status-dot" /> System Online & Deploying
             </div>
-
-            <div className="eh-status-pill reveal-1">
-              <div className="eh-status-dot" /> Available for New Projects
-            </div>
-
-            <h1 className="eh-massive-text reveal-2">
+            <h1 className="eh-massive-text">
               <span className="eh-text-outline">DARSH</span>
+              <span className="eh-text-solid">PRAJAPATI.</span>
             </h1>
+          </header>
 
-            <div className="eh-hero-bottom reveal-3">
-              <p className="eh-bio">
-                I engineer <strong>high-performance</strong>, aesthetic digital architectures. 
-                Specializing in the MERN stack & Android ecosystem to build scalable, pixel-perfect solutions.
-              </p>
-
+          {/* --- THE ULTIMATE BENTO GRID --- */}
+          <div className="eh-bento-grid">
+            
+            {/* WIDGET 1: Hero Bio (Span 6) */}
+            <div className="eh-card eh-bio-card col-span-12 col-span-lg-6" style={{ animationDelay: '0.1s' }}>
+              <div>
+                <div className="eh-widget-header">
+                  <Terminal size={18} /> <span>Role_Identification</span>
+                </div>
+                <p className="eh-bio-text">
+                  I engineer <strong>high-performance, secure digital architectures</strong>. 
+                  Specializing as a MERN Stack Specialist & App Developer to build scalable backends and pixel-perfect interfaces.
+                </p>
+              </div>
+              
               <div className="eh-actions">
                 <a href="/Darsh_resume.pdf" download className="eh-btn eh-btn-primary">
-                  Download CV <Download size={18} />
+                  Download Resume <Download size={16} />
                 </a>
                 <Link to="/projects" className="eh-btn eh-btn-secondary">
-                  Explore Work <ArrowRight size={18} />
+                  View Architectures <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
-          </div>
 
-          {/* --- ASYMMETRICAL 4-COLUMN BENTO GRID --- */}
-          <div className="eh-bento-grid reveal-4">
-            
-            {/* Widget 1: Main Stack (Span 2) */}
-            <div className="eh-bento-card eh-span-2 eh-featured-bg">
-              <div className="eh-bento-icon"><Code2 size={24} /></div>
-              <div>
-                <div className="eh-stat-num">MERN</div>
-                <div className="eh-stat-label">Core Architecture Stack</div>
+            {/* WIDGET 2: Location (Span 3) */}
+            <div className="eh-card col-span-12 col-span-md-6 col-span-lg-3" style={{ animationDelay: '0.2s', justifyContent: 'flex-end' }}>
+              <div className="eh-map-bg" />
+              <div className="eh-loc-content">
+                <div className="eh-widget-header" style={{ marginBottom: '16px' }}>
+                  <MapPin size={18} /> <span>Base_Station</span>
+                </div>
+                <h3 className="eh-loc-title">Gujarat</h3>
+                <p className="eh-loc-sub">India (IST)</p>
               </div>
             </div>
 
-            {/* Widget 2: Projects */}
-            <div className="eh-bento-card">
-              <div className="eh-bento-header" style={{marginBottom: '0'}}><Terminal size={20} /></div>
-              <div style={{marginTop: '24px'}}>
-                <div className="eh-stat-num">15<span style={{color: 'var(--primary)', fontSize: '32px'}}>+</span></div>
-                <div className="eh-stat-label">Projects Shipped</div>
+            {/* WIDGET 3: Current Focus (Span 3) */}
+            <div className="eh-card col-span-12 col-span-md-6 col-span-lg-3" style={{ animationDelay: '0.3s', borderTop: '2px solid var(--primary)' }}>
+              <div className="eh-widget-header">
+                <Activity size={18} /> <span>Live_Execution</span>
+              </div>
+              <div style={{ marginTop: 'auto' }}>
+                <h3 className="eh-focus-title">StockWatcher</h3>
+                <p className="eh-focus-desc">Developing a real-time portfolio & alert system powered by FastAPI and MongoDB.</p>
               </div>
             </div>
 
-            {/* Widget 3: Location */}
-            <div className="eh-bento-card" style={{overflow: 'hidden'}}>
-              <div className="eh-map-bg"></div>
-              <div className="eh-bento-header" style={{marginBottom: '0'}}><MapPin size={20} /></div>
-              <div style={{marginTop: '24px', zIndex: 1}}>
-                <div className="eh-stat-num" style={{fontSize: '32px'}}>Gujarat</div>
-                <div className="eh-stat-label">Base Location, India</div>
+            {/* WIDGET 4: GitHub Contributions (Span 12 Full Width) */}
+            <div className="eh-card col-span-12" style={{ animationDelay: '0.4s' }}>
+              <div className="eh-widget-header">
+                <Github size={18} /> <span>Commit_History</span>
               </div>
-            </div>
-
-            {/* Widget 4: GitHub Calendar (Full Width Span 4) */}
-            <div className="eh-bento-card eh-span-4" style={{ overflowX: 'auto' }}>
-              <div className="eh-bento-header">
-                <Github size={20} />
-                <span>GitHub Contributions</span>
-              </div>
-              <div style={{ padding: '10px 0', minWidth: '700px' }}>
-                <GitHubCalendar 
-                  username="DWRSH" 
-                  colorScheme="dark"
-                  theme={eliteCalendarTheme}
-                  blockSize={14}
-                  blockMargin={6}
-                  fontSize={14}
-                  hideTotalCount={false}
-                />
-              </div>
-            </div>
-
-            {/* Widget 5: Tools & Technologies (Span 2) */}
-            <div className="eh-bento-card eh-span-2">
-              <div className="eh-bento-header">
-                <Smartphone size={20} />
-                <span>Tech Arsenal</span>
-              </div>
-              <div className="eh-stat-label">
-                My go-to tools for building scalable web apps, mobile interfaces, and secure architectures.
-              </div>
-              <div className="eh-tech-tags">
-                <span className="eh-tech-tag">React.js</span>
-                <span className="eh-tech-tag">Node.js</span>
-                <span className="eh-tech-tag">MongoDB</span>
-                <span className="eh-tech-tag">React Native</span>
-                <span className="eh-tech-tag">FastAPI</span>
-                <span className="eh-tech-tag">Python</span>
-              </div>
-            </div>
-
-            {/* Widget 6: Current Focus (Span 2) */}
-            <div className="eh-bento-card eh-span-2" style={{ borderLeft: '2px solid var(--primary)' }}>
-              <div className="eh-bento-header">
-                <Activity size={20} />
-                <span>Currently Building</span>
-              </div>
-              <div>
-                <div className="eh-stat-num" style={{fontSize: '28px'}}>StockWatcher</div>
-                <div className="eh-stat-label">
-                  Developing a real-time portfolio management and alert system integrated with modern fintech APIs.
+              <div className="eh-git-scroll">
+                <div style={{ minWidth: '800px', display: 'flex', justifyContent: 'center' }}>
+                  <GitHubCalendar 
+                    username="princep4423d" 
+                    colorScheme="dark"
+                    theme={eliteCalendarTheme}
+                    blockSize={13}
+                    blockMargin={5}
+                    fontSize={14}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Widget 7: Social Connect (Full Width Span 4) */}
-            <div className="eh-bento-card eh-span-4" style={{ padding: '24px' }}>
+            {/* WIDGET 5: Tools & Skills (Span 5) */}
+            <div className="eh-card col-span-12 col-span-lg-5" style={{ animationDelay: '0.5s' }}>
+              <div className="eh-widget-header">
+                <Layers size={18} /> <span>Tech_Arsenal</span>
+              </div>
+              <div className="eh-skills-container">
+                <span className="eh-skill-tag"><Code2 size={14} color="#61DAFB"/> React & Expo</span>
+                <span className="eh-skill-tag"><Code2 size={14} color="#339933"/> Node.js</span>
+                <span className="eh-skill-tag"><Code2 size={14} color="#47A248"/> MongoDB</span>
+                <span className="eh-skill-tag"><Terminal size={14} color="#009688"/> FastAPI</span>
+                <span className="eh-skill-tag"><Code2 size={14} color="#3776AB"/> Python</span>
+                <span className="eh-skill-tag"><Shield size={14} color="#FF9900"/> Cyber Security</span>
+              </div>
+            </div>
+
+            {/* WIDGET 6: Milestones / Achievements (Span 5) */}
+            <div className="eh-card col-span-12 col-span-md-8 col-span-lg-5" style={{ animationDelay: '0.6s' }}>
+              <div className="eh-widget-header">
+                <BookOpen size={18} /> <span>Milestones</span>
+              </div>
+              <div className="eh-achieve-list">
+                <div className="eh-achieve-item">
+                  <Shield size={16} className="eh-achieve-icon" />
+                  <span className="eh-achieve-text">Completed specialized <strong>Cyber Security Job Simulation</strong> for Deloitte Australia.</span>
+                </div>
+                <div className="eh-achieve-item">
+                  <BookOpen size={16} className="eh-achieve-icon" />
+                  <span className="eh-achieve-text">Authored research paper on <strong>Enhanced CNN (AFS-CNN)</strong> for deep learning image processing.</span>
+                </div>
+                <div className="eh-achieve-item">
+                  <Terminal size={16} className="eh-achieve-icon" />
+                  <span className="eh-achieve-text">Preparing for M.Sc. Cyber Security intake while pursuing <strong>B.Sc. in CA & IT</strong>.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* WIDGET 7: Social Links (Span 2) */}
+            <div className="eh-card col-span-12 col-span-md-4 col-span-lg-2" style={{ padding: '20px', animationDelay: '0.7s' }}>
               <div className="eh-social-grid">
-                <a href="https://github.com/DWRSH" target="_blank" rel="noreferrer" className="eh-social-btn">
-                  <Github size={18} /> GitHub
+                <a href="https://github.com/princep4423d" target="_blank" rel="noreferrer" className="eh-social-btn">
+                  <Github size={24} style={{ marginBottom: '4px' }} /> Git
                 </a>
-                <a href="https://www.linkedin.com/in/darshprajapati15" target="_blank" rel="noreferrer" className="eh-social-btn">
-                  <Linkedin size={18} /> LinkedIn
+                <a href="https://linkedin.com/" target="_blank" rel="noreferrer" className="eh-social-btn">
+                  <Linkedin size={24} style={{ marginBottom: '4px' }} /> In
                 </a>
-                <a href="mailto:contact@darshprajapati.dev" className="eh-social-btn">
-                  <Mail size={18} /> Email
+                <a href="mailto:hello@darshprajapati.dev" className="eh-social-btn" style={{ gridColumn: 'span 2' }}>
+                  <Mail size={20} style={{ marginBottom: '4px' }} /> Ping Me
                 </a>
               </div>
             </div>
 
           </div>
-
         </div>
       </section>
     </>
