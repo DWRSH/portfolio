@@ -203,8 +203,8 @@ export default function Footer() {
   const SOCIALS = [
     { 
       name: 'Email', 
-      handle: 'darshprajapati1510@gmail.com', 
-      url: 'mailto:darshprajapati1510@gmail.com', 
+      handle: 'contact@darshprajapati.dev', 
+      url: 'mailto:contact@darshprajapati.dev', 
       icon: Mail 
     },
     { 
