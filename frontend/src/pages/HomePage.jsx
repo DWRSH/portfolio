@@ -252,7 +252,6 @@ export default function HomePage() {
 
             <h1 className="eh-massive-text reveal-2">
               <span className="eh-text-outline">DARSH</span>
-              <span className="eh-text-solid">PRAJAPATI.</span>
             </h1>
 
             <div className="eh-hero-bottom reveal-3">
