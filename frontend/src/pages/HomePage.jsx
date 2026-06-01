@@ -304,7 +304,7 @@ export default function HomePage() {
               <div className="eh-git-wrapper">
                 <div className="eh-git-scale">
                   <GitHubCalendar 
-                    username="princep4423d" 
+                    username="DWRSH" 
                     colorScheme="dark"
                     theme={eliteCalendarTheme}
                     blockSize={11}
@@ -352,7 +352,7 @@ export default function HomePage() {
             <div className="eh-card col-span-2" style={{ padding: '16px' }}>
               <div className="eh-social-grid">
                 
-                <a href="https://github.com/princep4423d" target="_blank" rel="noreferrer" className="eh-social-item">
+                <a href="https://github.com/DWRSH" target="_blank" rel="noreferrer" className="eh-social-item">
                   <Github size={16} className="mb-1 text-white" />
                   <div>
                     <div className="eh-social-name">GitHub</div>
