@@ -339,7 +339,7 @@ export default function HomePage() {
               
               <div style={{ padding: '10px 0', display: 'flex', justifyContent: 'center' }}>
                 <GitHubCalendar 
-                  username="princep4423d" 
+                  username="DWRSH" 
                   colorScheme="dark"
                   theme={eliteCalendarTheme}
                   blockSize={12}
