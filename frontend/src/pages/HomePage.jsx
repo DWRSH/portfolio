@@ -1,551 +1,796 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Download, Sparkles, MapPin, Music, Trophy, PenTool, Github, Linkedin, Wrench, BookOpen, Layers } from 'lucide-react';
-import GitHubCalendar from 'react-github-calendar';
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight, Download, Sparkles, MapPin, Music, Trophy,
+  Github, Layers, Wrench, BookOpen, Star, Users, GitBranch,
+  ExternalLink, Headphones, Mail, Code2, Zap
+} from "lucide-react";
 
-/* ─── 20-YOE PREMIUM BENTO GRID ARCHITECTURE ────────────────────────────── */
-const eliteHomeStyles = `
-  :root {
-    --bg-ultra-dark: #020406;
-    --primary: #00d2b4;
-    --primary-hover: #00f0cc;
-    --accent: #6366f1;
-    --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.45);
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --card-bg: #090d13; /* Exact dark layout box color from screenshot */
-    --easing-premium: cubic-bezier(0.16, 1, 0.3, 1);
-  }
+/* ─────────────────────────────────────────────────────────────────────────
+   STYLES
+───────────────────────────────────────────────────────────────────────── */
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
 
-  .eh-wrapper {
-    background-color: var(--bg-ultra-dark);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-    color: var(--text-main);
-    padding: 120px 24px 60px;
-  }
+/* ── Reset & Root ─────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  /* --- Ambient Light & Grid --- */
-  .eh-ambient {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  }
-  .eh-glow-1 {
-    position: absolute; width: 800px; height: 800px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,210,180,0.05) 0%, transparent 60%);
-    top: -300px; right: -200px;
-    animation: floatSlow 15s ease-in-out infinite;
-  }
-  .eh-glow-2 {
-    position: absolute; width: 600px; height: 600px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 60%);
-    bottom: -200px; left: -200px;
-    animation: floatSlow 18s ease-in-out infinite reverse;
-  }
-  .eh-noise {
-    position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-  }
+:root{
+  --bg:        #04060a;
+  --surf:      #0b0f18;
+  --surf2:     #111620;
+  --border:    rgba(255,255,255,0.07);
+  --border-h:  rgba(255,255,255,0.14);
+  --teal:      #00d4b4;
+  --teal-dim:  rgba(0,212,180,0.10);
+  --teal-glow: rgba(0,212,180,0.22);
+  --violet:    #7c6ff7;
+  --text:      #ffffff;
+  --muted:     rgba(255,255,255,0.40);
+  --muted2:    rgba(255,255,255,0.22);
+  --ease:      cubic-bezier(0.16,1,0.3,1);
+  --r:         18px;
+  --rsm:       12px;
+}
 
-  /* --- Animations --- */
-  @keyframes revealUp {
-    from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
-    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
-  }
-  @keyframes floatSlow {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-30px, 40px); }
-  }
-  @keyframes rotateBadge {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
+/* ── Page Shell ───────────────────────────────────────────────────────── */
+.hp{
+  background:var(--bg);
+  font-family:'DM Sans',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
 
-  .reveal-1 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.1s; }
-  .reveal-2 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.2s; }
-  .reveal-3 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.3s; }
-  .reveal-4 { opacity: 0; animation: revealUp 1s var(--easing-premium) forwards; animation-delay: 0.5s; }
+/* ── Ambient glows ────────────────────────────────────────────────────── */
+.hp-ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.hp-g1{
+  position:absolute;width:900px;height:900px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,180,0.055) 0%,transparent 65%);
+  top:-350px;right:-250px;
+  animation:floatA 18s ease-in-out infinite;
+}
+.hp-g2{
+  position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,111,247,0.05) 0%,transparent 65%);
+  bottom:-250px;left:-200px;
+  animation:floatA 22s ease-in-out infinite reverse;
+}
+.hp-noise{
+  position:absolute;inset:0;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+@keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(-28px,38px)}}
 
-  /* --- Container & Layout --- */
-  .eh-container {
-    position: relative; z-index: 2;
-    width: 100%; max-width: 1200px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
+/* ── Page Content wrapper ─────────────────────────────────────────────── */
+.hp-body{
+  position:relative;z-index:1;
+  max-width:1180px;margin:0 auto;
+  padding:100px 24px 64px;
+  display:flex;flex-direction:column;gap:56px;
+}
+@media(max-width:640px){.hp-body{padding:80px 16px 48px;gap:40px}}
 
-  /* --- Massive Editorial Typography --- */
-  .eh-hero-section {
-    display: flex; flex-direction: column; position: relative;
-  }
-  
-  .eh-status-pill {
-    display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
-    padding: 8px 16px; border-radius: 100px; border: 1px solid rgba(0,210,180,0.3);
-    background: rgba(0,210,180,0.05); color: var(--primary);
-    font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-    margin-bottom: 32px; backdrop-filter: blur(8px);
-  }
-  .eh-status-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
-    box-shadow: 0 0 10px var(--primary); animation: blink 2s infinite;
-  }
-  @keyframes blink { 50% { opacity: 0.4; box-shadow: none; } }
+/* ══════════════════════════════════════════════════
+   HERO SECTION
+══════════════════════════════════════════════════ */
+.hero{display:flex;flex-direction:column;gap:0;position:relative}
 
-  .eh-massive-text {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(60px, 11vw, 160px);
-    font-weight: 800; line-height: 0.9;
-    letter-spacing: -0.04em; margin: 0 0 24px 0;
-    display: flex; flex-direction: column;
-  }
-  .eh-text-outline {
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
-    transition: all 0.5s var(--easing-premium);
-  }
-  .eh-text-outline:hover {
-    color: var(--primary); -webkit-text-stroke: 1.5px transparent;
-    text-shadow: 0 0 60px rgba(0,210,180,0.3);
-  }
+/* Status pill */
+.hero-pill{
+  display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+  padding:7px 16px;border-radius:100px;
+  border:1px solid rgba(0,212,180,0.3);background:rgba(0,212,180,0.06);
+  color:var(--teal);font-size:11.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;margin-bottom:28px;backdrop-filter:blur(8px);
+}
+.hero-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--teal);
+  box-shadow:0 0 9px var(--teal);animation:blink 2.2s ease-in-out infinite;
+}
+@keyframes blink{50%{opacity:.35;box-shadow:none}}
 
-  .eh-hero-bottom {
-    display: flex; flex-direction: column; gap: 32px;
-  }
-  @media (min-width: 768px) {
-    .eh-hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; }
-  }
+/* Big name */
+.hero-name{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(72px,14vw,168px);
+  font-weight:800;line-height:.88;
+  letter-spacing:-.04em;
+  margin-bottom:32px;
+  display:flex;flex-direction:column;
+}
+.hero-outline{
+  color:transparent;
+  -webkit-text-stroke:1.5px rgba(255,255,255,0.18);
+  transition:color .5s var(--ease),-webkit-text-stroke .5s var(--ease),text-shadow .5s var(--ease);
+  cursor:default;
+}
+.hero-outline:hover{
+  color:var(--teal);
+  -webkit-text-stroke:1.5px transparent;
+  text-shadow:0 0 80px rgba(0,212,180,.28);
+}
 
-  .eh-bio {
-    font-size: 18px; font-weight: 300; line-height: 1.6;
-    color: var(--text-muted); max-width: 480px; margin: 0;
-  }
-  .eh-bio strong { color: #fff; font-weight: 500; }
+/* Rotating badge */
+.hero-badge{
+  position:absolute;top:0;right:0;
+  width:130px;height:130px;
+  display:none;
+}
+@media(min-width:900px){.hero-badge{display:block}}
+.badge-svg{animation:rotateBadge 14s linear infinite;width:100%;height:100%}
+.badge-icon{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  color:var(--teal);
+}
+@keyframes rotateBadge{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-  /* --- Liquid Hover Buttons --- */
-  .eh-actions { display: flex; gap: 16px; flex-wrap: wrap; }
-  
-  .eh-btn {
-    position: relative; display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 32px; border-radius: 100px; font-size: 15px; font-weight: 600;
-    text-decoration: none; overflow: hidden; transition: color 0.4s; z-index: 1;
-  }
-  .eh-btn::before {
-    content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%;
-    transition: transform 0.5s var(--easing-premium); z-index: -1;
-    border-radius: 100px;
-  }
-  
-  .eh-btn-primary {
-    background: var(--primary); color: var(--bg-ultra-dark);
-    border: 1px solid var(--primary);
-  }
-  .eh-btn-primary::before { background: #fff; }
-  .eh-btn-primary:hover { color: var(--bg-ultra-dark); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,210,180,0.2); }
-  .eh-btn-primary:hover::before { transform: translateY(-100%); }
+/* Bottom row */
+.hero-bottom{
+  display:flex;flex-direction:column;gap:28px;
+}
+@media(min-width:700px){
+  .hero-bottom{flex-direction:row;justify-content:space-between;align-items:flex-end}
+}
+.hero-bio{
+  font-size:17px;font-weight:300;line-height:1.65;
+  color:var(--muted);max-width:460px;
+}
+.hero-bio strong{color:#fff;font-weight:500}
 
-  .eh-btn-secondary {
-    background: var(--glass-bg); color: #fff;
-    border: 1px solid var(--glass-border); backdrop-filter: blur(12px);
-  }
-  .eh-btn-secondary::before { background: rgba(255,255,255,0.1); }
-  .eh-btn-secondary:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
-  .eh-btn-secondary:hover::before { transform: translateY(-100%); }
-  .eh-btn-secondary:hover svg { transform: translateX(4px); }
-  .eh-btn svg { transition: transform 0.3s; }
+/* CTA Buttons */
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;flex-shrink:0}
+.hbtn{
+  position:relative;display:inline-flex;align-items:center;gap:9px;
+  padding:14px 28px;border-radius:100px;
+  font-size:14.5px;font-weight:600;text-decoration:none;
+  overflow:hidden;z-index:1;transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+}
+.hbtn::before{
+  content:'';position:absolute;top:100%;left:0;
+  width:100%;height:100%;border-radius:100px;
+  transition:transform .5s var(--ease);z-index:-1;
+}
+.hbtn:hover{transform:translateY(-3px)}
+.hbtn-primary{background:var(--teal);color:#04060a;border:1px solid var(--teal)}
+.hbtn-primary::before{background:#fff}
+.hbtn-primary:hover{box-shadow:0 12px 32px rgba(0,212,180,.22)}
+.hbtn-primary:hover::before{transform:translateY(-100%)}
+.hbtn-sec{background:rgba(255,255,255,.03);color:#fff;border:1px solid var(--border);backdrop-filter:blur(10px)}
+.hbtn-sec::before{background:rgba(255,255,255,.07)}
+.hbtn-sec:hover{border-color:rgba(255,255,255,.18)}
+.hbtn-sec:hover::before{transform:translateY(-100%)}
+.hbtn svg{transition:transform .3s}
+.hbtn:hover svg{transform:translateX(3px)}
 
-  /* --- Rotating SVG Badge --- */
-  .eh-rotating-badge {
-    position: absolute; top: 40px; right: 0;
-    width: 140px; height: 140px;
-    display: none;
-  }
-  @media (min-width: 1024px) { .eh-rotating-badge { display: block; } }
-  
-  .eh-badge-svg { animation: rotateBadge 12s linear infinite; width: 100%; height: 100%; }
-  .eh-badge-icon {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    color: var(--primary);
-  }
+/* Scroll hint */
+.hero-scroll{
+  display:flex;align-items:center;gap:10px;margin-top:48px;
+  font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted2);font-family:'Fira Code',monospace;
+}
+.scroll-line{
+  width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--muted2));
+}
 
-  /* ─── MASTER BOX BENTO GRID CONTAINER (NO BORDER) ─────────────────────── */
-  .eh-bento-master {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile for tight bento look */
-    gap: 14px;
-    width: 100%;
-  }
+/* ══════════════════════════════════════════════════
+   BENTO GRID
+══════════════════════════════════════════════════ */
+.bento{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  width:100%;
+}
 
-  @media (min-width: 768px) {
-    .eh-bento-master {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
+/* Responsive breakpoints */
+@media(max-width:1000px){
+  .bento{grid-template-columns:repeat(3,1fr)}
+  .c4{grid-column:span 3 !important}
+  .c3{grid-column:span 3 !important}
+  .c2{grid-column:span 2 !important}
+  .c1{grid-column:span 1 !important}
+}
+@media(max-width:720px){
+  .bento{grid-template-columns:repeat(2,1fr);gap:11px}
+  .c4,.c3,.c2{grid-column:span 2 !important}
+  .c1{grid-column:span 1 !important}
+  .mob-full{grid-column:span 2 !important}
+}
+@media(max-width:420px){
+  .bento{grid-template-columns:1fr;gap:10px}
+  .c4,.c3,.c2,.c1,.mob-full{grid-column:span 1 !important}
+}
 
-  @media (min-width: 1024px) {
-    .eh-bento-master {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-  }
+/* Span helpers */
+.c1{grid-column:span 1}
+.c2{grid-column:span 2}
+.c3{grid-column:span 3}
+.c4{grid-column:span 4}
 
-  /* Compact Individual Cards */
-  .eh-bento-card {
-    background: var(--card-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    transition: all 0.3s var(--easing-premium);
-  }
-  .eh-bento-card:hover {
-    border-color: rgba(255,255,255,0.15);
-    transform: translateY(-2px);
-  }
+/* ── Base Card ────────────────────────────────────────────────────────── */
+.card{
+  background:var(--surf);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:22px;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:14px;
+  transition:border-color .3s,transform .35s var(--ease),box-shadow .35s var(--ease);
+}
+.card:hover{
+  border-color:var(--border-h);
+  transform:translateY(-3px);
+  box-shadow:0 20px 48px rgba(0,0,0,.5);
+}
+.card::after{
+  content:'';position:absolute;inset:0;border-radius:var(--r);
+  background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%),rgba(0,212,180,.045),transparent 50%);
+  opacity:0;transition:opacity .4s;pointer-events:none;
+}
+.card:hover::after{opacity:1}
 
-  /* Grid Spanning Rules */
-  .span-1 { grid-column: span 1; }
-  .span-2 { grid-column: span 2; }
-  .span-3 { grid-column: span 3; }
-  .span-4 { grid-column: span 4; }
+/* card label */
+.lbl{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+}
+.lbl svg{color:var(--muted2);flex-shrink:0}
 
-  @media (max-width: 768px) {
-    .span-1, .span-2, .span-3, .span-4 { grid-column: span 2; }
-    .mob-half { grid-column: span 1 !important; } /* Keeps essential small blocks side-by-side on mobile */
-  }
+/* ── CARD: Stack Diagram ──────────────────────────────────────────────── */
+.venn-wrap{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  min-height:148px;position:relative;
+}
+.venn-c{
+  width:108px;height:108px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;position:absolute;
+}
+.va{
+  background:rgba(124,111,247,.13);border:1.5px solid rgba(124,111,247,.35);
+  left:calc(50% - 76px);
+}
+.vb{
+  background:rgba(0,212,180,.09);border:1.5px solid rgba(0,212,180,.3);
+  left:calc(50% - 32px);
+}
+.vtag{font-family:'Syne',sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.04em}
+.vsub{font-size:9px;color:var(--muted);font-weight:500;letter-spacing:.07em;text-transform:uppercase;font-family:'Fira Code',monospace}
+.vcenter{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:9px;font-weight:700;color:#fff;text-align:center;
+  background:rgba(0,0,0,.6);padding:5px 9px;border-radius:7px;
+  backdrop-filter:blur(8px);white-space:nowrap;z-index:2;font-family:'Fira Code',monospace;
+}
+.vcorner{position:absolute;font-family:'Fira Code',monospace;font-size:9.5px;font-weight:500;color:var(--muted2)}
+.vtl{top:0;left:0}.vtr{top:0;right:0}.vbr{bottom:0;right:0}
 
-  /* Widget Content Elements */
-  .eh-w-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 12px; }
-  .eh-w-title svg { color: var(--text-muted); }
-  
-  .eh-text-bold-title { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 8px; }
-  .eh-text-muted-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
-  
-  .eh-bullet-list { margin: 8px 0 0 0; padding-left: 16px; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+/* ── CARD: Blog ───────────────────────────────────────────────────────── */
+.blog-title{font-family:'Syne',sans-serif;font-size:15.5px;font-weight:700;line-height:1.4;color:#fff}
+.blog-desc{font-size:12.5px;line-height:1.6;color:var(--muted)}
+.blog-meta{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.blog-date{font-size:11px;color:var(--muted2);font-family:'Fira Code',monospace}
+.read-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:var(--teal);
+  background:var(--teal-dim);border:1px solid rgba(0,212,180,.2);
+  padding:4px 11px;border-radius:100px;text-decoration:none;
+  transition:background .2s,border-color .2s;
+}
+.read-pill:hover{background:rgba(0,212,180,.18);border-color:rgba(0,212,180,.4)}
 
-  /* Map and Graphic Elements */
-  .eh-diagram-box {
-    width: 100%; height: 120px; border-radius: 10px; margin-bottom: 12px;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    display: flex; align-items: center; justify-content: center; position: relative;
-  }
-  .eh-map-frame {
-    width: 100%; height: 100px; border: 0; border-radius: 10px; margin-top: auto;
-    filter: invert(90%) hue-rotate(180deg) contrast(90%); pointer-events: none;
-  }
+/* ── CARD: Achievements ───────────────────────────────────────────────── */
+.ach-list{display:flex;flex-direction:column;gap:9px}
+.ach-item{
+  display:flex;align-items:center;gap:10px;
+  font-size:12.5px;color:rgba(255,255,255,.68);
+  background:var(--surf2);border:1px solid var(--border);
+  padding:9px 13px;border-radius:var(--rsm);
+}
+.ach-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;box-shadow:0 0 8px var(--teal-glow)}
 
-  /* GitHub Calendar Layout Constraints */
-  .eh-github-box { width: 100%; display: flex; justify-content: center; overflow: hidden; }
-  .eh-github-scale { transform: scale(0.96); transform-origin: center; width: max-content; }
-  @media (max-width: 768px) {
-    .eh-github-box { overflow-x: auto; justify-content: flex-start; }
-    .eh-github-scale { transform: scale(1); padding-bottom: 4px; }
-  }
-  .react-activity-calendar { color: var(--text-muted) !important; font-family: 'Fira Code', monospace; font-size: 11px; }
+/* ── CARD: Tools ──────────────────────────────────────────────────────── */
+.tools-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{
+  font-family:'Fira Code',monospace;font-size:11px;font-weight:500;
+  color:rgba(255,255,255,.6);background:var(--surf2);border:1px solid var(--border);
+  padding:5px 12px;border-radius:100px;
+  transition:border-color .2s,color .2s;
+}
+.tchip:hover{border-color:var(--teal);color:var(--teal)}
 
-  /* Under Construction Strip */
-  .eh-construction-strip {
-    background: #000; border: 1px solid var(--glass-border); border-radius: 12px;
-    padding: 14px; display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-weight: 700; font-size: 15px; color: #fff; text-transform: uppercase; letter-spacing: 0.05em;
-  }
+/* ── CARD: Location ───────────────────────────────────────────────────── */
+.map-wrap{flex:1;border-radius:var(--rsm);overflow:hidden;min-height:118px;position:relative}
+.map-wrap iframe{width:100%;height:100%;border:0;border-radius:var(--rsm);pointer-events:none;min-height:118px;filter:invert(92%) hue-rotate(180deg) saturate(.8) contrast(.9)}
+.loc-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;display:flex;align-items:center;gap:6px}
+.loc-name svg{color:var(--teal)}
 
-  /* Clean Image Wrappers */
-  .eh-fit-img { width: 100%; height: 100%; object-fit: contain; }
+/* ── CARD: Music ──────────────────────────────────────────────────────── */
+.music-inner{display:flex;align-items:center;gap:14px}
+.music-art{width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 4px 18px rgba(0,0,0,.55)}
+.music-song{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff}
+.music-artist{font-size:12px;color:var(--muted);margin-top:2px}
+.np-row{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10.5px;color:var(--teal);font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+.np-bars{display:flex;align-items:flex-end;gap:2px;height:13px}
+.npb{width:3px;background:var(--teal);border-radius:1px;animation:npA .9s ease-in-out infinite alternate}
+.npb:nth-child(2){animation-delay:.2s}.npb:nth-child(3){animation-delay:.4s}
+@keyframes npA{from{height:3px}to{height:13px}}
+.music-bar{height:3px;border-radius:100px;background:var(--surf2);position:relative;overflow:hidden;margin-top:4px}
+.music-fill{position:absolute;left:0;top:0;height:100%;width:62%;background:linear-gradient(90deg,var(--teal),var(--violet));border-radius:100px}
+.music-time{display:flex;justify-content:space-between;font-family:'Fira Code',monospace;font-size:10px;color:var(--muted2);margin-top:4px}
 
-  /* Skills Grid Layout (Exact Match) */
-  .eh-tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: auto; }
-  .eh-tech-icon-card {
-    background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
-    border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-  }
-  .eh-tech-img { width: 22px; height: 22px; object-fit: contain; }
-  .invert-logo { filter: invert(1); }
+/* ── CARD: Discord ────────────────────────────────────────────────────── */
+.disc-inner{display:flex;align-items:center;gap:12px}
+.disc-logo{width:44px;height:44px;border-radius:11px;background:#5865f2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.disc-name{font-weight:700;font-size:14px;color:#fff}
+.disc-handle{font-family:'Fira Code',monospace;font-size:12px;color:var(--muted);margin-top:2px}
+.disc-online{display:flex;align-items:center;gap:5px;font-size:11px;color:#43b581;margin-top:5px}
+.disc-online-dot{width:7px;height:7px;border-radius:50%;background:#43b581;box-shadow:0 0 8px rgba(67,181,129,.6)}
 
-  /* Social Dynamic Box Grid */
-  .eh-social-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
-  .eh-social-card {
-    background: #000; border: 1px solid var(--glass-border); border-radius: 10px;
-    padding: 12px; display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: #fff;
-    transition: background 0.2s;
-  }
-  .eh-social-card:hover { background: rgba(255,255,255,0.04); }
-  .eh-soc-title { font-weight: 700; font-size: 13px; color: #fff; }
-  .eh-soc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; }
+/* ── CARD: GitHub ─────────────────────────────────────────────────────── */
+.gh-stats{display:flex;gap:10px;flex-wrap:wrap}
+.gh-stat{
+  display:flex;align-items:center;gap:9px;flex:1;min-width:84px;
+  background:var(--surf2);border:1px solid var(--border);
+  border-radius:var(--rsm);padding:11px 14px;
+}
+.gh-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+.gh-label{font-size:11px;color:var(--muted);margin-top:1px}
+.cal-label{font-size:11px;color:var(--muted);font-family:'Fira Code',monospace}
+.cal-grid{display:flex;gap:3px;overflow-x:auto;padding-bottom:4px}
+.cal-col{display:flex;flex-direction:column;gap:3px}
+.cal-cell{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+
+/* ── CARD: Tech Stack ─────────────────────────────────────────────────── */
+.tech-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:720px){.tech-grid{grid-template-columns:repeat(6,1fr)}}
+.ticon{
+  background:var(--surf2);border:1px solid var(--border);border-radius:10px;
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  transition:border-color .25s,transform .25s var(--ease),background .25s;
+}
+.ticon:hover{border-color:var(--border-h);background:rgba(255,255,255,.04);transform:translateY(-3px)}
+.ticon img{width:24px;height:24px;object-fit:contain}
+.inv{filter:invert(1) brightness(.8)}
+
+/* ── CARD: Learning ───────────────────────────────────────────────────── */
+.learn-list{display:flex;flex-direction:column;gap:11px}
+.learn-item{display:flex;align-items:center;gap:10px}
+.learn-lbl{font-size:12.5px;color:rgba(255,255,255,.68);flex:0 0 100px}
+.learn-bar{flex:1;height:4px;background:var(--surf2);border-radius:100px;overflow:hidden}
+.learn-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--teal),var(--violet));transition:width 1.6s var(--ease)}
+.learn-pct{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);width:30px;text-align:right;flex-shrink:0}
+
+/* ── CARD: Socials ────────────────────────────────────────────────────── */
+.soc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.soc-item{
+  background:var(--surf2);border:1px solid var(--border);border-radius:var(--rsm);
+  padding:14px;display:flex;flex-direction:column;gap:5px;
+  text-decoration:none;color:inherit;
+  transition:border-color .25s,background .25s;
+}
+.soc-item:hover{border-color:var(--border-h);background:rgba(255,255,255,.04)}
+.soc-icon{font-size:19px}
+.soc-name{font-weight:700;font-size:13px;color:#fff}
+.soc-handle{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted)}
+
+/* ── CARD: CTA ────────────────────────────────────────────────────────── */
+.cta-card{
+  background:linear-gradient(135deg,rgba(0,212,180,.07) 0%,rgba(124,111,247,.07) 100%) !important;
+  border-color:rgba(0,212,180,.18) !important;
+}
+.cta-card:hover{border-color:rgba(0,212,180,.35) !important}
+.cta-big{font-family:'Syne',sans-serif;font-size:clamp(22px,3.5vw,30px);font-weight:800;line-height:1.2;color:#fff}
+.cta-big span{color:var(--teal)}
+.cta-sub{font-size:13px;color:var(--muted);line-height:1.6}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--teal);color:#04060a;
+  font-weight:700;font-size:13.5px;
+  padding:11px 22px;border-radius:100px;
+  text-decoration:none;border:none;cursor:pointer;align-self:flex-start;
+  transition:background .2s,transform .25s var(--ease),box-shadow .25s;
+  margin-top:auto;
+}
+.cta-btn:hover{background:#00f2ce;transform:translateY(-2px);box-shadow:0 8px 26px rgba(0,212,180,.3)}
+
+/* ── CARD: Stats Counter ──────────────────────────────────────────────── */
+.stats-row{display:flex;gap:0;flex:1}
+.stat-box{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px 8px;text-align:center;border-right:1px solid var(--border);
+}
+.stat-box:last-child{border-right:none}
+.stat-num{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,40px);font-weight:800;color:#fff;line-height:1}
+.stat-num span{color:var(--teal)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.07em}
+
+/* ── Animations ────────────────────────────────────────────────────────── */
+@keyframes revealUp{
+  from{opacity:0;transform:translateY(36px);filter:blur(8px)}
+  to{opacity:1;transform:translateY(0);filter:blur(0)}
+}
+.r1{opacity:0;animation:revealUp 1s var(--ease) .1s forwards}
+.r2{opacity:0;animation:revealUp 1s var(--ease) .22s forwards}
+.r3{opacity:0;animation:revealUp 1s var(--ease) .36s forwards}
+.r4{opacity:0;animation:revealUp 1s var(--ease) .52s forwards}
+.r5{opacity:0;animation:revealUp 1s var(--ease) .66s forwards}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:100px}
 `;
 
-export default function HomePage() {
-  const eliteCalendarTheme = {
-    dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
-  };
+/* ─────────────────────────────────────────────────────────────────────────
+   MINI GITHUB CALENDAR (pure CSS, no external dep)
+───────────────────────────────────────────────────────────────────────── */
+const LEVELS = [0,0,1,2,0,3,4,1,0,0,2,3,1,0,2,4,1,3,0,2,1,4,3,2,1,0,2,3,4,1,2,0,
+                1,3,4,2,1,0,3,2,4,1,2,3,0,1,2,4,3,1,2,0,3,4,1,2,0,3,4,1,2,0,3,1,
+                4,2,0,1,3,2,4,0,1,2,3,4,0,1,2,3,4,0,1,2,3,4,0,1,3,2,4,1,2,3,0,4,
+                2,1,3,0,2,4,1,0,3,2,4,0,1,3,2,4,0,1,3,0,2,4,1,3,2,0,4,1,3,0,2,4,
+                1,3,2,0,4,1,3,2,0,4,1,3,2,0,1,4,3,2,1,0,4,3,2,1,0,3,4,1,2,0,3,4,
+                1,2,0,3,4,1,2,0,3];
+const CAL_COLORS = ['#161b22','#0e4429','#006d32','#26a641','#39d353'];
 
-  const techIcons = [
-    { name: 'C', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg' },
-    { name: 'C++', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
-    { name: 'CSS3', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
-    { name: 'Discord', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/discord/discord-original.svg' },
-    { name: 'Django', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg', invert: true },
-    { name: 'Docker', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-    { name: '.NET', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg' },
-    { name: 'React', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-    { name: 'GitHub', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg', invert: true },
-    { name: 'HTML5', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg' },
-    { name: 'Java', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-    { name: 'JavaScript', url: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' }
-  ];
+function MiniCal() {
+  const WEEKS = 26;
+  let idx = 0;
+  return (
+    <div className="cal-grid">
+      {Array.from({length:WEEKS}).map((_,w)=>(
+        <div className="cal-col" key={w}>
+          {Array.from({length:7}).map((_,d)=>(
+            <div className="cal-cell" key={d}
+              style={{background:CAL_COLORS[LEVELS[idx++%LEVELS.length]]}} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────────────────────────────────── */
+const TECH = [
+  {name:'C',        url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg'},
+  {name:'C++',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg'},
+  {name:'JS',       url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+  {name:'React',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'},
+  {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
+  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
+  {name:'Django',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg',inv:true},
+  {name:'Docker',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'},
+  {name:'.NET',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg'},
+  {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
+  {name:'Java',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg'},
+  {name:'Discord',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/discord/discord-original.svg'},
+];
+
+const LEARNING = [
+  {label:'Next.js',     pct:72},
+  {label:'TypeScript',  pct:58},
+  {label:'DevOps/CI',   pct:35},
+];
+
+const TOOLS = ['VS Code','Git','GitHub','Postman','Vite','Android Studio','Figma','npm'];
+
+const SOCIALS = [
+  {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
+  {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'#'},
+  {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
+  {icon:'✍️', name:'Blog',     handle:'Articles', href:'#'},
+];
+
+const ACHIEVEMENTS = [
+  'Completed 50+ projects',
+  'Built full MERN blog platform',
+  'Visited 30+ software hubs',
+  'Open-source contributor',
+];
+
+/* ─────────────────────────────────────────────────────────────────────────
+   COMPONENT
+───────────────────────────────────────────────────────────────────────── */
+export default function HomePage() {
+
+  // Mouse glow on cards
+  useEffect(() => {
+    const cards = document.querySelectorAll('.card');
+    const handlers = [];
+    cards.forEach(card => {
+      const fn = e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      };
+      card.addEventListener('mousemove', fn);
+      handlers.push({card, fn});
+    });
+    return () => handlers.forEach(({card,fn}) => card.removeEventListener('mousemove',fn));
+  }, []);
 
   return (
     <>
-      <style>{eliteHomeStyles}</style>
+      <style>{CSS}</style>
+      <div className="hp">
 
-      <section className="eh-wrapper">
-        {/* --- Ambient Background --- */}
-        <div className="eh-ambient">
-          <div className="eh-glow-1" />
-          <div className="eh-glow-2" />
-          <div className="eh-noise" />
+        {/* Ambient bg */}
+        <div className="hp-ambient">
+          <div className="hp-g1"/><div className="hp-g2"/><div className="hp-noise"/>
         </div>
 
-        <div className="eh-container">
-          
-          {/* --- Massive Editorial Hero (UNTOUCHED) --- */}
-          <div className="eh-hero-section">
-            <div className="eh-rotating-badge reveal-1">
-              <svg viewBox="0 0 100 100" className="eh-badge-svg">
-                <path id="circlePath" fill="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
+        <div className="hp-body">
+
+          {/* ══════════════════ HERO ══════════════════ */}
+          <section className="hero">
+
+            {/* Rotating badge */}
+            <div className="hero-badge r1">
+              <svg viewBox="0 0 100 100" className="badge-svg">
+                <path id="bp" fill="none" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"/>
                 <text>
-                  <textPath href="#circlePath" fill="rgba(255,255,255,0.4)" fontSize="10" letterSpacing="1.5px" fontWeight="600">
+                  <textPath href="#bp" fill="rgba(255,255,255,0.35)" fontSize="9.5"
+                    letterSpacing="1.6" fontWeight="600">
                     CREATIVE DEVELOPER • FULL STACK •
                   </textPath>
                 </text>
               </svg>
-              <div className="eh-badge-icon"><Sparkles size={24} /></div>
+              <div className="badge-icon"><Sparkles size={22}/></div>
             </div>
 
-            <div className="eh-status-pill reveal-1">
-              <div className="eh-status-dot" />
+            {/* Status pill */}
+            <div className="hero-pill r1">
+              <div className="hero-dot"/>
               Available for New Projects
             </div>
 
-            <h1 className="eh-massive-text reveal-2">
-              <span className="eh-text-outline">DARSH</span>
+            {/* Big name */}
+            <h1 className="hero-name r2">
+              <span className="hero-outline">DARSH</span>
             </h1>
 
-            <div className="eh-hero-bottom reveal-3">
-              <p className="eh-bio">
-                I engineer <strong>high-performance</strong>, aesthetic digital architectures. 
-                Specializing in the MERN stack to bridge the gap between heavy-duty backends and pixel-perfect frontends.
+            {/* Bio + CTA */}
+            <div className="hero-bottom r3">
+              <p className="hero-bio">
+                I engineer <strong>high-performance</strong>, aesthetic digital
+                architectures. Specialising in the <strong>MERN stack</strong> —
+                bridging heavy-duty backends with pixel-perfect frontends.
               </p>
-
-              <div className="eh-actions">
-                <a href="/Darsh_resume.pdf" download className="eh-btn eh-btn-primary">
-                  Download CV <Download size={18} />
+              <div className="hero-btns">
+                <a href="/Darsh_resume.pdf" download className="hbtn hbtn-primary">
+                  Download CV <Download size={17}/>
                 </a>
-                <Link to="/projects" className="eh-btn eh-btn-secondary">
-                  Explore Work <ArrowRight size={18} />
+                <Link to="/projects" className="hbtn hbtn-sec">
+                  Explore Work <ArrowRight size={17}/>
                 </Link>
               </div>
             </div>
-          </div>
 
-          {/* ─── 100% IMAGE ACCURATE BENTO MASTER ─────────────────────────── */}
-          <div className="eh-bento-master reveal-4">
-            
-            {/* Widget 1: Full-Stack vs MEAN Diagram Block */}
-            <div className="eh-bento-card span-2">
-              <div className="eh-diagram-box">
-                <span className="absolute top-3 left-3 text-[11px] font-bold text-gray-400">Full-Stack</span>
-                <span className="absolute top-3 right-3 text-[11px] font-bold text-gray-400">Mean Stack</span>
-                <span className="absolute bottom-3 right-3 text-[11px] font-bold text-gray-400">Mern Stack</span>
-                
-                {/* Visual Intersect representation matching the image */}
-                <div className="flex items-center justify-center gap-1">
-                  <div className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-[10px] font-bold">MEAN</div>
-                  <div className="w-10 h-10 rounded-full bg-red-500/80 text-white font-bold text-xs flex items-center justify-center z-10">VS</div>
-                  <div className="w-16 h-16 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-[10px] font-bold text-teal-400">MERN</div>
+            {/* Scroll hint */}
+            <div className="hero-scroll r4">
+              <div className="scroll-line"/>
+              scroll to explore
+            </div>
+          </section>
+
+          {/* ══════════════════ BENTO ══════════════════ */}
+          <div className="bento r5">
+
+            {/* ── 1. Venn / Stack Diagram ── c2 ── */}
+            <div className="card c2">
+              <div className="lbl"><Code2 size={13}/>Architecture Focus</div>
+              <div className="venn-wrap">
+                <span className="vcorner vtl">Full-Stack</span>
+                <span className="vcorner vtr">MEAN</span>
+                <span className="vcorner vbr">MERN</span>
+                <div className="venn-c va">
+                  <span className="vtag" style={{color:'#9b8ff9'}}>MEAN</span>
+                  <span className="vsub">Angular</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Widget 2: Blog Card */}
-            <div className="eh-bento-card span-1">
-              <h4 className="eh-text-bold-title">Is MERN Stack Dead? A Fresher's Struggle To Get a...</h4>
-              <p className="eh-text-muted-desc line-clamp-3">A real and honest story of a fresher visiting 30+ software hubs to find opportunities.</p>
-              <div className="flex justify-between text-[11px] text-gray-500 mt-auto font-medium">
-                <span>December 18, 2025</span>
-                <span>6 min read</span>
-              </div>
-            </div>
-
-            {/* Widget 3: Achievements Box */}
-            <div className="eh-bento-card span-1 mob-half">
-              <div className="eh-w-title"><Trophy size={15} /> Achievements</div>
-              <ul className="eh-bullet-list">
-                <li>Completed 50+ Projects</li>
-                <li>Built a MERN blog app</li>
-              </ul>
-            </div>
-
-            {/* Widget 4: Tools Block */}
-            <div className="eh-bento-card span-1 mob-half">
-              <div className="eh-w-title"><Layers size={15} /> Tools</div>
-              <p className="eh-text-muted-desc mt-1">VS Code, Git, GitHub, Postman, Vite, Android Studio</p>
-            </div>
-
-            {/* Widget 5: Location Map Box */}
-            <div className="eh-bento-card span-1 mob-half">
-              <div className="eh-w-title"><MapPin size={15} /> Location</div>
-              <p className="text-xs text-gray-400 font-medium">Idar, Gujarat</p>
-              <div className="eh-map-img">
-                <iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58444.75704901416!2d72.96291244335936!3d23.834469200000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395dbece3b6d2e6f%3A0xc54dfabfbfd538e4!2sIdar%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1701323838276!5m2!1sen!2sin" 
-                  className="eh-map-frame" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map">
-                </iframe>
-              </div>
-            </div>
-
-            {/* Widget 6: Alone Track Box */}
-            <div className="eh-bento-card span-1 mob-half">
-              <div className="eh-w-title"><Music size={15} /> Alone</div>
-              <div className="flex gap-3 items-center mb-2">
-                <span className="text-[11px] text-gray-400 flex-1">Top listened track this month</span>
-                <img src="https://upload.wikimedia.org/wikipedia/en/0/03/Alan_Walker_-_Alone.png" alt="Alone" className="w-12 h-12 rounded-lg object-cover" />
-              </div>
-              <p className="text-[11px] text-gray-500 italic mt-auto leading-tight">"This track captures the feeling of being completely immersed in your own world..."</p>
-            </div>
-
-            {/* Widget 7: GitHub Contributions (Span 2) */}
-            <div className="eh-bento-card span-2">
-              <div className="eh-w-title"><Github size={15} /> GitHub Contributions</div>
-              <div className="eh-github-box">
-                <div className="eh-github-scale">
-                  <GitHubCalendar 
-                    username="DWRSH" 
-                    colorScheme="dark"
-                    theme={eliteCalendarTheme}
-                    blockSize={11}
-                    blockMargin={4}
-                    fontSize={12}
-                    hideTotalCount={true}
-                  />
+                <div className="venn-c vb">
+                  <span className="vtag" style={{color:'#00d4b4'}}>MERN</span>
+                  <span className="vsub">React</span>
                 </div>
-              </div>
-              <div className="flex justify-between text-[11px] text-white font-bold mt-4 px-1">
-                <span>Stars: 6</span>
-                <span>Followers: 5</span>
-                <span>Repos: 12</span>
+                <div className="vcenter">Node + Express<br/>+ MongoDB</div>
               </div>
             </div>
 
-            {/* Widget 8: Discord Small Card */}
-            <div className="eh-bento-card span-1 mob-half" style={{ background: '#11141a' }}>
-              <div className="flex items-center gap-2 mb-2">
-                {/* Inline SVG for Discord Icon */}
-                <svg className="w-5 h-5 text-indigo-400 fill-current" viewBox="0 0 127.14 96.36"><path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a74.37,74.37,0,0,0,6.72-11A68.6,68.6,0,0,1,28.21,79.9c.85-.63,1.69-1.29,2.5-2a75.47,75.47,0,0,0,72.71,0c.81.69,1.65,1.35,2.5,2a68.41,68.41,0,0,1-10.57,5.47,75.06,75.06,0,0,0,6.72,11,105.73,105.73,0,0,0,31-18.83C129.07,50.7,123.2,27.83,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/></svg>
-                <span className="text-xs font-bold text-white">discord</span>
-              </div>
-              <p className="text-[11px] text-gray-400">@DWRSH</p>
-              <p className="text-[10px] text-gray-500 mt-2 leading-tight">Actively engaging in developer communities on Discord.</p>
-            </div>
-
-            {/* MIDDLE ROW FULL-SPAN: Under Construction Bar Block */}
-            <div className="span-4 col-span-4 width-full">
-              <div className="eh-construction-strip">
-                <Wrench size={16} /> Under Construction
-              </div>
-            </div>
-
-            {/* Widget 9: Vertical Book Block */}
-            <div className="eh-bento-card span-1 mob-half" style={{ padding: 0 }}>
-              <div className="flex h-full">
-                <div className="text-[10px] font-bold text-gray-400 border-r border-white/10 pr-2 flex items-center justify-center text-center px-2 py-4" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', background: '#090d13' }}>
-                  I love reading books <BookOpen size={11} className="inline ml-1" />
-                </div>
-                <div className="flex-1 flex items-center justify-center p-3 bg-black/40">
-                  <img src="https://upload.wikimedia.org/wikipedia/en/b/b9/Rich_Dad_Poor_Dad.jpg" alt="Rich Dad Cover" className="eh-fit-img max-h-[110px] rounded shadow-md" />
-                </div>
-              </div>
-            </div>
-
-            {/* Widget 10: Skills Static Grid Wrapper */}
-            <div className="eh-bento-card span-1 mob-half">
-              <div className="eh-w-title"><Layers size={14} /> Skills</div>
-              <div className="eh-tech-grid">
-                {techIcons.slice(0, 8).map((skill, idx) => (
-                  <div key={idx} className="eh-tech-icon-card" title={skill.name}>
-                    <img src={skill.url} className={`eh-tech-img ${skill.invert ? 'invert-logo' : ''}`} alt={skill.name} />
+            {/* ── 2. Stats ── c2 ── */}
+            <div className="card c2" style={{padding:'0'}}>
+              <div className="stats-row">
+                {[
+                  {num:'50',suffix:'+',lbl:'Projects'},
+                  {num:'2',suffix:'+',lbl:'Years Exp'},
+                  {num:'30',suffix:'+',lbl:'Hubs Visited'},
+                ].map(s=>(
+                  <div className="stat-box" key={s.lbl}>
+                    <div className="stat-num">{s.num}<span>{s.suffix}</span></div>
+                    <div className="stat-lbl">{s.lbl}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Widget 11: Comprehensive Social Dynamic Grid (Spans 2) */}
-            <div className="eh-bento-card span-2" style={{ padding: '14px', background: 'transparent', border: 'none' }}>
-              <div className="eh-social-container">
-                
-                {/* CodePen Inline SVG */}
-                <a href="#" className="eh-social-card">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-white fill-none stroke-current" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2l10 6.5v7L12 22 2 15.5v-7L12 2zm0 0v6.5M22 8.5L12 15 2 8.5M2 15.5L12 9l10 6.5"/></svg>
-                    <span className="eh-soc-title">CodePen</span>
-                  </div>
-                  <span className="eh-soc-desc">View my front-end UI blueprints...</span>
-                </a>
-
-                {/* Facebook Inline SVG */}
-                <a href="#" className="eh-social-card">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-white fill-current" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.8c4.56-.93 8-4.96 8-9.8z"/></svg>
-                    <span className="eh-soc-title">Facebook</span>
-                  </div>
-                  <span className="eh-soc-desc">Connect and follow me on social streams...</span>
-                </a>
-
-                {/* GitHub */}
-                <a href="https://github.com/DWRSH" target="_blank" rel="noreferrer" className="eh-social-card">
-                  <div className="flex items-center gap-2">
-                    <Github size={16} />
-                    <span className="eh-soc-title">GitHub</span>
-                  </div>
-                  <span className="eh-soc-desc">Explore engineering repositories and tools...</span>
-                </a>
-
-                {/* LinkedIn */}
-                <a href="https://www.linkedin.com/in/darshprajapati15" target="_blank" rel="noreferrer" className="eh-social-card">
-                  <div className="flex items-center gap-2">
-                    <Linkedin size={16} className="text-[#0077b5]" />
-                    <span className="eh-soc-title">LinkedIn</span>
-                  </div>
-                  <span className="eh-soc-desc">Connect with my industry network...</span>
-                </a>
-
-                {/* Reddit Full Width Span Inside Grid */}
-                <a href="#" className="eh-social-card" style={{ gridColumn: 'span 2' }}>
-                  <div className="flex items-center gap-2">
-                    {/* Reddit Inline SVG */}
-                    <svg className="w-5 h-5 text-orange-500 fill-current" viewBox="0 0 20 20"><g><path d="M17.17,9a2.31,2.31,0,0,0-2.32,2.31,2.44,2.44,0,0,0,.08,0,5.65,5.65,0,0,1-3.66-1.5,5.72,5.72,0,0,1-1-1.63,2.48,2.48,0,0,0,.43-1.39,2.31,2.31,0,0,0-4.62,0,2.41,2.41,0,0,0,.48,1.44,5.83,5.83,0,0,1-4.72,3.12,2.42,2.42,0,0,0,.08-.54A2.31,2.31,0,0,0,4.52,8.52a2.34,2.34,0,0,0-1.47.53,10.66,10.66,0,0,1,.1-1.8A4.14,4.14,0,0,1,6,3.61a1.21,1.21,0,0,0,.34.05,1.15,1.15,0,1,0-1.15-1.15,1.13,1.13,0,0,0,.1.48A6.33,6.33,0,0,0,2,6.91a13.3,13.3,0,0,0-.14,2.32,2.3,2.3,0,0,0-1.14,2,2.32,2.32,0,0,0,3.77,1.8,7.92,7.92,0,0,0,5.4,1.88,8,8,0,0,0,5.44-1.89,2.32,2.32,0,0,0,3.74-1.79A2.3,2.3,0,0,0,17.17,9Z"/></g></svg>
-                    <span className="eh-soc-title">Reddit</span>
-                  </div>
-                  <span className="eh-soc-desc">DWRSH <br/> Join technical open-source discussions and share engineering insights on subreddits.</span>
-                </a>
-
+            {/* ── 3. Blog ── c1 ── */}
+            <div className="card c1" style={{minHeight:210}}>
+              <div className="lbl"><BookOpen size={13}/>Latest Post</div>
+              <p className="blog-title">Is MERN Stack Dead? A Fresher's Struggle To Find a Job…</p>
+              <p className="blog-desc">An honest story of visiting 30+ software hubs to find real opportunities in today's market.</p>
+              <div className="blog-meta">
+                <span className="blog-date">18 Dec 2025 · 6 min</span>
+                <a href="#" className="read-pill">Read <ArrowRight size={11}/></a>
               </div>
             </div>
 
-          </div>
-        </div>
-      </section>
+            {/* ── 4. Achievements ── c1 ── */}
+            <div className="card c1">
+              <div className="lbl"><Trophy size={13}/>Achievements</div>
+              <div className="ach-list">
+                {ACHIEVEMENTS.map(a=>(
+                  <div className="ach-item" key={a}>
+                    <div className="ach-dot"/>{a}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── 5. Location ── c1 ── */}
+            <div className="card c1">
+              <div className="lbl"><MapPin size={13}/>Location</div>
+              <div className="loc-name"><MapPin size={14}/>Idar, Gujarat</div>
+              <div className="map-wrap">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58444.75704901416!2d72.96291244335936!3d23.834469200000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395dbece3b6d2e6f%3A0xc54dfabfbfd538e4!2sIdar%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1701323838276!5m2!1sen!2sin"
+                  allowFullScreen="" loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade" title="Map"
+                />
+              </div>
+            </div>
+
+            {/* ── 6. Music ── c2 ── */}
+            <div className="card c2">
+              <div className="lbl"><Headphones size={13}/>Now Playing</div>
+              <div className="music-inner">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/en/0/03/Alan_Walker_-_Alone.png"
+                  alt="Alone" className="music-art"
+                />
+                <div style={{flex:1}}>
+                  <div className="music-song">Alone</div>
+                  <div className="music-artist">Alan Walker</div>
+                  <div className="np-row">
+                    <div className="np-bars">
+                      <div className="npb" style={{height:4}}/>
+                      <div className="npb" style={{height:9}}/>
+                      <div className="npb" style={{height:5}}/>
+                    </div>
+                    Playing
+                  </div>
+                </div>
+              </div>
+              <div className="music-bar"><div className="music-fill"/></div>
+              <div className="music-time"><span>1:42</span><span>2:43</span></div>
+            </div>
+
+            {/* ── 7. Discord ── c1 ── */}
+            <div className="card c1">
+              <div className="lbl">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.033.057a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                </svg>
+                Discord
+              </div>
+              <div className="disc-inner">
+                <div className="disc-logo">
+                  <svg width="22" height="16" viewBox="0 0 24 18" fill="white">
+                    <path d="M20.317 1.37A19.791 19.791 0 0 0 15.432-.145a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0A12.64 12.64 0 0 0 8.64-.108a.077.077 0 0 0-.079.037A19.736 19.736 0 0 0 3.677 1.37a.07.07 0 0 0-.032.027C.533 5.976-.32 10.51.099 15a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="disc-name">Darsh</div>
+                  <div className="disc-handle">@dwrsh</div>
+                  <div className="disc-online">
+                    <div className="disc-online-dot"/>Online
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 8. GitHub Activity ── c3 ── */}
+            <div className="card c3">
+              <div className="lbl"><Github size={13}/>GitHub Activity</div>
+              <div className="gh-stats">
+                {[
+                  {icon:<Star size={14} color="#f0c23a"/>, num:'6', lbl:'Stars'},
+                  {icon:<Users size={14} color="#00d4b4"/>, num:'5', lbl:'Followers'},
+                  {icon:<GitBranch size={14} color="#7c6ff7"/>, num:'12', lbl:'Repos'},
+                ].map(s=>(
+                  <div className="gh-stat" key={s.lbl}>
+                    {s.icon}
+                    <div>
+                      <div className="gh-num">{s.num}</div>
+                      <div className="gh-label">{s.lbl}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="cal-label">Contributions — last 6 months</div>
+              <MiniCal/>
+            </div>
+
+            {/* ── 9. Tools ── c1 ── */}
+            <div className="card c1">
+              <div className="lbl"><Wrench size={13}/>Tools</div>
+              <div className="tools-wrap">
+                {TOOLS.map(t=><div className="tchip" key={t}>{t}</div>)}
+              </div>
+            </div>
+
+            {/* ── 10. Tech Stack ── c3 ── */}
+            <div className="card c3">
+              <div className="lbl"><Layers size={13}/>Tech Stack</div>
+              <div className="tech-grid">
+                {TECH.map(t=>(
+                  <div className="ticon" title={t.name} key={t.name}>
+                    <img src={t.url} alt={t.name} className={t.inv?'inv':''}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── 11. Currently Learning ── c1 ── */}
+            <div className="card c1">
+              <div className="lbl"><Zap size={13}/>Currently Learning</div>
+              <div className="learn-list">
+                {LEARNING.map(l=>(
+                  <div className="learn-item" key={l.label}>
+                    <span className="learn-lbl">{l.label}</span>
+                    <div className="learn-bar">
+                      <div className="learn-fill" style={{width:`${l.pct}%`}}/>
+                    </div>
+                    <span className="learn-pct">{l.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── 12. Socials ── c2 ── */}
+            <div className="card c2">
+              <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
+              <div className="soc-grid">
+                {SOCIALS.map(s=>(
+                  <a className="soc-item" key={s.name} href={s.href}
+                    target="_blank" rel="noreferrer">
+                    <span className="soc-icon">{s.icon}</span>
+                    <span className="soc-name">{s.name}</span>
+                    <span className="soc-handle">{s.handle}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* ── 13. CTA ── c2 ── */}
+            <div className="card c2 cta-card">
+              <p className="cta-big">
+                Let's build<br/><span>something great.</span>
+              </p>
+              <p className="cta-sub">
+                Open to freelance projects, full-time roles, and interesting collabs.
+                Drop a message — I reply fast.
+              </p>
+              <a href="mailto:darsh@example.com" className="cta-btn">
+                <Mail size={15}/> Get in Touch
+              </a>
+            </div>
+
+          </div>{/* /bento */}
+        </div>{/* /hp-body */}
+      </div>{/* /hp */}
     </>
   );
 }
