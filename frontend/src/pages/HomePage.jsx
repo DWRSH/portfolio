@@ -2,14 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2, Terminal
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Cpu
 } from "lucide-react";
 
-// Tumhara actual API instance import kar liya
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Marquee + Fully Interactive Terminal)
+   STYLES (True Mobile Bento Grid + Animated AI Core + Marquee)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -44,7 +43,6 @@ const CSS = `
 
 /* Page Body */
 .hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
-@media(max-width: 640px) { .hp-body { padding: 80px 16px 48px; gap: 40px; } }
 
 /* ── Hero Section ── */
 .hero { display: flex; flex-direction: column; gap: 0; position: relative; }
@@ -74,50 +72,66 @@ const CSS = `
 .hbtn-sec:hover { border-color: rgba(255,255,255,.18); }
 .hbtn-sec:hover::before { transform: translateY(-100%); }
 
-/* ── BENTO GRID ── */
+/* ── TRUE MOBILE BENTO GRID ── */
 .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: clamp(12px, 2vw, 16px); width: 100%; }
+.c1 { grid-column: span 1; } .c2 { grid-column: span 2; } .c3 { grid-column: span 3; }
+
+/* Grid Responsive Breakpoints */
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
-@media(max-width: 640px) { .bento { grid-template-columns: 1fr; } .c4, .c3, .c2, .c1 { grid-column: span 1; } }
-.c1 { grid-column: span 1; } .c2 { grid-column: span 2; } .c3 { grid-column: span 3; }
+
+/* 🔴 STRICT 2-COLUMN MOBILE GRID FIX */
+@media(max-width: 640px) { 
+  .hp-body { padding: 80px 16px 48px; gap: 40px; }
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } /* Keep 2 columns */
+  .c1 { grid-column: span 1; } /* Elements like Music/Map stay side-by-side */
+  .c2, .c3, .c4 { grid-column: span 2; } /* Larger elements span full mobile width */
+  
+  /* Make latest post span full width on mobile so text fits */
+  .mob-full { grid-column: span 2 !important; }
+  
+  /* Fix Stats row for mobile */
+  .stats-row { flex-wrap: wrap; }
+  .stat-box { width: 50%; border-bottom: 1px solid var(--border); }
+  .stat-box:nth-child(even) { border-right: none; }
+  .stat-box:nth-child(n+3) { border-bottom: none; }
+}
 
 .card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: clamp(16px, 3vw, 22px); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; transition: border-color .3s, transform .35s var(--ease), box-shadow .35s var(--ease); }
 .card:hover { border-color: var(--border-h); transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,.5); }
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* ── PLAYABLE TERMINAL ── */
-.terminal-wrap { flex: 1; background: #000; border-radius: var(--rsm); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; overflow: hidden; }
-.term-header { background: #1a1b26; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
-.term-dots { display: flex; gap: 6px; }
-.term-dot { width: 10px; height: 10px; border-radius: 50%; }
-.term-dot.close { background: #ff5f56; } .term-dot.min { background: #ffbd2e; } .term-dot.max { background: #27c93f; }
-.term-clock { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); }
-.term-body { padding: 12px; font-family: 'Fira Code', monospace; font-size: 12px; line-height: 1.6; color: #a9b1d6; flex: 1; overflow-y: auto; max-height: 140px; display: flex; flex-direction: column; }
-.term-body::-webkit-scrollbar { width: 4px; }
-.term-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-.term-line { margin-bottom: 4px; }
-.term-user { color: #7aa2f7; font-weight: 600; }
-.term-dir { color: #9ece6a; }
-.term-res { color: #bb9af7; margin-bottom: 6px; white-space: pre-wrap; }
-.term-input-row { display: flex; align-items: center; margin-top: auto; }
-.term-input { background: transparent; border: none; outline: none; color: #fff; font-family: 'Fira Code', monospace; font-size: 12px; flex: 1; margin-left: 6px; caret-color: #00d4b4; }
+/* ── 24/7 ANIMATED AI NEURAL CORE SVG ── */
+.neural-core-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 160px; position: relative; }
+.neural-svg { width: 100%; max-width: 190px; height: auto; overflow: visible; }
+/* SVG Animations */
+.nc-core { fill: var(--teal-dim); stroke: var(--teal); stroke-width: 1.5; animation: pulseCore 2.5s ease-in-out infinite alternate; transform-origin: center; }
+.nc-orbit1 { fill: none; stroke: var(--violet); stroke-width: 1; stroke-dasharray: 8 6; animation: spinRight 12s linear infinite; transform-origin: center; }
+.nc-orbit2 { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 0.8; stroke-dasharray: 15 10 5 10; animation: spinLeft 18s linear infinite; transform-origin: center; }
+.nc-line { fill: none; stroke: var(--teal); stroke-width: 1.2; stroke-dasharray: 6; animation: flowData 1.5s linear infinite; opacity: 0.6; }
+.nc-node { fill: #fff; animation: glowNode 2s infinite alternate; }
+
+@keyframes pulseCore { 0% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 10px var(--teal); } 100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 15px var(--teal)); } }
+@keyframes spinRight { 100% { transform: rotate(360deg); } }
+@keyframes spinLeft { 100% { transform: rotate(-360deg); } }
+@keyframes flowData { to { stroke-dashoffset: -12; } }
+@keyframes glowNode { 0% { opacity: 0.5; r: 2.5; } 100% { opacity: 1; r: 4; filter: drop-shadow(0 0 5px #fff); } }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
-.vinyl-container { position: relative; width: 90px; height: 90px; }
+.vinyl-container { position: relative; width: clamp(70px, 20vw, 90px); height: clamp(70px, 20vw, 90px); }
 .vinyl-record { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%); border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease); }
 .vinyl-record.playing { animation: spinRecord 2s linear infinite; }
 @keyframes spinRecord { 100% { transform: rotate(360deg); } }
 .vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
 .vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
-.tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); }
+.tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); z-index: 5; }
 .tonearm.playing { transform: rotate(10deg); }
 .music-info { text-align: center; z-index: 2; }
-.music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 2px; }
+.music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: clamp(13px, 4vw, 15px); margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
 .hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
-@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
 .tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
@@ -132,7 +146,6 @@ const CSS = `
 @keyframes scrollR { to { transform: translateX(0); } }
 
 /* Stats & Others */
-.stats-row { display: flex; flex: 1; border-radius: var(--r); overflow: hidden; }
 .stat-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; text-align: center; border-right: 1px solid var(--border); }
 .stat-box:last-child { border-right: none; }
 .stat-num { font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: #fff; line-height: 1; }
@@ -202,14 +215,6 @@ const SOCIALS = [
 export default function HomePage() {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
-  // Terminal State
-  const termEndRef = useRef(null);
-  const [termInput, setTermInput] = useState('');
-  const [termTime, setTermTime] = useState('');
-  const [termHistory, setTermHistory] = useState([
-    { cmd: '', res: 'Welcome to DarshOS v1.0.0\nType "help" to see available commands.' }
-  ]);
 
   // Blog Auto-Sync State
   const [latestPost, setLatestPost] = useState(null);
@@ -230,38 +235,7 @@ export default function HomePage() {
     }
   };
 
-  // Terminal Handlers
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTermTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (termEndRef.current) termEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, [termHistory]);
-
-  const handleTermCommand = (e) => {
-    if (e.key === 'Enter') {
-      const cmd = termInput.trim().toLowerCase();
-      let res = '';
-
-      if (cmd === 'help') res = 'Commands: help, about, skills, clear, sudo, whoami';
-      else if (cmd === 'about') res = 'Darsh Prajapati: Full Stack Developer & Cyber Security Enthusiast.';
-      else if (cmd === 'skills') res = 'MERN Stack, Python, FastAPI, React Native, Ethical Hacking...';
-      else if (cmd === 'whoami') res = 'guest_user';
-      else if (cmd === 'sudo') res = 'Nice try. This incident will be reported.';
-      else if (cmd === 'clear') { setTermHistory([]); setTermInput(''); return; }
-      else if (cmd === '') res = '';
-      else res = `zsh: command not found: ${cmd}`;
-
-      setTermHistory(prev => [...prev, { cmd, res }]);
-      setTermInput('');
-    }
-  };
-
-  // Blog Auto-Sync Logic (Now correctly using your API instance)
+  // Auto-Syncing Logic connecting to your Custom Axios API
   useEffect(() => {
     async function fetchLatestBlog() {
       try {
@@ -320,48 +294,35 @@ export default function HomePage() {
           <div className="bento r5">
 
             {/* ROW 1 */}
+            {/* ── NEW 24/7 ANIMATED AI NEURAL CORE ── */}
             <div className="card c2">
-              <div className="lbl"><Terminal size={13}/>Interactive Shell</div>
-              <div className="terminal-wrap" onClick={() => document.getElementById('term-input').focus()}>
-                <div className="term-header">
-                  <div className="term-dots">
-                    <span className="term-dot close"></span>
-                    <span className="term-dot min"></span>
-                    <span className="term-dot max"></span>
-                  </div>
-                  <div className="term-clock">{termTime}</div>
-                </div>
-                <div className="term-body">
-                  {termHistory.map((item, i) => (
-                    <div key={i} className="term-line">
-                      {item.cmd && (
-                        <div>
-                          <span className="term-user">darsh@mac</span>:<span className="term-dir">~</span>$ {item.cmd}
-                        </div>
-                      )}
-                      {item.res && <div className="term-res">{item.res}</div>}
-                    </div>
-                  ))}
-                  <div className="term-input-row">
-                    <span className="term-user">darsh@mac</span>:<span className="term-dir">~</span>$ 
-                    <input 
-                      id="term-input"
-                      type="text" 
-                      className="term-input" 
-                      value={termInput}
-                      onChange={(e) => setTermInput(e.target.value)}
-                      onKeyDown={handleTermCommand}
-                      autoComplete="off"
-                      spellCheck="false"
-                    />
-                  </div>
-                  <div ref={termEndRef} />
-                </div>
+              <div className="lbl"><Cpu size={13}/>System Architecture</div>
+              <div className="neural-core-wrap">
+                <svg viewBox="0 0 200 200" className="neural-svg">
+                  {/* Central Hub */}
+                  <circle cx="100" cy="100" r="35" className="nc-core" />
+                  
+                  {/* Rotating Orbits */}
+                  <circle cx="100" cy="100" r="65" className="nc-orbit1" />
+                  <circle cx="100" cy="100" r="85" className="nc-orbit2" />
+                  
+                  {/* Flowing Data Lines */}
+                  <path d="M 100 65 L 100 20 M 100 135 L 100 180 M 65 100 L 20 100 M 135 100 L 180 100" className="nc-line" />
+                  <path d="M 75 75 L 45 45 M 125 125 L 155 155 M 75 125 L 45 155 M 125 75 L 155 45" className="nc-line" style={{animationDelay: '0.5s', opacity: 0.3}} />
+                  
+                  {/* Processing Nodes */}
+                  <circle cx="100" cy="20" r="3" className="nc-node" />
+                  <circle cx="100" cy="180" r="3" className="nc-node" style={{animationDelay: '0.2s'}} />
+                  <circle cx="20" cy="100" r="3" className="nc-node" style={{animationDelay: '0.4s'}} />
+                  <circle cx="180" cy="100" r="3" className="nc-node" style={{animationDelay: '0.6s'}} />
+                  <circle cx="45" cy="45" r="2.5" className="nc-node" style={{animationDelay: '0.8s'}} />
+                  <circle cx="155" cy="155" r="2.5" className="nc-node" style={{animationDelay: '1s'}} />
+                </svg>
               </div>
             </div>
 
             <div className="card c2" style={{padding: 0}}>
-              <div className="stats-row">
+              <div className="stats-row" style={{height: '100%'}}>
                 <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
                 <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
                 <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
@@ -372,8 +333,9 @@ export default function HomePage() {
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '10px' }}>
-                <img src="https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Stats" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                {/* FIXED GITHUB STATS - Using reliable eight-theta fork to avoid Vercel suspension */}
+                <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Stats" style={{ height: '140px', flex: '1', minWidth: '280px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', minWidth: '280px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                  <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
@@ -403,7 +365,7 @@ export default function HomePage() {
                 <div className="music-info">
                   <div className="music-song">Lo-Fi Coding</div>
                   <div className="music-artist">Lofi Study</div>
-                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Hover to Play'}</div>
+                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
                 </div>
               </div>
             </div>
@@ -442,7 +404,8 @@ export default function HomePage() {
             </div>
 
             {/* ROW 4 */}
-            <div className="card c1">
+            {/* ── AUTO-SYNCING LATEST POST (Now spans full width on Mobile for readability) ── */}
+            <div className="card c1 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -462,7 +425,7 @@ export default function HomePage() {
             </div>
 
             <div className="card c1" style={{padding: 0}}>
-              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute'}}><MapPin size={13}/>Location</div>
+              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
               <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
                 <div className="map-wrap">
                   <iframe
