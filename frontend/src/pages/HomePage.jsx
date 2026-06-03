@@ -191,7 +191,7 @@ const TECH = [
 
 const SOCIALS = [
   {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
-  {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'#'},
+  {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'https://www.linkedin.com/in/darshprajapati15'},
   {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
 ];
 
@@ -239,7 +239,7 @@ export default function HomePage() {
                 bridging heavy-duty backends with pixel-perfect frontends.
               </p>
               <div className="hero-btns">
-                <a href="#" className="hbtn hbtn-primary">Download CV <Download size={17}/></a>
+                <a href="/Darsh_resume.pdf" className="hbtn hbtn-primary">Download CV <Download size={17}/></a>
                 <Link to="/projects" className="hbtn hbtn-sec">Explore Work <ArrowRight size={17}/></Link>
               </div>
             </div>
@@ -260,9 +260,9 @@ export default function HomePage() {
 
             <div className="card c2" style={{padding: 0}}>
               <div className="stats-row">
-                <div className="stat-box"><div className="stat-num">50<span>+</span></div><div className="stat-lbl">Projects</div></div>
+                <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
                 <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
-                <div className="stat-box"><div className="stat-num">30<span>+</span></div><div className="stat-lbl">Hubs</div></div>
+                <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
               </div>
             </div>
 
@@ -341,7 +341,7 @@ export default function HomePage() {
               <p className="blog-title">Is MERN Stack Dead?</p>
               <p className="blog-desc" style={{marginBottom: '10px'}}>An honest story of visiting 30+ software hubs to find real opportunities.</p>
               <div className="blog-meta">
-                <a href="#" className="read-pill">Read <ArrowRight size={11}/></a>
+                <a href="/blog" className="read-pill">Read <ArrowRight size={11}/></a>
               </div>
             </div>
 
@@ -349,7 +349,7 @@ export default function HomePage() {
               <div className="lbl" style={{padding: '16px 16px 0'}}><MapPin size={13}/>Location</div>
               <div className="map-wrap" style={{minHeight: '100%'}}>
                 <iframe
-                  src="https://maps.google.com/maps?q=Gujarat,India&t=k&z=7&ie=UTF8&iwloc=&output=embed"
+                  src="https://share.google/t1IN1qG1Xwg1tzytM"
                   allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
                 />
               </div>
@@ -359,7 +359,7 @@ export default function HomePage() {
               <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px'}}>
                 Let's build <span style={{color: 'var(--teal)'}}>something great.</span>
               </p>
-              <a href="mailto:darsh@example.com" className="cta-btn"><Mail size={15}/> Get in Touch</a>
+              <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
             </div>
 
           </div>{/* /bento */}
