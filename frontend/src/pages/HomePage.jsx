@@ -5,6 +5,9 @@ import {
   Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2, Terminal
 } from "lucide-react";
 
+// Tumhara actual API instance import kar liya
+import api from '../api/axios';
+
 /* ─────────────────────────────────────────────────────────────────────────
    STYLES (Perfect Grid + Marquee + Fully Interactive Terminal)
 ───────────────────────────────────────────────────────────────────────── */
@@ -114,6 +117,7 @@ const CSS = `
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
 .hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
+@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
 .tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
@@ -144,7 +148,7 @@ const CSS = `
 /* Clickable Map Link Wrapper */
 .map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; transition: opacity 0.2s; }
 .map-link:hover { opacity: 0.85; }
-.map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; } /* pointer-events none allows the parent a-tag to handle clicks */
+.map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
 .map-wrap iframe { width: 100%; height: 100%; border: 0; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
 
 .soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; }
@@ -228,7 +232,6 @@ export default function HomePage() {
 
   // Terminal Handlers
   useEffect(() => {
-    // Clock for terminal header
     const interval = setInterval(() => {
       setTermTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
     }, 1000);
@@ -236,7 +239,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Auto-scroll terminal to bottom
     if (termEndRef.current) termEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [termHistory]);
 
@@ -259,34 +261,31 @@ export default function HomePage() {
     }
   };
 
-  // Blog Auto-Sync Logic (Replace with your actual API endpoint later)
+  // Blog Auto-Sync Logic (Now correctly using your API instance)
   useEffect(() => {
-    async function fetchBlog() {
+    async function fetchLatestBlog() {
       try {
-        /* 
-           TODO: Replace this URL with your actual blog's API or RSS-to-JSON endpoint.
-           Example: const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=YOUR_BLOG_RSS_URL'); 
-           const data = await res.json();
-        */
+        const response = await api.get('/blogs');
+        const posts = response.data;
         
-        // Simulating network fetch delay for realism
-        setTimeout(() => {
+        if (posts && posts.length > 0) {
+          const latest = posts[0];
           setLatestPost({
-            title: "Enhanced CNN with Adaptive Feature Selection (AFS-CNN)",
-            desc: "Exploring deep learning architectures for image processing. This paper details a novel approach to feature extraction that significantly improves classification accuracy.",
-            link: "/blog" // Replace with actual dynamic link like data.items[0].link
+            title: latest.title,
+            desc: latest.desc || (latest.content ? latest.content.substring(0, 120) + '...' : 'Click to read this article.'),
+            link: `/blog/${latest.slug || latest._id}`
           });
-          setLoadingPost(false);
-        }, 1500);
-
+        } else {
+          setLatestPost(null);
+        }
+        setLoadingPost(false);
       } catch (error) {
-        console.error("Failed to sync blog", error);
+        console.error("Failed to sync latest blog:", error);
         setLoadingPost(false);
       }
     }
-    fetchBlog();
+    fetchLatestBlog();
   }, []);
-
 
   return (
     <>
@@ -321,7 +320,6 @@ export default function HomePage() {
           <div className="bento r5">
 
             {/* ROW 1 */}
-            {/* ── FULLY INTERACTIVE TERMINAL ── */}
             <div className="card c2">
               <div className="lbl"><Terminal size={13}/>Interactive Shell</div>
               <div className="terminal-wrap" onClick={() => document.getElementById('term-input').focus()}>
@@ -444,7 +442,6 @@ export default function HomePage() {
             </div>
 
             {/* ROW 4 */}
-            {/* ── AUTO-SYNCING LATEST POST ── */}
             <div className="card c1">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
@@ -456,7 +453,7 @@ export default function HomePage() {
                   <p className="blog-title">{latestPost.title}</p>
                   <p className="blog-desc">{latestPost.desc}</p>
                   <div className="blog-meta">
-                    <a href={latestPost.link} className="read-pill">Read <ArrowRight size={11}/></a>
+                    <Link to={latestPost.link} className="read-pill">Read <ArrowRight size={11}/></Link>
                   </div>
                 </>
               ) : (
@@ -464,7 +461,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* ── CLICKABLE REAL MAP (Centers accurately on Gujarat, IN) ── */}
             <div className="card c1" style={{padding: 0}}>
               <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute'}}><MapPin size={13}/>Location</div>
               <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
