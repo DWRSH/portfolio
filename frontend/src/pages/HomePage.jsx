@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Cpu
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (True Mobile Bento Grid + Animated AI Core + Marquee)
+   STYLES (Perfect Grid + Car SVG + Strict Horizontal Stats)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -72,29 +72,27 @@ const CSS = `
 .hbtn-sec:hover { border-color: rgba(255,255,255,.18); }
 .hbtn-sec:hover::before { transform: translateY(-100%); }
 
-/* ── TRUE MOBILE BENTO GRID ── */
+/* ── BENTO GRID ── */
 .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: clamp(12px, 2vw, 16px); width: 100%; }
 .c1 { grid-column: span 1; } .c2 { grid-column: span 2; } .c3 { grid-column: span 3; }
 
-/* Grid Responsive Breakpoints */
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
 
-/* 🔴 STRICT 2-COLUMN MOBILE GRID FIX */
+/* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
 @media(max-width: 640px) { 
   .hp-body { padding: 80px 16px 48px; gap: 40px; }
-  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } /* Keep 2 columns */
-  .c1 { grid-column: span 1; } /* Elements like Music/Map stay side-by-side */
-  .c2, .c3, .c4 { grid-column: span 2; } /* Larger elements span full mobile width */
-  
-  /* Make latest post span full width on mobile so text fits */
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
+  .c1 { grid-column: span 1; } 
+  .c2, .c3, .c4 { grid-column: span 2; } 
   .mob-full { grid-column: span 2 !important; }
   
-  /* Fix Stats row for mobile */
-  .stats-row { flex-wrap: wrap; }
-  .stat-box { width: 50%; border-bottom: 1px solid var(--border); }
-  .stat-box:nth-child(even) { border-right: none; }
-  .stat-box:nth-child(n+3) { border-bottom: none; }
+  /* Force Stats into a single horizontal row */
+  .stats-row { flex-direction: row !important; flex-wrap: nowrap !important; }
+  .stat-box { padding: 12px 4px !important; border-bottom: none !important; border-right: 1px solid var(--border) !important; }
+  .stat-box:last-child { border-right: none !important; }
+  .stat-num { font-size: 20px !important; }
+  .stat-lbl { font-size: 9px !important; }
 }
 
 .card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: clamp(16px, 3vw, 22px); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; transition: border-color .3s, transform .35s var(--ease), box-shadow .35s var(--ease); }
@@ -102,21 +100,22 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* ── 24/7 ANIMATED AI NEURAL CORE SVG ── */
-.neural-core-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 160px; position: relative; }
-.neural-svg { width: 100%; max-width: 190px; height: auto; overflow: visible; }
-/* SVG Animations */
-.nc-core { fill: var(--teal-dim); stroke: var(--teal); stroke-width: 1.5; animation: pulseCore 2.5s ease-in-out infinite alternate; transform-origin: center; }
-.nc-orbit1 { fill: none; stroke: var(--violet); stroke-width: 1; stroke-dasharray: 8 6; animation: spinRight 12s linear infinite; transform-origin: center; }
-.nc-orbit2 { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 0.8; stroke-dasharray: 15 10 5 10; animation: spinLeft 18s linear infinite; transform-origin: center; }
-.nc-line { fill: none; stroke: var(--teal); stroke-width: 1.2; stroke-dasharray: 6; animation: flowData 1.5s linear infinite; opacity: 0.6; }
-.nc-node { fill: #fff; animation: glowNode 2s infinite alternate; }
+/* ── PLAYFUL ANIMATED CAR SVG ── */
+.car-wrap { flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 140px; position: relative; overflow: hidden; padding-bottom: 10px; border-radius: var(--rsm); }
+.svg-scene { width: 100%; max-width: 260px; height: 120px; overflow: visible; }
+.road-line { stroke: var(--muted); stroke-width: 3; stroke-dasharray: 20 20; animation: driveRoad 0.5s linear infinite; }
+.car-body { fill: var(--teal); animation: carBounce 0.4s ease-in-out infinite alternate; }
+.car-window { fill: #04060a; }
+.car-wheel-group { transform-origin: center; animation: spinWheel 0.5s linear infinite; }
+.wheel-base { fill: #111; stroke: var(--violet); stroke-width: 2; }
+.wheel-spoke { stroke: var(--violet); stroke-width: 1.5; }
+.scenery-obj { fill: var(--teal-dim); animation: moveScenery 4s linear infinite; }
+.scenery-cloud { fill: rgba(255,255,255,0.05); animation: moveScenery 8s linear infinite; }
 
-@keyframes pulseCore { 0% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 10px var(--teal); } 100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 15px var(--teal)); } }
-@keyframes spinRight { 100% { transform: rotate(360deg); } }
-@keyframes spinLeft { 100% { transform: rotate(-360deg); } }
-@keyframes flowData { to { stroke-dashoffset: -12; } }
-@keyframes glowNode { 0% { opacity: 0.5; r: 2.5; } 100% { opacity: 1; r: 4; filter: drop-shadow(0 0 5px #fff); } }
+@keyframes driveRoad { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+@keyframes carBounce { 0% { transform: translateY(0px); } 100% { transform: translateY(-2.5px); } }
+@keyframes spinWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes moveScenery { from { transform: translateX(300px); } to { transform: translateX(-100px); } }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
@@ -146,6 +145,7 @@ const CSS = `
 @keyframes scrollR { to { transform: translateX(0); } }
 
 /* Stats & Others */
+.stats-row { display: flex; flex: 1; flex-direction: row; border-radius: var(--r); overflow: hidden; background: var(--surf2); border: 1px solid var(--border); }
 .stat-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; text-align: center; border-right: 1px solid var(--border); }
 .stat-box:last-child { border-right: none; }
 .stat-num { font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: #fff; line-height: 1; }
@@ -158,7 +158,6 @@ const CSS = `
 .read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(0,212,180,.2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
 .read-pill:hover { background: rgba(0,212,180,.18); border-color: rgba(0,212,180,.4); }
 
-/* Clickable Map Link Wrapper */
 .map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; transition: opacity 0.2s; }
 .map-link:hover { opacity: 0.85; }
 .map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
@@ -216,11 +215,9 @@ export default function HomePage() {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Blog Auto-Sync State
   const [latestPost, setLatestPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(true);
 
-  // Music Handlers
   const handlePlay = () => {
     if(audioRef.current) {
       audioRef.current.volume = 0.5;
@@ -235,7 +232,6 @@ export default function HomePage() {
     }
   };
 
-  // Auto-Syncing Logic connecting to your Custom Axios API
   useEffect(() => {
     async function fetchLatestBlog() {
       try {
@@ -294,35 +290,65 @@ export default function HomePage() {
           <div className="bento r5">
 
             {/* ROW 1 */}
-            {/* ── NEW 24/7 ANIMATED AI NEURAL CORE ── */}
+            {/* ── PLAYFUL ANIMATED CAR SVG ── */}
             <div className="card c2">
-              <div className="lbl"><Cpu size={13}/>System Architecture</div>
-              <div className="neural-core-wrap">
-                <svg viewBox="0 0 200 200" className="neural-svg">
-                  {/* Central Hub */}
-                  <circle cx="100" cy="100" r="35" className="nc-core" />
+              <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
+              <div className="car-wrap">
+                <svg viewBox="0 0 200 100" className="svg-scene">
+                  {/* Moving Clouds */}
+                  <g className="scenery-cloud">
+                    <path d="M20,30 Q30,15 45,30 Q55,25 65,35 L20,35 Z" />
+                  </g>
+                  <g className="scenery-cloud" style={{animationDelay: '4s', transform: 'scale(0.8) translateY(10px)'}}>
+                    <path d="M10,20 Q20,5 35,20 Q45,15 55,25 L10,25 Z" />
+                  </g>
                   
-                  {/* Rotating Orbits */}
-                  <circle cx="100" cy="100" r="65" className="nc-orbit1" />
-                  <circle cx="100" cy="100" r="85" className="nc-orbit2" />
-                  
-                  {/* Flowing Data Lines */}
-                  <path d="M 100 65 L 100 20 M 100 135 L 100 180 M 65 100 L 20 100 M 135 100 L 180 100" className="nc-line" />
-                  <path d="M 75 75 L 45 45 M 125 125 L 155 155 M 75 125 L 45 155 M 125 75 L 155 45" className="nc-line" style={{animationDelay: '0.5s', opacity: 0.3}} />
-                  
-                  {/* Processing Nodes */}
-                  <circle cx="100" cy="20" r="3" className="nc-node" />
-                  <circle cx="100" cy="180" r="3" className="nc-node" style={{animationDelay: '0.2s'}} />
-                  <circle cx="20" cy="100" r="3" className="nc-node" style={{animationDelay: '0.4s'}} />
-                  <circle cx="180" cy="100" r="3" className="nc-node" style={{animationDelay: '0.6s'}} />
-                  <circle cx="45" cy="45" r="2.5" className="nc-node" style={{animationDelay: '0.8s'}} />
-                  <circle cx="155" cy="155" r="2.5" className="nc-node" style={{animationDelay: '1s'}} />
+                  {/* Moving Trees/Scenery */}
+                  <g className="scenery-obj" style={{animationDelay: '1s'}}>
+                    <rect x="23" y="60" width="4" height="20" fill="var(--muted2)"/>
+                    <circle cx="25" cy="55" r="10" />
+                  </g>
+                  <g className="scenery-obj" style={{animationDelay: '3s', transform: 'scale(0.7) translateY(35px)'}}>
+                    <rect x="53" y="60" width="4" height="20" fill="var(--muted2)"/>
+                    <circle cx="55" cy="55" r="10" />
+                  </g>
+
+                  {/* Road */}
+                  <line x1="0" y1="85" x2="200" y2="85" stroke="var(--border)" strokeWidth="2" />
+                  <line x1="0" y1="92" x2="200" y2="92" className="road-line" />
+
+                  {/* Car Body (Bounces) */}
+                  <g className="car-body">
+                    <path d="M 60 60 L 75 40 L 110 40 L 125 60 Z" />
+                    <rect x="50" y="60" width="85" height="18" rx="4" />
+                    {/* Windows */}
+                    <path d="M 75 45 L 90 45 L 90 60 L 65 60 Z" className="car-window" />
+                    <path d="M 95 45 L 105 45 L 115 60 L 95 60 Z" className="car-window" />
+                    {/* Headlight */}
+                    <path d="M 128 64 L 135 64 L 135 68 L 128 68 Z" fill="#fff" />
+                  </g>
+
+                  {/* Wheels (Spinning) */}
+                  <g transform="translate(68, 78)">
+                    <circle cx="0" cy="0" r="9" className="wheel-base" />
+                    <g className="car-wheel-group">
+                      <line x1="-9" y1="0" x2="9" y2="0" className="wheel-spoke" />
+                      <line x1="0" y1="-9" x2="0" y2="9" className="wheel-spoke" />
+                    </g>
+                  </g>
+                  <g transform="translate(118, 78)">
+                    <circle cx="0" cy="0" r="9" className="wheel-base" />
+                    <g className="car-wheel-group">
+                      <line x1="-9" y1="0" x2="9" y2="0" className="wheel-spoke" />
+                      <line x1="0" y1="-9" x2="0" y2="9" className="wheel-spoke" />
+                    </g>
+                  </g>
                 </svg>
               </div>
             </div>
 
-            <div className="card c2" style={{padding: 0}}>
-              <div className="stats-row" style={{height: '100%'}}>
+            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none'}}>
+              <div className="stats-row">
                 <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
                 <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
                 <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
@@ -332,10 +358,10 @@ export default function HomePage() {
             {/* ROW 2 */}
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '10px' }}>
-                {/* FIXED GITHUB STATS - Using reliable eight-theta fork to avoid Vercel suspension */}
-                <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Stats" style={{ height: '140px', flex: '1', minWidth: '280px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', minWidth: '280px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
+                <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="GitHub Stats" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000" alt="GitHub Streak" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                  <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
@@ -404,7 +430,6 @@ export default function HomePage() {
             </div>
 
             {/* ROW 4 */}
-            {/* ── AUTO-SYNCING LATEST POST (Now spans full width on Mobile for readability) ── */}
             <div className="card c1 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
