@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid Packing + OG Music Player + Navbar)
+   STYLES (Perfect Grid Packing + OG Music Player - NO NAVBAR)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -46,26 +46,9 @@ const CSS = `
 .hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
-/* ── Web Header / Navbar ── */
-.navbar {
-  position: relative; z-index: 10;
-  max-width: 1180px; margin: 0 auto;
-  padding: 24px 24px 0;
-  display: flex; align-items: center; justify-content: flex-start;
-}
-.brand-logo {
-  display: flex; align-items: center;
-  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff;
-  letter-spacing: 0.05em; text-decoration: none;
-}
-.brand-icon {
-  color: var(--teal); margin-right: 2px;
-  filter: drop-shadow(0 0 12px rgba(0,212,180,0.4));
-}
-
 /* Page Body */
-.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 60px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
-@media(max-width: 640px) { .hp-body { padding: 40px 16px 48px; gap: 40px; } }
+.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
+@media(max-width: 640px) { .hp-body { padding: 80px 16px 48px; gap: 40px; } }
 
 /* ── Hero Section ── */
 .hero { display: flex; flex-direction: column; gap: 0; position: relative; }
@@ -73,7 +56,7 @@ const CSS = `
 .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 9px var(--teal); animation: blink 2.2s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .35; box-shadow: none; } }
 
-/* Restored Original Hero Text */
+/* Original Hero Text */
 .hero-name { font-family: 'Syne', sans-serif; font-size: clamp(60px, 12vw, 168px); font-weight: 800; line-height: .88; letter-spacing: -.04em; margin-bottom: 32px; display: flex; flex-direction: column; }
 .hero-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.18); transition: all .5s var(--ease); cursor: default; }
 .hero-outline:hover { color: var(--teal); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 80px rgba(0,212,180,.28); }
@@ -236,16 +219,6 @@ export default function HomePage() {
       <style>{CSS}</style>
       <div className="hp">
         
-        {/* Brand Header Navbar with the "D" Icon logic applied seamlessly */}
-        <nav className="navbar r1">
-          <Link to="/" className="brand-logo">
-            <svg className="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 4h6.5a7.5 7.5 0 0 1 0 15H4z"/>
-            </svg>
-            ARSH
-          </Link>
-        </nav>
-
         <div className="hp-ambient">
           <div className="hp-g1"/><div className="hp-g2"/>
         </div>
