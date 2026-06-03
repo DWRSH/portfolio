@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Download, Sparkles, MapPin, Music, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2, Zap
+  ArrowRight, Download, Sparkles, MapPin, Trophy,
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid Packing & Real Data Setup)
+   STYLES (Perfect Grid Packing + OG Music Player + Navbar)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -40,13 +40,32 @@ const CSS = `
   position: relative;
 }
 
+/* Ambient Glows */
 .hp-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .hp-g1 { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(0,212,180,0.055) 0%, transparent 65%); top: -350px; right: -250px; animation: floatA 18s ease-in-out infinite; }
 .hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
-.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
-@media(max-width: 640px) { .hp-body { padding: 80px 16px 48px; gap: 40px; } }
+/* ── Web Header / Navbar ── */
+.navbar {
+  position: relative; z-index: 10;
+  max-width: 1180px; margin: 0 auto;
+  padding: 24px 24px 0;
+  display: flex; align-items: center; justify-content: flex-start;
+}
+.brand-logo {
+  display: flex; align-items: center;
+  font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff;
+  letter-spacing: 0.05em; text-decoration: none;
+}
+.brand-icon {
+  color: var(--teal); margin-right: 2px;
+  filter: drop-shadow(0 0 12px rgba(0,212,180,0.4));
+}
+
+/* Page Body */
+.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 60px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
+@media(max-width: 640px) { .hp-body { padding: 40px 16px 48px; gap: 40px; } }
 
 /* ── Hero Section ── */
 .hero { display: flex; flex-direction: column; gap: 0; position: relative; }
@@ -54,12 +73,10 @@ const CSS = `
 .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 9px var(--teal); animation: blink 2.2s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .35; box-shadow: none; } }
 
-/* Modified Hero Name for D Icon Branding */
+/* Restored Original Hero Text */
 .hero-name { font-family: 'Syne', sans-serif; font-size: clamp(60px, 12vw, 168px); font-weight: 800; line-height: .88; letter-spacing: -.04em; margin-bottom: 32px; display: flex; flex-direction: column; }
-.hero-outline { display: flex; align-items: center; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.18); transition: all .5s var(--ease); cursor: default; }
-.hero-outline svg { stroke: rgba(255,255,255,0.18); transition: all .5s var(--ease); margin-right: 4px; }
+.hero-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.18); transition: all .5s var(--ease); cursor: default; }
 .hero-outline:hover { color: var(--teal); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 80px rgba(0,212,180,.28); }
-.hero-outline:hover svg { stroke: var(--teal); filter: drop-shadow(0 0 40px rgba(0,212,180,.5)); }
 
 .hero-bottom { display: flex; flex-direction: column; gap: 28px; }
 @media(min-width: 768px) { .hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; } }
@@ -79,11 +96,11 @@ const CSS = `
 .hbtn-sec:hover { border-color: rgba(255,255,255,.18); }
 .hbtn-sec:hover::before { transform: translateY(-100%); }
 
-/* ── PERFECT BENTO GRID (Zero Gaps) ── */
+/* ── BENTO GRID (Dense Packing) ── */
 .bento {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-auto-flow: dense; /* The Magic Property to prevent side gaps */
+  grid-auto-flow: dense; 
   gap: clamp(12px, 2vw, 16px);
   width: 100%;
 }
@@ -99,13 +116,39 @@ const CSS = `
   background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: clamp(16px, 3vw, 22px); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; transition: border-color .3s, transform .35s var(--ease), box-shadow .35s var(--ease);
 }
 .card:hover { border-color: var(--border-h); transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,.5); }
-.card::after { content: ''; position: absolute; inset: 0; border-radius: var(--r); background: radial-gradient(600px circle at var(--mx,50%) var(--my,50%), rgba(0,212,180,.045), transparent 40%); opacity: 0; transition: opacity .4s; pointer-events: none; }
-.card:hover::after { opacity: 1; }
 
-.lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* Custom Component Styles */
+/* ── OG Interactive Music Player ── */
+.music-player-wrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; position: relative; gap: 16px; cursor: pointer;
+}
+.vinyl-container { position: relative; width: 90px; height: 90px; }
+.vinyl-record {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%);
+  border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s var(--ease);
+}
+.vinyl-record.playing { animation: spinRecord 2s linear infinite; }
+@keyframes spinRecord { 100% { transform: rotate(360deg); } }
+.vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
+.vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
+.tonearm {
+  position: absolute; top: -10px; right: -15px; width: 35px; height: 60px;
+  transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+}
+.tonearm.playing { transform: rotate(10deg); }
+.music-info { text-align: center; z-index: 2; }
+.music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 2px; }
+.music-artist { font-size: 11px; color: var(--muted); }
+.hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
+@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
+
+/* Other Components */
 .venn-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 148px; position: relative; }
 .venn-c { width: 108px; height: 108px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; position: absolute; }
 .va { background: rgba(124,111,247,.13); border: 1.5px solid rgba(124,111,247,.35); left: calc(50% - 76px); }
@@ -126,14 +169,8 @@ const CSS = `
 .read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(0,212,180,.2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
 .read-pill:hover { background: rgba(0,212,180,.18); border-color: rgba(0,212,180,.4); }
 
-.map-wrap { flex: 1; border-radius: var(--rsm); overflow: hidden; min-height: 140px; position: relative; }
-.map-wrap iframe { width: 100%; height: 100%; border: 0; pointer-events: none; min-height: 140px; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
-
-/* Compact Music Player */
-.music-compact { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; height: 100%; padding-top: 10px; }
-.music-art-compact { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; animation: rotateBadge 8s linear infinite; box-shadow: 0 0 20px rgba(124,111,247,0.3); border: 2px solid var(--surf2); }
-.music-bar { height: 4px; width: 100%; border-radius: 100px; background: var(--surf2); position: relative; overflow: hidden; margin-top: auto; }
-.music-fill { position: absolute; left: 0; top: 0; height: 100%; width: 62%; background: linear-gradient(90deg, var(--teal), var(--violet)); border-radius: 100px; }
+.map-wrap { flex: 1; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; }
+.map-wrap iframe { width: 100%; height: 100%; border: 0; pointer-events: none; position: absolute; inset: 0; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
 
 .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 10px; }
 .ticon { background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; transition: border-color .25s, transform .25s var(--ease); }
@@ -149,8 +186,7 @@ const CSS = `
 .cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--teal); color: #04060a; font-weight: 700; font-size: 13.5px; padding: 11px 22px; border-radius: 100px; text-decoration: none; align-self: flex-start; transition: all .2s; }
 .cta-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,212,180,.3); }
 
-/* Animations */
-@keyframes rotateBadge { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+/* Reveal Animations */
 @keyframes revealUp { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: translateY(0); } }
 .r1 { opacity: 0; animation: revealUp 0.8s var(--ease) .1s forwards; }
 .r2 { opacity: 0; animation: revealUp 0.8s var(--ease) .2s forwards; }
@@ -177,28 +213,39 @@ const SOCIALS = [
 ];
 
 export default function HomePage() {
-  // Glow effect logic
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (isMobile) return; 
-    const cards = document.querySelectorAll('.card');
-    const handlers = [];
-    cards.forEach(card => {
-      const fn = e => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      };
-      card.addEventListener('mousemove', fn);
-      handlers.push({card, fn});
-    });
-    return () => handlers.forEach(({card,fn}) => card.removeEventListener('mousemove',fn));
-  }, []);
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handlePlay = () => {
+    if(audioRef.current) {
+      audioRef.current.volume = 0.5;
+      audioRef.current.play().catch(()=>console.log("Autoplay prevented by browser"));
+      setIsPlaying(true);
+    }
+  };
+
+  const handlePause = () => {
+    if(audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
 
   return (
     <>
       <style>{CSS}</style>
       <div className="hp">
+        
+        {/* Brand Header Navbar with the "D" Icon logic applied seamlessly */}
+        <nav className="navbar r1">
+          <Link to="/" className="brand-logo">
+            <svg className="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h6.5a7.5 7.5 0 0 1 0 15H4z"/>
+            </svg>
+            ARSH
+          </Link>
+        </nav>
+
         <div className="hp-ambient">
           <div className="hp-g1"/><div className="hp-g2"/>
         </div>
@@ -207,14 +254,9 @@ export default function HomePage() {
           <section className="hero">
             <div className="hero-pill r1"><div className="hero-dot"/> Available for New Projects</div>
             
-            {/* Incorporating your "D" icon branding request directly into the header */}
+            {/* Restored pure text hero name */}
             <h1 className="hero-name r2">
-              <span className="hero-outline">
-                <svg width="0.8em" height="0.8em" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 4h6.5a7.5 7.5 0 0 1 0 15H4z"/>
-                </svg>
-                ARSH
-              </span>
+              <span className="hero-outline">DARSH</span>
             </h1>
 
             <div className="hero-bottom r3">
@@ -254,7 +296,6 @@ export default function HomePage() {
             {/* ROW 2: 3 + 1 = 4 Cols */}
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              {/* REAL DATA FETCH: Vercel GitHub Readme Stats API & RShah Graph */}
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '10px' }}>
                 <img src="https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Stats" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
                 <img src="https://github-readme-streak-stats.herokuapp.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
@@ -264,12 +305,36 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="card c1" style={{minHeight: '210px'}}>
-              <div className="lbl"><BookOpen size={13}/>Latest Post</div>
-              <p className="blog-title">Is MERN Stack Dead?</p>
-              <p className="blog-desc">An honest story of visiting 30+ software hubs to find real opportunities.</p>
-              <div className="blog-meta">
-                <a href="#" className="read-pill">Read <ArrowRight size={11}/></a>
+            {/* OG Interactive Music Player Card */}
+            <div 
+              className="card c1" 
+              style={{minHeight: '210px'}}
+              onMouseEnter={handlePlay}
+              onMouseLeave={handlePause}
+              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
+            >
+              <div className="lbl"><Headphones size={13}/>Vibes</div>
+              
+              {/* Using a royalty-free lo-fi beat sample URL */}
+              <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
+              
+              <div className="music-player-wrap">
+                <div className="vinyl-container">
+                  <div className={`vinyl-record ${isPlaying ? 'playing' : ''}`}>
+                    <div className="vinyl-label"><div className="vinyl-hole"/></div>
+                  </div>
+                  {/* Tonearm graphic made with SVG */}
+                  <svg className={`tonearm ${isPlaying ? 'playing' : ''}`} viewBox="0 0 40 80">
+                    <circle cx="30" cy="10" r="8" fill="#555" stroke="#222" strokeWidth="2"/>
+                    <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#ccc" strokeWidth="4" strokeLinecap="round"/>
+                    <rect x="2" y="65" width="12" height="15" rx="2" fill="#222" transform="rotate(25 8 72)"/>
+                  </svg>
+                </div>
+                <div className="music-info">
+                  <div className="music-song">Lo-Fi Coding</div>
+                  <div className="music-artist">Lofi Study</div>
+                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Hover to Play'}</div>
+                </div>
               </div>
             </div>
 
@@ -299,27 +364,21 @@ export default function HomePage() {
 
             {/* ROW 4: 1 + 1 + 2 = 4 Cols */}
             <div className="card c1">
-              <div className="lbl"><MapPin size={13}/>Location</div>
-              <div style={{fontFamily: 'Syne', fontWeight: 700, fontSize: '15px', color: '#fff', marginBottom: '8px'}}>Gujarat, India</div>
-              {/* REAL MAP EMBED */}
-              <div className="map-wrap">
+              <div className="lbl"><BookOpen size={13}/>Latest Post</div>
+              <p className="blog-title">Is MERN Stack Dead?</p>
+              <p className="blog-desc" style={{marginBottom: '10px'}}>An honest story of visiting 30+ software hubs to find real opportunities.</p>
+              <div className="blog-meta">
+                <a href="#" className="read-pill">Read <ArrowRight size={11}/></a>
+              </div>
+            </div>
+
+            <div className="card c1" style={{padding: 0}}>
+              <div className="lbl" style={{padding: '16px 16px 0'}}><MapPin size={13}/>Location</div>
+              <div className="map-wrap" style={{minHeight: '100%'}}>
                 <iframe
                   src="https://maps.google.com/maps?q=Gujarat,India&t=k&z=7&ie=UTF8&iwloc=&output=embed"
                   allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
                 />
-              </div>
-            </div>
-
-            {/* COMPACT MUSIC PLAYER */}
-            <div className="card c1">
-              <div className="lbl"><Headphones size={13}/>On Repeat</div>
-              <div className="music-compact">
-                <img src="https://upload.wikimedia.org/wikipedia/en/0/03/Alan_Walker_-_Alone.png" alt="Alone" className="music-art-compact" />
-                <div>
-                  <div style={{fontFamily: 'Syne', fontWeight: 700, color: '#fff', fontSize: '15px'}}>Alone</div>
-                  <div style={{fontSize: '12px', color: 'var(--muted)'}}>Alan Walker</div>
-                </div>
-                <div className="music-bar"><div className="music-fill"/></div>
               </div>
             </div>
 
