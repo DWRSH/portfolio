@@ -478,7 +478,7 @@ export default function HomePage() {
               <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
                 <div className="map-wrap">
                   <iframe
-                    src="https://maps.google.com/maps?q=Surat,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
+                    src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
                     allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
                   />
                 </div>
