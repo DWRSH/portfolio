@@ -8,7 +8,7 @@ import {
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Car SVG + Strict Horizontal Stats)
+   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -72,7 +72,7 @@ const CSS = `
 .hbtn-sec:hover { border-color: rgba(255,255,255,.18); }
 .hbtn-sec:hover::before { transform: translateY(-100%); }
 
-/* ── BENTO GRID ── */
+/* ── TRUE MOBILE BENTO GRID ── */
 .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: clamp(12px, 2vw, 16px); width: 100%; }
 .c1 { grid-column: span 1; } .c2 { grid-column: span 2; } .c3 { grid-column: span 3; }
 
@@ -87,7 +87,6 @@ const CSS = `
   .c2, .c3, .c4 { grid-column: span 2; } 
   .mob-full { grid-column: span 2 !important; }
   
-  /* Force Stats into a single horizontal row */
   .stats-row { flex-direction: row !important; flex-wrap: nowrap !important; }
   .stat-box { padding: 12px 4px !important; border-bottom: none !important; border-right: 1px solid var(--border) !important; }
   .stat-box:last-child { border-right: none !important; }
@@ -100,22 +99,14 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* ── PLAYFUL ANIMATED CAR SVG ── */
-.car-wrap { flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 140px; position: relative; overflow: hidden; padding-bottom: 10px; border-radius: var(--rsm); }
-.svg-scene { width: 100%; max-width: 260px; height: 120px; overflow: visible; }
-.road-line { stroke: var(--muted); stroke-width: 3; stroke-dasharray: 20 20; animation: driveRoad 0.5s linear infinite; }
-.car-body { fill: var(--teal); animation: carBounce 0.4s ease-in-out infinite alternate; }
-.car-window { fill: #04060a; }
-.car-wheel-group { transform-origin: center; animation: spinWheel 0.5s linear infinite; }
-.wheel-base { fill: #111; stroke: var(--violet); stroke-width: 2; }
-.wheel-spoke { stroke: var(--violet); stroke-width: 1.5; }
-.scenery-obj { fill: var(--teal-dim); animation: moveScenery 4s linear infinite; }
-.scenery-cloud { fill: rgba(255,255,255,0.05); animation: moveScenery 8s linear infinite; }
-
-@keyframes driveRoad { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
-@keyframes carBounce { 0% { transform: translateY(0px); } 100% { transform: translateY(-2.5px); } }
-@keyframes spinWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes moveScenery { from { transform: translateX(300px); } to { transform: translateX(-100px); } }
+/* ── CAR SVG WRAPPER ── */
+.car-wrap { 
+  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
+  min-height: 140px; position: relative; overflow: hidden; 
+  padding: 0; border-radius: var(--rsm); 
+  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
+}
+.svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
@@ -131,6 +122,7 @@ const CSS = `
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: clamp(13px, 4vw, 15px); margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
 .hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
+@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
 .tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
@@ -290,64 +282,96 @@ export default function HomePage() {
           <div className="bento r5">
 
             {/* ROW 1 */}
-            {/* ── PLAYFUL ANIMATED CAR SVG ── */}
+            {/* ── NATIVE SVG ANIMATED CAR ── */}
             <div className="card c2">
               <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
               <div className="car-wrap">
-                <svg viewBox="0 0 200 100" className="svg-scene">
-                  {/* Moving Clouds */}
-                  <g className="scenery-cloud">
-                    <path d="M20,30 Q30,15 45,30 Q55,25 65,35 L20,35 Z" />
-                  </g>
-                  <g className="scenery-cloud" style={{animationDelay: '4s', transform: 'scale(0.8) translateY(10px)'}}>
-                    <path d="M10,20 Q20,5 35,20 Q45,15 55,25 L10,25 Z" />
-                  </g>
-                  
-                  {/* Moving Trees/Scenery */}
-                  <g className="scenery-obj" style={{animationDelay: '1s'}}>
-                    <rect x="23" y="60" width="4" height="20" fill="var(--muted2)"/>
-                    <circle cx="25" cy="55" r="10" />
-                  </g>
-                  <g className="scenery-obj" style={{animationDelay: '3s', transform: 'scale(0.7) translateY(35px)'}}>
-                    <rect x="53" y="60" width="4" height="20" fill="var(--muted2)"/>
-                    <circle cx="55" cy="55" r="10" />
+                <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
+                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Deep Background (Slow Clouds/City) */}
+                  <g opacity="0.1" fill="var(--teal)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
+                    <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
+                    <path d="M 70 120 L 70 40 L 110 40 L 110 120 Z" />
+                    <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
                   </g>
 
-                  {/* Road */}
-                  <line x1="0" y1="85" x2="200" y2="85" stroke="var(--border)" strokeWidth="2" />
-                  <line x1="0" y1="92" x2="200" y2="92" className="road-line" />
+                  {/* Mid Background (Fast Cityscape) */}
+                  <g opacity="0.2" fill="var(--violet)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
+                    <rect x="10" y="70" width="30" height="60" />
+                    <rect x="50" y="90" width="40" height="40" />
+                    <rect x="110" y="50" width="35" height="80" />
+                    <rect x="180" y="75" width="25" height="55" />
+                    <rect x="230" y="60" width="45" height="70" />
+                  </g>
 
-                  {/* Car Body (Bounces) */}
-                  <g className="car-body">
-                    <path d="M 60 60 L 75 40 L 110 40 L 125 60 Z" />
-                    <rect x="50" y="60" width="85" height="18" rx="4" />
-                    {/* Windows */}
-                    <path d="M 75 45 L 90 45 L 90 60 L 65 60 Z" className="car-window" />
-                    <path d="M 95 45 L 105 45 L 115 60 L 95 60 Z" className="car-window" />
+                  {/* The Road */}
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
+                    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
+                  </line>
+
+                  {/* Bouncing Car Body */}
+                  <g>
+                    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
+                    
+                    {/* Main Chassis */}
+                    <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
+                    
+                    {/* Window */}
+                    <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
+                    
+                    {/* Window Reflection Details */}
+                    <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+                    <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+
+                    {/* Taillight */}
+                    <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
+                    
                     {/* Headlight */}
-                    <path d="M 128 64 L 135 64 L 135 68 L 128 68 Z" fill="#fff" />
+                    <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
+                    
+                    {/* Headlight Beam */}
+                    <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
+                    
+                    {/* Door Outline */}
+                    <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
+                    <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
                   </g>
 
-                  {/* Wheels (Spinning) */}
-                  <g transform="translate(68, 78)">
-                    <circle cx="0" cy="0" r="9" className="wheel-base" />
-                    <g className="car-wheel-group">
-                      <line x1="-9" y1="0" x2="9" y2="0" className="wheel-spoke" />
-                      <line x1="0" y1="-9" x2="0" y2="9" className="wheel-spoke" />
+                  {/* Independent Spinning Back Wheel */}
+                  <g transform="translate(100, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
                     </g>
                   </g>
-                  <g transform="translate(118, 78)">
-                    <circle cx="0" cy="0" r="9" className="wheel-base" />
-                    <g className="car-wheel-group">
-                      <line x1="-9" y1="0" x2="9" y2="0" className="wheel-spoke" />
-                      <line x1="0" y1="-9" x2="0" y2="9" className="wheel-spoke" />
+
+                  {/* Independent Spinning Front Wheel */}
+                  <g transform="translate(180, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
                     </g>
                   </g>
                 </svg>
               </div>
             </div>
 
-            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none'}}>
+            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
               <div className="stats-row">
                 <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
                 <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
