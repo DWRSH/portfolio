@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Code2, Terminal
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid Packing + OG Music Player - NO NAVBAR)
+   STYLES (Perfect Grid Packing + Marquee + Interactive Terminal)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -103,27 +103,32 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
+/* ── DYNAMIC TERMINAL ── */
+.terminal-wrap { flex: 1; background: #000; border-radius: var(--rsm); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; overflow: hidden; }
+.term-header { background: #1a1b26; padding: 8px 12px; display: flex; gap: 6px; }
+.term-dot { width: 10px; height: 10px; border-radius: 50%; }
+.term-dot.close { background: #ff5f56; } .term-dot.min { background: #ffbd2e; } .term-dot.max { background: #27c93f; }
+.term-body { padding: 12px; font-family: 'Fira Code', monospace; font-size: 11.5px; line-height: 1.7; color: #a9b1d6; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.term-user { color: #7aa2f7; font-weight: 600; }
+.term-dir { color: #9ece6a; }
+.type-wrap { display: inline-flex; align-items: center; }
+.type-text { overflow: hidden; white-space: nowrap; border-right: 2px solid transparent; width: 0; animation: typing 2.5s steps(30, end) 0.5s forwards; }
+.term-cursor { display: inline-block; width: 6px; height: 14px; background: #fff; margin-left: 4px; animation: blink-cursor 1s step-end infinite; }
+.term-res-1 { opacity: 0; color: #bb9af7; animation: fade-in 0.1s 3.2s forwards; margin-top: 4px; }
+.term-res-2 { opacity: 0; color: #9ece6a; animation: fade-in 0.1s 4.0s forwards; }
+@keyframes typing { from { width: 0; } to { width: 185px; } }
+@keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes fade-in { to { opacity: 1; } }
+
 /* ── OG Interactive Music Player ── */
-.music-player-wrap {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  flex: 1; position: relative; gap: 16px; cursor: pointer;
-}
+.music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
 .vinyl-container { position: relative; width: 90px; height: 90px; }
-.vinyl-record {
-  width: 100%; height: 100%; border-radius: 50%;
-  background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%);
-  border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.3s var(--ease);
-}
+.vinyl-record { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%); border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease); }
 .vinyl-record.playing { animation: spinRecord 2s linear infinite; }
 @keyframes spinRecord { 100% { transform: rotate(360deg); } }
 .vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
 .vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
-.tonearm {
-  position: absolute; top: -10px; right: -15px; width: 35px; height: 60px;
-  transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
-}
+.tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); }
 .tonearm.playing { transform: rotate(10deg); }
 .music-info { text-align: center; z-index: 2; }
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 2px; }
@@ -131,13 +136,17 @@ const CSS = `
 .hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
 @keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
-/* Other Components */
-.venn-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 148px; position: relative; }
-.venn-c { width: 108px; height: 108px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; position: absolute; }
-.va { background: rgba(124,111,247,.13); border: 1.5px solid rgba(124,111,247,.35); left: calc(50% - 76px); }
-.vb { background: rgba(0,212,180,.09); border: 1.5px solid rgba(0,212,180,.3); left: calc(50% - 32px); }
-.vtag { font-family: 'Syne', sans-serif; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; }
-.vcenter { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 9px; font-weight: 700; color: #fff; text-align: center; background: rgba(0,0,0,.6); padding: 5px 9px; border-radius: 7px; backdrop-filter: blur(8px); white-space: nowrap; z-index: 2; font-family: 'Fira Code', monospace; }
+/* ── TWO-ROW INFINITE MARQUEE ── */
+.tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
+.tm-track { display: flex; width: max-content; gap: 14px; }
+.tm-left { animation: scrollL 25s linear infinite; }
+.tm-right { transform: translateX(calc(-50% - 7px)); animation: scrollR 25s linear infinite; }
+.ticon { background: var(--surf2); border: 1px solid var(--border); border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: border-color .25s, transform .25s var(--ease); flex-shrink: 0; }
+.ticon:hover { border-color: var(--teal); transform: translateY(-3px); }
+.ticon img { width: 22px; height: 22px; object-fit: contain; }
+.inv { filter: invert(1) brightness(.8); }
+@keyframes scrollL { to { transform: translateX(calc(-50% - 7px)); } }
+@keyframes scrollR { to { transform: translateX(0); } }
 
 .stats-row { display: flex; flex: 1; border-radius: var(--r); overflow: hidden; }
 .stat-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; text-align: center; border-right: 1px solid var(--border); }
@@ -147,19 +156,13 @@ const CSS = `
 .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: .07em; }
 
 .blog-title { font-family: 'Syne', sans-serif; font-size: 15.5px; font-weight: 700; line-height: 1.4; color: #fff; }
-.blog-desc { font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+.blog-desc { font-size: 12.5px; line-height: 1.6; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .blog-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
 .read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(0,212,180,.2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
 .read-pill:hover { background: rgba(0,212,180,.18); border-color: rgba(0,212,180,.4); }
 
 .map-wrap { flex: 1; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; }
 .map-wrap iframe { width: 100%; height: 100%; border: 0; pointer-events: none; position: absolute; inset: 0; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
-
-.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 10px; }
-.ticon { background: var(--surf2); border: 1px solid var(--border); border-radius: 10px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; transition: border-color .25s, transform .25s var(--ease); }
-.ticon:hover { border-color: var(--teal); transform: translateY(-3px); }
-.ticon img { width: 22px; height: 22px; object-fit: contain; }
-.inv { filter: invert(1) brightness(.8); }
 
 .soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; }
 .soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
@@ -178,16 +181,30 @@ const CSS = `
 .r5 { opacity: 0; animation: revealUp 0.8s var(--ease) .5s forwards; }
 `;
 
-const TECH = [
+/* Extended Tech Stacks to fill the Marquee loops gracefully */
+const TECH_ROW_1 = [
   {name:'React',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'},
   {name:'Node JS',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg'},
   {name:'MongoDB',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg'},
   {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
   {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
+  {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
+  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
+];
+
+const TECH_ROW_2 = [
+  {name:'JavaScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+  {name:'TypeScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg'},
   {name:'Docker',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'},
   {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
   {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
+  {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
+  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
 ];
+
+// Duplicate for infinite loop
+const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
+const MARQUEE_2 = [...TECH_ROW_2, ...TECH_ROW_2, ...TECH_ROW_2];
 
 const SOCIALS = [
   {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
@@ -227,7 +244,6 @@ export default function HomePage() {
           <section className="hero">
             <div className="hero-pill r1"><div className="hero-dot"/> Available for New Projects</div>
             
-            {/* Restored pure text hero name */}
             <h1 className="hero-name r2">
               <span className="hero-outline">DARSH</span>
             </h1>
@@ -245,16 +261,30 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Grid perfectly blocked into sets of 4 columns to prevent gaps */}
           <div className="bento r5">
 
             {/* ROW 1: 2 + 2 = 4 Cols */}
+            {/* ── NEW DYNAMIC TERMINAL (Replaced Architecture Focus) ── */}
             <div className="card c2">
-              <div className="lbl"><Code2 size={13}/>Architecture Focus</div>
-              <div className="venn-wrap">
-                <div className="venn-c va"><span className="vtag" style={{color:'#9b8ff9'}}>MEAN</span></div>
-                <div className="venn-c vb"><span className="vtag" style={{color:'#00d4b4'}}>MERN</span></div>
-                <div className="vcenter">Node + Express<br/>+ MongoDB</div>
+              <div className="lbl"><Terminal size={13}/>Live Workspace</div>
+              <div className="terminal-wrap">
+                <div className="term-header">
+                  <span className="term-dot close"></span>
+                  <span className="term-dot min"></span>
+                  <span className="term-dot max"></span>
+                </div>
+                <div className="term-body">
+                  <p>
+                    <span className="term-user">darsh@mac</span>:
+                    <span className="term-dir">~/StockWatcher</span>$ 
+                    <span className="type-wrap">
+                      <span className="type-text">fastapi dev main.py</span>
+                      <span className="term-cursor"></span>
+                    </span>
+                  </p>
+                  <p className="term-res-1">INFO:     Uvicorn running on http://127.0.0.1:8000</p>
+                  <p className="term-res-2">INFO:     MongoDB synced successfully. Real-time alerts active.</p>
+                </div>
               </div>
             </div>
 
@@ -271,7 +301,8 @@ export default function HomePage() {
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '10px' }}>
                 <img src="https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Stats" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                <img src="https://github-readme-streak-stats.herokuapp.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                {/* Fixed GitHub Streak API using reliable demolab instance */}
+                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true" alt="GitHub Streak" style={{ height: '140px', flex: '1', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                  <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
@@ -287,16 +318,12 @@ export default function HomePage() {
               onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
             >
               <div className="lbl"><Headphones size={13}/>Vibes</div>
-              
-              {/* Using a royalty-free lo-fi beat sample URL */}
               <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
-              
               <div className="music-player-wrap">
                 <div className="vinyl-container">
                   <div className={`vinyl-record ${isPlaying ? 'playing' : ''}`}>
                     <div className="vinyl-label"><div className="vinyl-hole"/></div>
                   </div>
-                  {/* Tonearm graphic made with SVG */}
                   <svg className={`tonearm ${isPlaying ? 'playing' : ''}`} viewBox="0 0 40 80">
                     <circle cx="30" cy="10" r="8" fill="#555" stroke="#222" strokeWidth="2"/>
                     <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#ccc" strokeWidth="4" strokeLinecap="round"/>
@@ -312,14 +339,24 @@ export default function HomePage() {
             </div>
 
             {/* ROW 3: 2 + 2 = 4 Cols */}
+            {/* ── NEW INFINITE SCROLLING TECH STACK ── */}
             <div className="card c2">
               <div className="lbl"><Layers size={13}/>Tech Stack</div>
-              <div className="tech-grid">
-                {TECH.map(t=>(
-                  <div className="ticon" title={t.name} key={t.name}>
-                    <img src={t.url} alt={t.name} className={t.inv?'inv':''}/>
-                  </div>
-                ))}
+              <div className="tech-marquee-wrapper">
+                <div className="tm-track tm-left">
+                  {MARQUEE_1.map((t, i) => (
+                    <div className="ticon" title={t.name} key={`m1-${i}`}>
+                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
+                    </div>
+                  ))}
+                </div>
+                <div className="tm-track tm-right">
+                  {MARQUEE_2.map((t, i) => (
+                    <div className="ticon" title={t.name} key={`m2-${i}`}>
+                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -336,10 +373,13 @@ export default function HomePage() {
             </div>
 
             {/* ROW 4: 1 + 1 + 2 = 4 Cols */}
+            {/* ── UPDATED LATEST POST ── */}
             <div className="card c1">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
-              <p className="blog-title">Is MERN Stack Dead?</p>
-              <p className="blog-desc" style={{marginBottom: '10px'}}>An honest story of visiting 30+ software hubs to find real opportunities.</p>
+              <p className="blog-title">Enhanced CNN with Adaptive Feature Selection (AFS-CNN)</p>
+              <p className="blog-desc" style={{marginBottom: '10px'}}>
+                Exploring deep learning architectures for image processing. This paper details a novel approach to feature extraction that significantly improves classification accuracy.
+              </p>
               <div className="blog-meta">
                 <a href="/blog" className="read-pill">Read <ArrowRight size={11}/></a>
               </div>
