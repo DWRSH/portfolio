@@ -492,7 +492,7 @@ export default function HomePage() {
               <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
             </div>
 
-          </div>{/* /bento */}
+          </div>
         </div>
       </div>
     </>
