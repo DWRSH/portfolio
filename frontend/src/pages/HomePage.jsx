@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
+  ArrowRight, Download, MapPin, Github, Layers, BookOpen, 
+  ExternalLink, Headphones, Mail, Gamepad2, Activity, Shield, Scan
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
+   STYLES (Perfect Grid + Car SVG + Unique Engineer Components)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -41,7 +41,6 @@ const CSS = `
 .hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
-/* Page Body */
 .hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
 
 /* ── Hero Section ── */
@@ -79,7 +78,7 @@ const CSS = `
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
 
-/* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
+/* 🔴 STRICT MOBILE LAYOUT */
 @media(max-width: 640px) { 
   .hp-body { padding: 80px 16px 48px; gap: 40px; }
   .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
@@ -100,13 +99,37 @@ const CSS = `
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
 /* ── CAR SVG WRAPPER ── */
-.car-wrap { 
-  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
-  min-height: 140px; position: relative; overflow: hidden; 
-  padding: 0; border-radius: var(--rsm); 
-  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
-}
+.car-wrap { flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 140px; position: relative; overflow: hidden; padding: 0; border-radius: var(--rsm); background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); }
 .svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
+
+/* ── UNIQUE: STOCKWATCHER LIVE PULSE ── */
+.sw-wrap { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(180deg, rgba(0,212,180,0.02) 0%, rgba(0,212,180,0.08) 100%); border-radius: var(--rsm); padding: 12px; position: relative; overflow: hidden; min-height: 120px; border: 1px solid rgba(0,212,180,0.1); }
+.sw-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; font-family: 'Fira Code', monospace; font-size: 10px; color: var(--teal); opacity: 0.8; }
+.sw-svg { width: 100%; height: 60px; overflow: visible; }
+.sw-line-g { animation: slideLeft 4s linear infinite; }
+.sw-line { fill: none; stroke: var(--teal); stroke-width: 2.5; filter: drop-shadow(0 4px 6px rgba(0,212,180,0.5)); }
+@keyframes slideLeft { from { transform: translateX(0); } to { transform: translateX(-100px); } }
+
+/* ── UNIQUE: CYBER SECURITY RADAR ── */
+.radar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 140px; }
+.radar-screen { width: 80px; height: 80px; border-radius: 50%; border: 1px solid rgba(0,212,180,0.4); position: relative; background: radial-gradient(circle, rgba(0,212,180,0.1) 0%, transparent 70%); overflow: hidden; }
+.radar-screen::before { content:''; position: absolute; inset: 0; background: repeating-radial-gradient(transparent, transparent 10px, rgba(0,212,180,0.2) 11px); }
+.radar-screen::after { content:''; position: absolute; top:50%; left:0; right:0; height:1px; background:rgba(0,212,180,0.3); } 
+.radar-sweep { position: absolute; top: 0; left: 50%; width: 50%; height: 50%; background: linear-gradient(135deg, rgba(0,212,180,0.8) 0%, transparent 70%); transform-origin: bottom left; animation: radarSpin 4s linear infinite; border-left: 2px solid var(--teal); }
+.radar-text { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; }
+@keyframes radarSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── UNIQUE: AFS-CNN VISION SCANNER ── */
+.ai-wrap { flex: 1; display: flex; align-items: center; justify-content: center; background: #070a10; border-radius: var(--rsm); position: relative; overflow: hidden; padding: 14px; min-height: 140px;}
+.ai-image { width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(124,111,247,0.3); border-radius: 8px;}
+.ai-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--violet); box-shadow: 0 0 10px var(--violet); animation: aiScan 2.5s ease-in-out infinite alternate; }
+.ai-bounding-box { position: absolute; top: 25%; left: 25%; width: 50%; height: 50%; border: 1px solid var(--violet); opacity: 0; animation: aiBbox 2.5s infinite alternate; }
+.ai-bounding-box::before, .ai-bounding-box::after { content:''; position: absolute; width: 6px; height: 6px; border-color: var(--teal); border-style: solid; }
+.ai-bounding-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.ai-bounding-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.ai-tag { position: absolute; top: -16px; left: -1px; background: var(--violet); color: #fff; font-family: 'Fira Code', monospace; font-size: 8px; padding: 2px 6px; white-space: nowrap; border-radius: 2px; }
+@keyframes aiScan { 0% { top: 5%; } 100% { top: 95%; } }
+@keyframes aiBbox { 0%, 40% { opacity: 0; transform: scale(1.1); } 50%, 100% { opacity: 1; transform: scale(1); } }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
@@ -155,8 +178,8 @@ const CSS = `
 .map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
 .map-wrap iframe { width: 100%; height: 100%; border: 0; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
 
-.soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; }
-.soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
+.soc-grid { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+.soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
 .soc-item:hover { border-color: var(--teal); background: rgba(0,212,180,0.05); }
 
 .cta-card { background: linear-gradient(135deg, rgba(0,212,180,.07) 0%, rgba(124,111,247,.07) 100%) !important; border-color: rgba(0,212,180,.18) !important; justify-content: center; }
@@ -181,7 +204,6 @@ const TECH_ROW_1 = [
   {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
   {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
   {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
-  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
 ];
 
 const TECH_ROW_2 = [
@@ -191,7 +213,6 @@ const TECH_ROW_2 = [
   {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
   {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
   {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
-  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
 ];
 
 const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
@@ -281,8 +302,7 @@ export default function HomePage() {
 
           <div className="bento r5">
 
-            {/* ROW 1 */}
-            {/* ── NATIVE SVG ANIMATED CAR ── */}
+            {/* ── ROW 1 ── */}
             <div className="card c2">
               <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
               <div className="car-wrap">
@@ -294,7 +314,6 @@ export default function HomePage() {
                     </linearGradient>
                   </defs>
 
-                  {/* Deep Background (Slow Clouds/City) */}
                   <g opacity="0.1" fill="var(--teal)">
                     <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
                     <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
@@ -302,7 +321,6 @@ export default function HomePage() {
                     <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
                   </g>
 
-                  {/* Mid Background (Fast Cityscape) */}
                   <g opacity="0.2" fill="var(--violet)">
                     <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
                     <rect x="10" y="70" width="30" height="60" />
@@ -312,41 +330,24 @@ export default function HomePage() {
                     <rect x="230" y="60" width="45" height="70" />
                   </g>
 
-                  {/* The Road */}
                   <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
                   <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
                     <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
                   </line>
 
-                  {/* Bouncing Car Body */}
                   <g>
                     <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
-                    
-                    {/* Main Chassis */}
                     <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
-                    
-                    {/* Window */}
                     <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
-                    
-                    {/* Window Reflection Details */}
                     <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
                     <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-
-                    {/* Taillight */}
                     <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
-                    
-                    {/* Headlight */}
                     <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
-                    
-                    {/* Headlight Beam */}
                     <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
-                    
-                    {/* Door Outline */}
                     <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
                     <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
                   </g>
 
-                  {/* Independent Spinning Back Wheel */}
                   <g transform="translate(100, 115)">
                     <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
                     <g>
@@ -357,7 +358,6 @@ export default function HomePage() {
                     </g>
                   </g>
 
-                  {/* Independent Spinning Front Wheel */}
                   <g transform="translate(180, 115)">
                     <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
                     <g>
@@ -370,8 +370,7 @@ export default function HomePage() {
                 </svg>
               </div>
             </div>
-
-            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
+<div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
               <div className="stats-row">
                 <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
                 <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
@@ -379,40 +378,16 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ROW 2 */}
-            <div className="card c3">
-              <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
+            {/* ── ROW 2 ── */}
+            <div className="card c2">
+              <div className="lbl"><Github size={13}/>Live GitHub Data</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '10px' }}>
                 <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="GitHub Stats" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                {/* RELIABLE TOP LANGUAGES STATS - Using the same stable fork */}
-<img 
-  src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=DWRSH&layout=compact&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" 
-  alt="Top Languages" 
-  style={{ 
-    width: '100%', 
-    height: '100%', 
-    maxHeight: '140px', 
-    objectFit: 'contain', 
-    background: 'var(--surf2)', 
-    borderRadius: '12px', 
-    border: '1px solid var(--border)' 
-  }} 
-/>
-
-              </div>
-              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                 <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
+                <img src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=DWRSH&layout=compact&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="Top Langs" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
               </div>
             </div>
 
-            <div 
-              className="card c1" 
-              style={{minHeight: '210px'}}
-              onMouseEnter={handlePlay}
-              onMouseLeave={handlePause}
-              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
-            >
+            <div className="card c1" onMouseEnter={handlePlay} onMouseLeave={handlePause} onTouchStart={() => isPlaying ? handlePause() : handlePlay()}>
               <div className="lbl"><Headphones size={13}/>Vibes</div>
               <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
               <div className="music-player-wrap">
@@ -429,12 +404,33 @@ export default function HomePage() {
                 <div className="music-info">
                   <div className="music-song">Lo-Fi Coding</div>
                   <div className="music-artist">Lofi Study</div>
-                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
                 </div>
               </div>
             </div>
 
-            {/* ROW 3 */}
+            <div className="card c1">
+              <div className="lbl"><Shield size={13}/>Security Radar</div>
+              <div className="radar-wrap">
+                 <div className="radar-screen">
+                    <div className="radar-sweep"></div>
+                 </div>
+                 <div className="radar-text">[SECURE] 0 Anomalies</div>
+              </div>
+            </div>
+
+            {/* ── ROW 3 ── */}
+            <div className="card c2">
+              <div className="lbl"><Activity size={13}/>StockWatcher Live</div>
+              <div className="sw-wrap">
+                 <div className="sw-header"><span>FASTAPI // MONGODB</span><span>SYNC: ACTIVE</span></div>
+                 <svg viewBox="0 0 200 60" className="sw-svg" preserveAspectRatio="none">
+                    <g className="sw-line-g">
+                      <polyline fill="none" points="0,50 20,40 40,45 60,20 80,30 100,10 120,35 140,25 160,40 180,15 200,30 220,40 240,45 260,20 280,30 300,10" className="sw-line" />
+                    </g>
+                 </svg>
+              </div>
+            </div>
+
             <div className="card c2">
               <div className="lbl"><Layers size={13}/>Tech Stack</div>
               <div className="tech-marquee-wrapper">
@@ -455,20 +451,50 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* ── ROW 4 ── */}
+            <div className="card c1">
+              <div className="lbl"><Scan size={13}/>AFS-CNN Vision</div>
+              <div className="ai-wrap">
+                <div className="ai-image">
+                   <svg viewBox="0 0 100 100" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2">
+                     <rect x="20" y="20" width="60" height="60" rx="4"/>
+                     <circle cx="50" cy="45" r="15" />
+                     <path d="M 35 70 Q 50 50 65 70" />
+                   </svg>
+                   <div className="ai-scanline"></div>
+                   <div className="ai-bounding-box">
+                      <span className="ai-tag">Feature_Ext_99%</span>
+                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card c1" style={{padding: 0}}>
+              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
+              <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
+                <div className="map-wrap">
+                  <iframe
+                    src="https://maps.google.com/maps?q=Surat,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
+                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
+                  />
+                </div>
+              </a>
+            </div>
+
             <div className="card c2">
               <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
               <div className="soc-grid">
                 {SOCIALS.map(s=>(
                   <a className="soc-item" key={s.name} href={s.href} target="_blank" rel="noreferrer">
-                    <span style={{fontSize: '18px'}}>{s.icon}</span>
+                    <span style={{fontSize: '16px'}}>{s.icon}</span>
                     <span style={{fontWeight: 700, fontSize: '13px', color: '#fff'}}>{s.name}</span>
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* ROW 4 */}
-            <div className="card c1 mob-full">
+            {/* ── ROW 5 ── */}
+            <div className="card c2 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -487,26 +513,14 @@ export default function HomePage() {
               )}
             </div>
 
-            <div className="card c1" style={{padding: 0}}>
-              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
-              <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
-                <div className="map-wrap">
-                  <iframe
-                    src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
-                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
-                  />
-                </div>
-              </a>
-            </div>
-
             <div className="card c2 cta-card">
-              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px'}}>
+              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, margin: 'auto 0 12px'}}>
                 Let's build <span style={{color: 'var(--teal)'}}>something great.</span>
               </p>
               <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
             </div>
 
-          </div>
+          </div>{/* /bento */}
         </div>
       </div>
     </>
