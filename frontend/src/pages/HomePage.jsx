@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight, Download, MapPin, Github, Layers, BookOpen, 
-  ExternalLink, Headphones, Mail, Terminal, Activity, Shield, Code2
+  ExternalLink, Headphones, Mail, Activity, Shield, Code2, 
+  Bug, Coffee, Server, Palette, Timer, Play, Square, RotateCcw
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Gamified StockWatcher & Cyber Decrypter)
+   STYLES (Premium Grid + 5 New Gamified Widgets)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500;700&display=swap');
@@ -100,6 +101,50 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
+/* ── 1. WIDGET: BUG SMASHER ── */
+.bug-wrap { flex: 1; position: relative; min-height: 100px; background: rgba(255,255,255,0.02); border-radius: var(--rsm); overflow: hidden; cursor: crosshair; }
+.bug-icon { position: absolute; color: var(--red); transition: all 0.4s ease-out; cursor: pointer; filter: drop-shadow(0 0 5px rgba(255,75,75,0.5)); }
+.bug-icon:hover { transform: scale(1.2); }
+.bug-score { position: absolute; bottom: 8px; left: 8px; font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); pointer-events: none; }
+
+/* ── 2. WIDGET: CODE FUEL (Coffee) ── */
+.fuel-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; }
+.coffee-cup { width: 40px; height: 50px; border: 3px solid var(--muted); border-top: none; border-radius: 0 0 10px 10px; position: relative; overflow: hidden; }
+.coffee-cup::after { content:''; position: absolute; right: -12px; top: 10px; width: 10px; height: 20px; border: 3px solid var(--muted); border-radius: 5px; border-left: none; }
+.coffee-liquid { position: absolute; bottom: 0; left: 0; right: 0; background: var(--teal); transition: height 0.3s var(--ease); box-shadow: 0 0 10px var(--teal-glow); }
+.fuel-text { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: var(--text); }
+
+/* ── 3. WIDGET: API PING TESTER ── */
+.ping-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; background: rgba(0,0,0,0.3); border-radius: var(--rsm); padding: 12px; border: 1px solid var(--border); }
+.ping-stage { display: flex; align-items: center; justify-content: space-between; position: relative; }
+.ping-server { color: var(--violet); }
+.ping-client { color: var(--teal); }
+.ping-path { position: absolute; left: 24px; right: 24px; top: 50%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; }
+.ping-packet { position: absolute; top: 50%; left: 24px; width: 8px; height: 8px; background: #fff; border-radius: 50%; transform: translateY(-50%); opacity: 0; box-shadow: 0 0 10px #fff; }
+.ping-packet.active { animation: pingMove 0.8s ease-in-out forwards; opacity: 1; }
+@keyframes pingMove { 0% { left: 24px; } 50% { left: calc(100% - 32px); background: var(--violet); } 100% { left: 24px; background: var(--teal); } }
+.ping-controls { display: flex; justify-content: space-between; align-items: center; }
+.ping-btn { background: rgba(0,212,180,0.1); border: 1px solid var(--teal); color: var(--teal); padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.ping-btn:hover { background: var(--teal); color: #000; }
+.ping-res { font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 700; color: var(--text); }
+
+/* ── 4. WIDGET: COMMIT PAINTER ── */
+.painter-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.painter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.painter-cell { width: 14px; height: 14px; border-radius: 3px; cursor: pointer; transition: transform 0.1s, background 0.2s; background: var(--surf2); border: 1px solid var(--border); }
+.painter-cell:active { transform: scale(0.8); }
+
+/* ── 5. WIDGET: FOCUS TIMER ── */
+.timer-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.timer-circle { position: relative; width: 70px; height: 70px; }
+.timer-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+.timer-bg { fill: none; stroke: var(--surf2); stroke-width: 4; }
+.timer-prog { fill: none; stroke: var(--violet); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; stroke-dasharray: 200; }
+.timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 700; }
+.timer-controls { display: flex; gap: 8px; }
+.timer-btn { background: var(--surf2); border: 1px solid var(--border); color: var(--text); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+.timer-btn:hover { background: var(--violet); border-color: var(--violet); color: #000; }
+
 /* ── GAMIFIED: CYBER DECRYPTER ── */
 .decrypt-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; background: #020406; border-radius: var(--rsm); padding: 16px; border: 1px solid rgba(0,212,180,0.15); position: relative; overflow: hidden; }
 .scan-line { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(0,212,180,0.1), transparent); height: 20px; animation: scanDown 3s linear infinite; pointer-events: none; }
@@ -126,7 +171,6 @@ const CSS = `
 .vinyl-container { position: relative; width: clamp(70px, 20vw, 90px); height: clamp(70px, 20vw, 90px); }
 .vinyl-record { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%); border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease); }
 .vinyl-record.playing { animation: spinRecord 2s linear infinite; }
-@keyframes spinRecord { 100% { transform: rotate(360deg); } }
 .vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
 .vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
 .tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); z-index: 5; }
@@ -134,8 +178,6 @@ const CSS = `
 .music-info { text-align: center; z-index: 2; }
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: clamp(13px, 4vw, 15px); margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
-.hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
-@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
 .tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
@@ -238,7 +280,27 @@ export default function HomePage() {
   const [stockData, setStockData] = useState(generateInitialStockData());
   const [score, setScore] = useState(0);
 
-  // Audio Handlers
+  // Bug Smasher State
+  const [bugPos, setBugPos] = useState({ x: 50, y: 50 });
+  const [bugsFixed, setBugsFixed] = useState(0);
+
+  // Coffee State
+  const [coffeeLevel, setCoffeeLevel] = useState(50);
+
+  // Ping State
+  const [isPinging, setIsPinging] = useState(false);
+  const [pingRes, setPingRes] = useState("--");
+
+  // Commit Painter State
+  const commitColors = ['var(--surf2)', 'rgba(0,212,180,0.2)', 'rgba(0,212,180,0.5)', 'rgba(0,212,180,0.8)', 'var(--teal)'];
+  const [gridCells, setGridCells] = useState(Array(25).fill(0));
+
+  // Pomodoro State
+  const [timeLeft, setTimeLeft] = useState(1500); // 25 mins
+  const [timerActive, setTimerActive] = useState(false);
+
+  // ── HANDLERS ──
+
   const handlePlay = () => {
     if(audioRef.current) {
       audioRef.current.volume = 0.5;
@@ -253,7 +315,6 @@ export default function HomePage() {
     }
   };
 
-  // Blog Fetch
   useEffect(() => {
     async function fetchLatestBlog() {
       try {
@@ -278,19 +339,16 @@ export default function HomePage() {
     fetchLatestBlog();
   }, []);
 
-  // Cyber Decrypter Handler
   const startDecryption = () => {
     if(isDecrypting) return;
     setIsDecrypting(true);
     let iterations = 0;
-    
     const interval = setInterval(() => {
       setDecryptText(targetString.split("").map((letter, index) => {
         if(letter === '\n' || letter === ' ') return letter;
         if(index < iterations) return targetString[index];
         return chars[Math.floor(Math.random() * chars.length)];
       }).join(""));
-      
       if(iterations >= targetString.length){
         clearInterval(interval);
         setIsDecrypting(false);
@@ -299,24 +357,71 @@ export default function HomePage() {
     }, 30);
   };
 
-  // StockTrader Handler
   const handleTrade = (prediction) => {
     const currentPrice = stockData[stockData.length - 1];
-    const nextPrice = currentPrice + (Math.random() * 20 - 10); // Random move up or down
-    
+    const nextPrice = currentPrice + (Math.random() * 20 - 10);
     const isUp = nextPrice > currentPrice;
     if ((prediction === 'up' && isUp) || (prediction === 'down' && !isUp)) {
       setScore(prev => prev + 100);
     } else {
       setScore(prev => prev - 50);
     }
+    setStockData([...stockData.slice(1), nextPrice]);
+  };
+  const stockPolyline = stockData.map((val, i) => `${(i / (stockData.length - 1)) * 100},${100 - val}`).join(" ");
 
-    const newData = [...stockData.slice(1), nextPrice];
-    setStockData(newData);
+  // Bug Smasher Logic
+  useEffect(() => {
+    const moveBug = setInterval(() => {
+      setBugPos({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 });
+    }, 1500);
+    return () => clearInterval(moveBug);
+  }, []);
+  const smashBug = (e) => {
+    e.stopPropagation();
+    setBugsFixed(prev => prev + 1);
+    setBugPos({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 });
   };
 
-  // SVG Polyline generator for StockTrader
-  const stockPolyline = stockData.map((val, i) => `${(i / (stockData.length - 1)) * 100},${100 - val}`).join(" ");
+  // Coffee Logic
+  useEffect(() => {
+    const drain = setInterval(() => {
+      setCoffeeLevel(prev => Math.max(prev - 2, 0));
+    }, 2000);
+    return () => clearInterval(drain);
+  }, []);
+  const sipCoffee = () => setCoffeeLevel(prev => Math.min(prev + 25, 100));
+
+  // Ping Logic
+  const handlePing = () => {
+    if(isPinging) return;
+    setIsPinging(true);
+    setPingRes("Pinging...");
+    setTimeout(() => {
+      setIsPinging(false);
+      setPingRes(`${Math.floor(Math.random() * 40 + 12)} ms`);
+    }, 800);
+  };
+
+  // Commit Painter Logic
+  const paintCell = (idx) => {
+    const newCells = [...gridCells];
+    newCells[idx] = (newCells[idx] + 1) % commitColors.length;
+    setGridCells(newCells);
+  };
+
+  // Timer Logic
+  useEffect(() => {
+    let interval = null;
+    if (timerActive && timeLeft > 0) {
+      interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+    } else if (timeLeft === 0) {
+      setTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timeLeft]);
+  const formatTime = (secs) => `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
+  const timerDashOffset = 200 - (timeLeft / 1500) * 200;
 
   return (
     <>
@@ -350,8 +455,7 @@ export default function HomePage() {
 
           <div className="bento r5">
 
-            {/* ROW 1 */}
-            {/* ── GAMIFIED 1: CYBER DECRYPTER ── */}
+            {/* ── ROW 1 ── */}
             <div className="card c2">
               <div className="lbl"><Shield size={13}/>Security Clearance</div>
               <div className="decrypt-wrap">
@@ -371,7 +475,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ROW 2 */}
+            {/* ── ROW 2 ── */}
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '10px' }}>
@@ -380,13 +484,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div 
-              className="card c1" 
-              style={{minHeight: '210px'}}
-              onMouseEnter={handlePlay}
-              onMouseLeave={handlePause}
-              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
-            >
+            <div className="card c1" onMouseEnter={handlePlay} onMouseLeave={handlePause} onTouchStart={() => isPlaying ? handlePause() : handlePlay()}>
               <div className="lbl"><Headphones size={13}/>Vibes</div>
               <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
               <div className="music-player-wrap">
@@ -403,13 +501,11 @@ export default function HomePage() {
                 <div className="music-info">
                   <div className="music-song">Lo-Fi Coding</div>
                   <div className="music-artist">Lofi Study</div>
-                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
                 </div>
               </div>
             </div>
 
-            {/* ROW 3 */}
-            {/* ── GAMIFIED 2: STOCKWATCHER TRADER ── */}
+            {/* ── ROW 3 ── */}
             <div className="card c2">
               <div className="lbl"><Activity size={13}/>StockWatcher Simulator</div>
               <div className="stock-wrap">
@@ -451,7 +547,92 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ROW 4 */}
+            {/* ── ROW 4 (NEW WIDGETS) ── */}
+            
+            {/* WIDGET 1: BUG SMASHER */}
+            <div className="card c1">
+              <div className="lbl"><Bug size={13}/>QA Testing</div>
+              <div className="bug-wrap" onClick={() => setBugPos({x: Math.random()*80+10, y: Math.random()*80+10})}>
+                 <Bug 
+                   className="bug-icon" 
+                   size={24} 
+                   style={{ left: \`\${bugPos.x}%\`, top: \`\${bugPos.y}%\` }} 
+                   onClick={smashBug} 
+                 />
+                 <span className="bug-score">Bugs Fixed: {bugsFixed}</span>
+              </div>
+            </div>
+
+            {/* WIDGET 2: CODE FUEL */}
+            <div className="card c1">
+              <div className="lbl"><Coffee size={13}/>Code Fuel</div>
+              <div className="fuel-wrap" onClick={sipCoffee}>
+                 <div className="coffee-cup">
+                    <div className="coffee-liquid" style={{ height: \`\${coffeeLevel}%\` }}></div>
+                 </div>
+                 <span className="fuel-text">{coffeeLevel}% Caffeine</span>
+              </div>
+            </div>
+
+            {/* WIDGET 3: API PING */}
+            <div className="card c2">
+               <div className="lbl"><Server size={13}/>API Latency</div>
+               <div className="ping-wrap">
+                  <div className="ping-stage">
+                     <Monitor className="ping-client" size={24} />
+                     <div className="ping-path"></div>
+                     <div className={\`ping-packet \${isPinging ? 'active' : ''}\`}></div>
+                     <Server className="ping-server" size={24} />
+                  </div>
+                  <div className="ping-controls">
+                     <button className="ping-btn" onClick={handlePing}>Ping Server</button>
+                     <span className="ping-res">{pingRes}</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* ── ROW 5 (NEW WIDGETS) ── */}
+            
+            {/* WIDGET 4: COMMIT PAINTER */}
+            <div className="card c1">
+               <div className="lbl"><Palette size={13}/>Commit Art</div>
+               <div className="painter-wrap">
+                  <div className="painter-grid">
+                     {gridCells.map((val, idx) => (
+                        <div 
+                          key={idx} 
+                          className="painter-cell" 
+                          style={{ background: commitColors[val], borderColor: val > 0 ? commitColors[val] : 'var(--border)' }}
+                          onMouseEnter={(e) => { if(e.buttons === 1) paintCell(idx) }}
+                          onClick={() => paintCell(idx)}
+                        ></div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+
+            {/* WIDGET 5: FOCUS TIMER */}
+            <div className="card c1">
+               <div className="lbl"><Timer size={13}/>Focus Mode</div>
+               <div className="timer-wrap">
+                  <div className="timer-circle">
+                     <svg viewBox="0 0 70 70" className="timer-svg">
+                        <circle cx="35" cy="35" r="32" className="timer-bg" />
+                        <circle cx="35" cy="35" r="32" className="timer-prog" style={{ strokeDashoffset: timerDashOffset }} />
+                     </svg>
+                     <div className="timer-text">{formatTime(timeLeft)}</div>
+                  </div>
+                  <div className="timer-controls">
+                     <button className="timer-btn" onClick={() => setTimerActive(!timerActive)}>
+                       {timerActive ? <Square size={12} /> : <Play size={12} fill="currentColor" />}
+                     </button>
+                     <button className="timer-btn" onClick={() => { setTimerActive(false); setTimeLeft(1500); }}>
+                       <RotateCcw size={12} />
+                     </button>
+                  </div>
+               </div>
+            </div>
+
             <div className="card c2">
               <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
               <div className="soc-grid">
@@ -464,6 +645,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* ── ROW 6 ── */}
             <div className="card c2 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
@@ -481,19 +663,6 @@ export default function HomePage() {
               ) : (
                 <p className="blog-desc">No posts found right now.</p>
               )}
-            </div>
-
-            {/* ROW 5 */}
-            <div className="card c2" style={{padding: 0}}>
-              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
-              <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
-                <div className="map-wrap">
-                  <iframe
-                    src="https://maps.google.com/maps?q=Surat,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
-                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
-                  />
-                </div>
-              </a>
             </div>
 
             <div className="card c2 cta-card">
