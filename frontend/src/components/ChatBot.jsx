@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, ExternalLink, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axios'; // 👈 Tumhara axios instance import ho gaya
 
 /* ─── CHATBOT STYLES ──────────────────────────────────────────────────────── */
 const chatStyles = `
@@ -243,6 +244,26 @@ const chatStyles = `
   .cb-send-btn:active { transform: scale(0.9); }
   .cb-send-btn:disabled { background: var(--cb-muted); cursor: not-allowed; }
 
+  /* Typing Animation */
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+  }
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--cb-primary);
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out both;
+  }
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes typing {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
   @media (max-width: 480px) {
     .chatbot-window {
       width: calc(100% - 40px);
@@ -256,12 +277,13 @@ const chatStyles = `
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const navigate = useNavigate(); // For programmatic routing
+  const [isTyping, setIsTyping] = useState(false);
+  const navigate = useNavigate();
   
   const [messages, setMessages] = useState([
     { 
       sender: 'bot', 
-      text: "Hey! I'm Darsh's AI Assistant. I know everything about his MERN stack skills, Cyber Security experience, projects, and academics. How can I help you today?",
+      text: "Hey! I'm Darsh's AI Assistant. I can tell you about his projects, skills, or help you get in touch. How can I help?",
       actions: [
         { label: "View Projects", path: "/projects" },
         { label: "Contact Details", path: "contact" }
@@ -273,111 +295,56 @@ export default function ChatBot() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  // ─── 100% FACTUAL KNOWLEDGE BASE ───
-  const getBotResponse = (query) => {
-    const text = query.toLowerCase();
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || isTyping) return;
 
-    // 1. Projects & Work
-    if (text.includes('project') || text.includes('work') || text.includes('build') || text.includes('portfolio')) {
-      return {
-        text: "Darsh is currently developing 'StockWatcher' (a real-time stock alert system using FastAPI & MongoDB) and establishing his own digital services startup called 'AllVora'. You can check out his complete portfolio here:",
-        actions: [{ label: "Go to Projects Page", path: "/projects" }]
-      };
-    } 
-    // 2. Skills & Tech Stack
-    else if (text.includes('skill') || text.includes('tech') || text.includes('stack') || text.includes('mern')) {
-      return {
-        text: "He is a Full Stack Developer specializing in the MERN Stack, Python, and React Native (Expo). He also has strong expertise in Deep Learning architectures and Fintech API integrations.",
-        actions: [{ label: "View Developer Profile", path: "/about" }]
-      };
-    } 
-    // 3. Education & Background
-    else if (text.includes('education') || text.includes('study') || text.includes('college') || text.includes('degree') || text.includes('university')) {
-      return {
-        text: "Darsh is currently in his 6th semester pursuing a B.Sc. in Computer Applications and Information Technology (CA & IT) at Ganpat University. He is also preparing for the CUET PG 2026 exam to pursue an M.Sc. in Cyber Security.",
-        actions: []
-      };
-    } 
-    // 4. Cyber Security & Experience
-    else if (text.includes('cyber') || text.includes('security') || text.includes('hack') || text.includes('experience')) {
-      return {
-        text: "He is deeply interested in digital forensics and ethical hacking. In January 2026, he successfully completed a Cyber Security job simulation for Deloitte Australia where he analyzed web breach logs.",
-        actions: []
-      };
-    } 
-    // 5. Research & AI/Blog
-    else if (text.includes('ai') || text.includes('machine learning') || text.includes('cnn') || text.includes('research') || text.includes('paper') || text.includes('blog')) {
-      return {
-        text: "Darsh is actively involved in AI research! In February 2026, he authored a journal-style paper titled 'Enhanced CNN with Adaptive Feature Selection for Image Classification (AFS-CNN)'. You can read his articles here:",
-        actions: [{ label: "Read Blog & Research", path: "/blog" }]
-      };
-    } 
-    // 6. Contact Details
-    else if (text.includes('contact') || text.includes('email') || text.includes('hire') || text.includes('talk') || text.includes('reach')) {
-      return {
-        text: <>You can email him directly at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>. He usually replies very quickly! You can also check his GitHub at <a href="https://github.com/DWRSH" target="_blank" rel="noreferrer">@DWRSH</a>.</>,
-        actions: []
-      };
-    } 
-    // 7. General Greetings
-    else if (text.includes('hi') || text.includes('hello') || text.includes('hey')) {
-      return {
-        text: "Hello there! How can I assist you? I can provide quick links to Darsh's projects, explain his M.Sc Cyber Security plans, or give you his direct contact info.",
-        actions: [
-          { label: "Show Projects", path: "/projects" },
-          { label: "Show Contact", path: "contact" }
-        ]
-      };
-    } 
-    // Default Fallback
-    else {
-      return {
-        text: "I am specifically trained on Darsh's professional profile. I can tell you about his B.Sc CA & IT studies, his 'StockWatcher' project, his AI research, or how to contact him.",
-        actions: [
-          { label: "View Projects", path: "/projects" },
-          { label: "About Darsh", path: "/about" }
-        ]
-      };
+    const currentInput = input;
+    
+    // 1. Add User Message
+    setMessages(prev => [...prev, { sender: 'user', text: currentInput }]);
+    setInput('');
+    setIsTyping(true);
+
+    try {
+      // 2. Call the Real Backend AI Route
+      const response = await api.post('/chat', { message: currentInput });
+      const data = response.data;
+
+      // 3. Add AI Response
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: data.text,
+        actions: data.actions 
+      }]);
+    } catch (error) {
+      console.error("Chat API failed:", error);
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: "I'm having a little trouble connecting right now, but you can always email Darsh directly at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>.",
+        actions: [{ label: "Get in Touch", path: "contact" }] 
+      }]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    // Add user message
-    setMessages(prev => [...prev, { sender: 'user', text: input }]);
-    const currentInput = input;
-    setInput('');
-
-    // Simulate thinking delay for bot
-    setTimeout(() => {
-      const responseObj = getBotResponse(currentInput);
-      setMessages(prev => [...prev, { 
-        sender: 'bot', 
-        text: responseObj.text,
-        actions: responseObj.actions 
-      }]);
-    }, 600);
-  };
-
-  // Handle Action Button Clicks
   const handleActionClick = (action) => {
     if (action.path === 'contact') {
-      // Direct contact logic
       setMessages(prev => [...prev, { sender: 'user', text: "How can I contact Darsh?" }]);
+      setIsTyping(true);
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           sender: 'bot', 
           text: <>You can email him at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>.</> 
         }]);
+        setIsTyping(false);
       }, 500);
     } else {
-      // Use React Router to navigate seamlessly
       navigate(action.path);
-      setIsOpen(false); // Optional: close chat when navigating
+      setIsOpen(false); 
     }
   };
 
@@ -385,17 +352,14 @@ export default function ChatBot() {
     <>
       <style>{chatStyles}</style>
       
-      {/* Floating Action Button */}
       <div className="chatbot-fab" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? <X size={28} color="#000" /> : <MessageSquare size={28} color="#000" />}
       </div>
 
-      {/* Chat Window */}
       <div className={`chatbot-window ${isOpen ? 'open' : ''}`}>
         
         <div className="cb-header">
           <div className="cb-header-left">
-            {/* Branding D Icon */}
             <div className="cb-avatar">D</div>
             <div>
               <h3 className="cb-title">Darsh's AI</h3>
@@ -410,9 +374,13 @@ export default function ChatBot() {
         <div className="cb-messages">
           {messages.map((msg, index) => (
             <div key={index} className={`cb-msg-row ${msg.sender}`}>
-              <div className="cb-bubble">{msg.text}</div>
+              <div 
+                className="cb-bubble" 
+                dangerouslySetInnerHTML={typeof msg.text === 'string' ? { __html: msg.text } : undefined}
+              >
+                {typeof msg.text !== 'string' && msg.text}
+              </div>
               
-              {/* Render Action Buttons if available */}
               {msg.actions && msg.actions.length > 0 && (
                 <div className="cb-actions">
                   {msg.actions.map((act, i) => (
@@ -429,6 +397,18 @@ export default function ChatBot() {
               )}
             </div>
           ))}
+          
+          {isTyping && (
+            <div className="cb-msg-row bot">
+              <div className="cb-bubble">
+                <div className="typing-dots">
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -436,11 +416,12 @@ export default function ChatBot() {
           <input 
             type="text" 
             className="cb-input" 
-            placeholder="Ask about projects, education, skills..." 
+            placeholder="Ask me anything..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isTyping}
           />
-          <button type="submit" className="cb-send-btn" disabled={!input.trim()}>
+          <button type="submit" className="cb-send-btn" disabled={!input.trim() || isTyping}>
             <Send size={18} />
           </button>
         </form>
