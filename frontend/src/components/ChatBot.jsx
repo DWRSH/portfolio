@@ -374,12 +374,16 @@ export default function ChatBot() {
         <div className="cb-messages">
           {messages.map((msg, index) => (
             <div key={index} className={`cb-msg-row ${msg.sender}`}>
-              <div 
-                className="cb-bubble" 
-                dangerouslySetInnerHTML={typeof msg.text === 'string' ? { __html: msg.text } : undefined}
-              >
-                {typeof msg.text !== 'string' && msg.text}
-              </div>
+              {typeof msg.text === 'string' ? (
+  <div 
+    className="cb-bubble" 
+    dangerouslySetInnerHTML={{ __html: msg.text }} 
+  />
+) : (
+  <div className="cb-bubble">
+    {msg.text}
+  </div>
+)}
               
               {msg.actions && msg.actions.length > 0 && (
                 <div className="cb-actions">
