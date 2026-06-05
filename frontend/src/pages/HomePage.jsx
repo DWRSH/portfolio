@@ -9,7 +9,7 @@ import {
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Premium Grid + 5 New Gamified Widgets)
+   STYLES (Premium Grid + 5 Gamified Widgets - Render Build Fixed)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500;700&display=swap');
@@ -484,7 +484,13 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="card c1" onMouseEnter={handlePlay} onMouseLeave={handlePause} onTouchStart={() => isPlaying ? handlePause() : handlePlay()}>
+            <div 
+              className="card c1" 
+              style={{minHeight: '210px'}}
+              onMouseEnter={handlePlay}
+              onMouseLeave={handlePause}
+              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
+            >
               <div className="lbl"><Headphones size={13}/>Vibes</div>
               <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
               <div className="music-player-wrap">
@@ -556,7 +562,7 @@ export default function HomePage() {
                  <Bug 
                    className="bug-icon" 
                    size={24} 
-                   style={{ left: \`\${bugPos.x}%\`, top: \`\${bugPos.y}%\` }} 
+                   style={{ left: `${bugPos.x}%`, top: `${bugPos.y}%` }} 
                    onClick={smashBug} 
                  />
                  <span className="bug-score">Bugs Fixed: {bugsFixed}</span>
@@ -568,7 +574,7 @@ export default function HomePage() {
               <div className="lbl"><Coffee size={13}/>Code Fuel</div>
               <div className="fuel-wrap" onClick={sipCoffee}>
                  <div className="coffee-cup">
-                    <div className="coffee-liquid" style={{ height: \`\${coffeeLevel}%\` }}></div>
+                    <div className="coffee-liquid" style={{ height: `${coffeeLevel}%` }}></div>
                  </div>
                  <span className="fuel-text">{coffeeLevel}% Caffeine</span>
               </div>
@@ -579,9 +585,9 @@ export default function HomePage() {
                <div className="lbl"><Server size={13}/>API Latency</div>
                <div className="ping-wrap">
                   <div className="ping-stage">
-                     <Monitor className="ping-client" size={24} />
+                     <Terminal className="ping-client" size={24} />
                      <div className="ping-path"></div>
-                     <div className={\`ping-packet \${isPinging ? 'active' : ''}\`}></div>
+                     <div className={`ping-packet ${isPinging ? 'active' : ''}`}></div>
                      <Server className="ping-server" size={24} />
                   </div>
                   <div className="ping-controls">
