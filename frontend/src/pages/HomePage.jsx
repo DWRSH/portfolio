@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight, Download, MapPin, Github, Layers, BookOpen, 
   ExternalLink, Headphones, Mail, Activity, Shield, Code2, 
-  Bug, Coffee, Server, Palette, Timer, Play, Square, RotateCcw
+  Bug, Coffee, Server, Palette, Timer, Play, Square, RotateCcw, Terminal
 } from "lucide-react";
 
 import api from '../api/axios';
