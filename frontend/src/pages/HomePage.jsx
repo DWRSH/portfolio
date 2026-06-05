@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
+  ArrowRight, Download, MapPin, Github, Layers, BookOpen, 
+  ExternalLink, Headphones, Mail, Terminal, Activity, Shield, Code2
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
+   STYLES (Perfect Grid + Gamified StockWatcher & Cyber Decrypter)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500;700&display=swap');
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,6 +25,8 @@ const CSS = `
   --teal-dim:  rgba(0,212,180,0.10);
   --teal-glow: rgba(0,212,180,0.22);
   --violet:    #7c6ff7;
+  --red:       #ff4b4b;
+  --green:     #00e676;
   --text:      #ffffff;
   --muted:     rgba(255,255,255,0.40);
   --muted2:    rgba(255,255,255,0.22);
@@ -41,7 +43,6 @@ const CSS = `
 .hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
-/* Page Body */
 .hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
 
 /* ── Hero Section ── */
@@ -79,7 +80,7 @@ const CSS = `
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
 
-/* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
+/* 🔴 STRICT MOBILE LAYOUT */
 @media(max-width: 640px) { 
   .hp-body { padding: 80px 16px 48px; gap: 40px; }
   .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
@@ -99,14 +100,26 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* ── CAR SVG WRAPPER ── */
-.car-wrap { 
-  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
-  min-height: 140px; position: relative; overflow: hidden; 
-  padding: 0; border-radius: var(--rsm); 
-  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
-}
-.svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
+/* ── GAMIFIED: CYBER DECRYPTER ── */
+.decrypt-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; background: #020406; border-radius: var(--rsm); padding: 16px; border: 1px solid rgba(0,212,180,0.15); position: relative; overflow: hidden; }
+.scan-line { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(0,212,180,0.1), transparent); height: 20px; animation: scanDown 3s linear infinite; pointer-events: none; }
+@keyframes scanDown { 0% { transform: translateY(-20px); } 100% { transform: translateY(180px); } }
+.decrypt-text { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal); line-height: 1.6; word-break: break-all; min-height: 60px; }
+.decrypt-btn { margin-top: 12px; align-self: flex-start; background: rgba(0,212,180,0.1); border: 1px solid var(--teal); color: var(--teal); padding: 6px 14px; font-family: 'Fira Code', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+.decrypt-btn:hover { background: var(--teal); color: #000; box-shadow: 0 0 15px rgba(0,212,180,0.4); }
+
+/* ── GAMIFIED: STOCKWATCHER TRADER ── */
+.stock-wrap { flex: 1; display: flex; flex-direction: column; background: #0b0f18; border-radius: var(--rsm); border: 1px solid var(--border); overflow: hidden; position: relative; padding: 12px; }
+.stock-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.stock-title { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: #fff; }
+.stock-score { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--teal); font-weight: 700; }
+.stock-chart { flex: 1; width: 100%; min-height: 60px; border-bottom: 1px solid var(--border-h); margin-bottom: 10px; position: relative; }
+.stock-controls { display: flex; gap: 8px; }
+.trade-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: transform 0.1s, filter 0.2s; }
+.trade-btn:active { transform: scale(0.95); }
+.btn-up { background: var(--green); color: #000; }
+.btn-down { background: var(--red); color: #000; }
+.trade-btn:hover { filter: brightness(1.2); }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
@@ -181,7 +194,6 @@ const TECH_ROW_1 = [
   {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
   {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
   {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
-  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
 ];
 
 const TECH_ROW_2 = [
@@ -191,7 +203,6 @@ const TECH_ROW_2 = [
   {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
   {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
   {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
-  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
 ];
 
 const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
@@ -203,13 +214,31 @@ const SOCIALS = [
   {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
 ];
 
+/* ── GAME 1: CYBER DECRYPTER LOGIC ── */
+const targetString = "> IDENTITY VERIFIED\n> DELOITTE CYBER SIMULATION: PASS\n> AFS-CNN RESEARCH: PUBLISHED\n> SYSTEM: FULLY SECURED.";
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>";
+
+/* ── GAME 2: STOCKWATCHER TRADER LOGIC ── */
+const generateInitialStockData = () => Array.from({length: 20}, (_, i) => 50 + Math.sin(i) * 10 + Math.random() * 5);
+
 export default function HomePage() {
+  // Audio
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Blog
   const [latestPost, setLatestPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(true);
 
+  // Decrypter State
+  const [decryptedText, setDecryptText] = useState("0x8F9A... ENCRYPTED NODE\nAWAITING MANUAL OVERRIDE.");
+  const [isDecrypting, setIsDecrypting] = useState(false);
+
+  // StockTrader State
+  const [stockData, setStockData] = useState(generateInitialStockData());
+  const [score, setScore] = useState(0);
+
+  // Audio Handlers
   const handlePlay = () => {
     if(audioRef.current) {
       audioRef.current.volume = 0.5;
@@ -224,12 +253,12 @@ export default function HomePage() {
     }
   };
 
+  // Blog Fetch
   useEffect(() => {
     async function fetchLatestBlog() {
       try {
         const response = await api.get('/blogs');
         const posts = response.data;
-        
         if (posts && posts.length > 0) {
           const latest = posts[0];
           setLatestPost({
@@ -248,6 +277,46 @@ export default function HomePage() {
     }
     fetchLatestBlog();
   }, []);
+
+  // Cyber Decrypter Handler
+  const startDecryption = () => {
+    if(isDecrypting) return;
+    setIsDecrypting(true);
+    let iterations = 0;
+    
+    const interval = setInterval(() => {
+      setDecryptText(targetString.split("").map((letter, index) => {
+        if(letter === '\n' || letter === ' ') return letter;
+        if(index < iterations) return targetString[index];
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join(""));
+      
+      if(iterations >= targetString.length){
+        clearInterval(interval);
+        setIsDecrypting(false);
+      }
+      iterations += 1/3; 
+    }, 30);
+  };
+
+  // StockTrader Handler
+  const handleTrade = (prediction) => {
+    const currentPrice = stockData[stockData.length - 1];
+    const nextPrice = currentPrice + (Math.random() * 20 - 10); // Random move up or down
+    
+    const isUp = nextPrice > currentPrice;
+    if ((prediction === 'up' && isUp) || (prediction === 'down' && !isUp)) {
+      setScore(prev => prev + 100);
+    } else {
+      setScore(prev => prev - 50);
+    }
+
+    const newData = [...stockData.slice(1), nextPrice];
+    setStockData(newData);
+  };
+
+  // SVG Polyline generator for StockTrader
+  const stockPolyline = stockData.map((val, i) => `${(i / (stockData.length - 1)) * 100},${100 - val}`).join(" ");
 
   return (
     <>
@@ -282,92 +351,15 @@ export default function HomePage() {
           <div className="bento r5">
 
             {/* ROW 1 */}
-            {/* ── NATIVE SVG ANIMATED CAR ── */}
+            {/* ── GAMIFIED 1: CYBER DECRYPTER ── */}
             <div className="card c2">
-              <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
-              <div className="car-wrap">
-                <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
-                  <defs>
-                    <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
-                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Deep Background (Slow Clouds/City) */}
-                  <g opacity="0.1" fill="var(--teal)">
-                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
-                    <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
-                    <path d="M 70 120 L 70 40 L 110 40 L 110 120 Z" />
-                    <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
-                  </g>
-
-                  {/* Mid Background (Fast Cityscape) */}
-                  <g opacity="0.2" fill="var(--violet)">
-                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
-                    <rect x="10" y="70" width="30" height="60" />
-                    <rect x="50" y="90" width="40" height="40" />
-                    <rect x="110" y="50" width="35" height="80" />
-                    <rect x="180" y="75" width="25" height="55" />
-                    <rect x="230" y="60" width="45" height="70" />
-                  </g>
-
-                  {/* The Road */}
-                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
-                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
-                    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
-                  </line>
-
-                  {/* Bouncing Car Body */}
-                  <g>
-                    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
-                    
-                    {/* Main Chassis */}
-                    <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
-                    
-                    {/* Window */}
-                    <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
-                    
-                    {/* Window Reflection Details */}
-                    <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-                    <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-
-                    {/* Taillight */}
-                    <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
-                    
-                    {/* Headlight */}
-                    <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
-                    
-                    {/* Headlight Beam */}
-                    <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
-                    
-                    {/* Door Outline */}
-                    <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
-                    <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
-                  </g>
-
-                  {/* Independent Spinning Back Wheel */}
-                  <g transform="translate(100, 115)">
-                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
-                    <g>
-                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
-                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
-                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
-                    </g>
-                  </g>
-
-                  {/* Independent Spinning Front Wheel */}
-                  <g transform="translate(180, 115)">
-                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
-                    <g>
-                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
-                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
-                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
-                    </g>
-                  </g>
-                </svg>
+              <div className="lbl"><Shield size={13}/>Security Clearance</div>
+              <div className="decrypt-wrap">
+                <div className="scan-line"></div>
+                <div className="decrypt-text" style={{ whiteSpace: 'pre-line' }}>{decryptedText}</div>
+                <button className="decrypt-btn" onClick={startDecryption} disabled={isDecrypting}>
+                  {isDecrypting ? 'Decrypting...' : 'Override Protocol'}
+                </button>
               </div>
             </div>
 
@@ -382,13 +374,9 @@ export default function HomePage() {
             {/* ROW 2 */}
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '10px' }}>
                 <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="GitHub Stats" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000" alt="GitHub Streak" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-              </div>
-              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                 <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
+                <img src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=DWRSH&layout=compact&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="Top Langs" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
               </div>
             </div>
 
@@ -421,6 +409,28 @@ export default function HomePage() {
             </div>
 
             {/* ROW 3 */}
+            {/* ── GAMIFIED 2: STOCKWATCHER TRADER ── */}
+            <div className="card c2">
+              <div className="lbl"><Activity size={13}/>StockWatcher Simulator</div>
+              <div className="stock-wrap">
+                <div className="stock-header">
+                  <span className="stock-title">$PORTFOLIO PNL</span>
+                  <span className="stock-score" style={{color: score < 0 ? 'var(--red)' : 'var(--green)'}}>
+                    {score >= 0 ? '+' : ''}{score}
+                  </span>
+                </div>
+                <div className="stock-chart">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{width: '100%', height: '100%', overflow: 'visible'}}>
+                    <polyline points={stockPolyline} fill="none" stroke={score < 0 ? 'var(--red)' : 'var(--teal)'} strokeWidth="2" vectorEffect="non-scaling-stroke" style={{transition: 'all 0.3s ease'}}/>
+                  </svg>
+                </div>
+                <div className="stock-controls">
+                  <button className="trade-btn btn-up" onClick={() => handleTrade('up')}>LONG ↑</button>
+                  <button className="trade-btn btn-down" onClick={() => handleTrade('down')}>SHORT ↓</button>
+                </div>
+              </div>
+            </div>
+
             <div className="card c2">
               <div className="lbl"><Layers size={13}/>Tech Stack</div>
               <div className="tech-marquee-wrapper">
@@ -441,6 +451,7 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* ROW 4 */}
             <div className="card c2">
               <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
               <div className="soc-grid">
@@ -453,8 +464,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ROW 4 */}
-            <div className="card c1 mob-full">
+            <div className="card c2 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -473,7 +483,8 @@ export default function HomePage() {
               )}
             </div>
 
-            <div className="card c1" style={{padding: 0}}>
+            {/* ROW 5 */}
+            <div className="card c2" style={{padding: 0}}>
               <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
               <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
                 <div className="map-wrap">
