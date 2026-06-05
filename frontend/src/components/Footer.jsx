@@ -50,7 +50,7 @@ const eliteFooterStyles = `
   .marquee-text span { color: var(--text-muted); }
   @keyframes scrollMarquee {
     0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); } /* Requires duplicated content */
+    100% { transform: translateX(-50%); } 
   }
 
   /* 2. Main Layout */
@@ -67,7 +67,7 @@ const eliteFooterStyles = `
   }
   .mf-huge-text {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(60px, 12vw, 160px);
+    font-size: clamp(48px, 12vw, 160px); /* Adjusted lower bound for mobile */
     font-weight: 800;
     line-height: 0.85;
     letter-spacing: -0.04em;
@@ -186,6 +186,33 @@ const eliteFooterStyles = `
   .mf-time-val { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--primary); font-weight: 500; }
   .blink { animation: blinker 1s linear infinite; }
   @keyframes blinker { 50% { opacity: 0; } }
+
+  /* ─── MOBILE RESPONSIVE ADJUSTMENTS ──────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .mf-container { padding: 60px 16px 32px; }
+    
+    .mf-heading-wrap { margin-bottom: 50px; }
+    .mf-huge-text { font-size: clamp(40px, 15vw, 100px); }
+    .mf-sub-heading { font-size: 15px; margin-top: 16px; padding: 0 10px; line-height: 1.5; }
+    
+    .mf-social-list { margin-bottom: 50px; }
+    .mf-row { padding: 24px 0; }
+    .mf-row:hover { padding: 24px 12px; }
+    
+    .mf-row-left { gap: 16px; }
+    .mf-row-icon { width: 40px; height: 40px; }
+    .mf-row-icon svg { width: 18px; height: 18px; }
+    .mf-row-title { font-size: 20px; }
+    
+    .mf-arrow { width: 24px; height: 24px; }
+    
+    .mf-bottom { gap: 20px; }
+    .mf-time-box { 
+      width: 100%; 
+      justify-content: center; 
+      padding: 12px 20px; 
+    }
+  }
 `;
 
 export default function Footer() {
@@ -231,7 +258,7 @@ export default function Footer() {
     <>
       <style>{eliteFooterStyles}</style>
       <footer className="mega-footer">
-        
+
         {/* Infinite CSS Marquee */}
         <div className="marquee-wrapper">
           <div className="marquee-content">
@@ -250,7 +277,7 @@ export default function Footer() {
         </div>
 
         <div className="mf-container">
-          
+
           {/* Massive Editorial Header */}
           <div className="mf-heading-wrap">
             <h2 className="mf-huge-text">Say Hello</h2>
@@ -273,7 +300,7 @@ export default function Footer() {
                   </div>
                   <span className="mf-row-title">{social.name}</span>
                 </div>
-                
+
                 <div className="mf-row-right">
                   <span className="mf-row-handle">{social.handle}</span>
                   <ArrowUpRight size={28} className="mf-arrow" strokeWidth={1.5} />
