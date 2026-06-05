@@ -1,18 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Download, MapPin, Github, Layers, BookOpen, 
-  ExternalLink, Headphones, Mail, Activity, Shield, Code2, 
-  Bug, Coffee, Server, Palette, Timer, Play, Square, RotateCcw, Terminal
+  ArrowRight, Download, Sparkles, MapPin, Trophy,
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Premium Grid + 5 Gamified Widgets - Render Build Fixed)
+   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,8 +25,6 @@ const CSS = `
   --teal-dim:  rgba(0,212,180,0.10);
   --teal-glow: rgba(0,212,180,0.22);
   --violet:    #7c6ff7;
-  --red:       #ff4b4b;
-  --green:     #00e676;
   --text:      #ffffff;
   --muted:     rgba(255,255,255,0.40);
   --muted2:    rgba(255,255,255,0.22);
@@ -44,6 +41,7 @@ const CSS = `
 .hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
+/* Page Body */
 .hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
 
 /* ── Hero Section ── */
@@ -81,7 +79,7 @@ const CSS = `
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
 
-/* 🔴 STRICT MOBILE LAYOUT */
+/* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
 @media(max-width: 640px) { 
   .hp-body { padding: 80px 16px 48px; gap: 40px; }
   .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
@@ -101,76 +99,21 @@ const CSS = `
 .lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
-/* ── 1. WIDGET: BUG SMASHER ── */
-.bug-wrap { flex: 1; position: relative; min-height: 100px; background: rgba(255,255,255,0.02); border-radius: var(--rsm); overflow: hidden; cursor: crosshair; }
-.bug-icon { position: absolute; color: var(--red); transition: all 0.4s ease-out; cursor: pointer; filter: drop-shadow(0 0 5px rgba(255,75,75,0.5)); }
-.bug-icon:hover { transform: scale(1.2); }
-.bug-score { position: absolute; bottom: 8px; left: 8px; font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); pointer-events: none; }
-
-/* ── 2. WIDGET: CODE FUEL (Coffee) ── */
-.fuel-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; }
-.coffee-cup { width: 40px; height: 50px; border: 3px solid var(--muted); border-top: none; border-radius: 0 0 10px 10px; position: relative; overflow: hidden; }
-.coffee-cup::after { content:''; position: absolute; right: -12px; top: 10px; width: 10px; height: 20px; border: 3px solid var(--muted); border-radius: 5px; border-left: none; }
-.coffee-liquid { position: absolute; bottom: 0; left: 0; right: 0; background: var(--teal); transition: height 0.3s var(--ease); box-shadow: 0 0 10px var(--teal-glow); }
-.fuel-text { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: var(--text); }
-
-/* ── 3. WIDGET: API PING TESTER ── */
-.ping-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; background: rgba(0,0,0,0.3); border-radius: var(--rsm); padding: 12px; border: 1px solid var(--border); }
-.ping-stage { display: flex; align-items: center; justify-content: space-between; position: relative; }
-.ping-server { color: var(--violet); }
-.ping-client { color: var(--teal); }
-.ping-path { position: absolute; left: 24px; right: 24px; top: 50%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-.ping-packet { position: absolute; top: 50%; left: 24px; width: 8px; height: 8px; background: #fff; border-radius: 50%; transform: translateY(-50%); opacity: 0; box-shadow: 0 0 10px #fff; }
-.ping-packet.active { animation: pingMove 0.8s ease-in-out forwards; opacity: 1; }
-@keyframes pingMove { 0% { left: 24px; } 50% { left: calc(100% - 32px); background: var(--violet); } 100% { left: 24px; background: var(--teal); } }
-.ping-controls { display: flex; justify-content: space-between; align-items: center; }
-.ping-btn { background: rgba(0,212,180,0.1); border: 1px solid var(--teal); color: var(--teal); padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-.ping-btn:hover { background: var(--teal); color: #000; }
-.ping-res { font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 700; color: var(--text); }
-
-/* ── 4. WIDGET: COMMIT PAINTER ── */
-.painter-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-.painter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-.painter-cell { width: 14px; height: 14px; border-radius: 3px; cursor: pointer; transition: transform 0.1s, background 0.2s; background: var(--surf2); border: 1px solid var(--border); }
-.painter-cell:active { transform: scale(0.8); }
-
-/* ── 5. WIDGET: FOCUS TIMER ── */
-.timer-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.timer-circle { position: relative; width: 70px; height: 70px; }
-.timer-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-.timer-bg { fill: none; stroke: var(--surf2); stroke-width: 4; }
-.timer-prog { fill: none; stroke: var(--violet); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; stroke-dasharray: 200; }
-.timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 700; }
-.timer-controls { display: flex; gap: 8px; }
-.timer-btn { background: var(--surf2); border: 1px solid var(--border); color: var(--text); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-.timer-btn:hover { background: var(--violet); border-color: var(--violet); color: #000; }
-
-/* ── GAMIFIED: CYBER DECRYPTER ── */
-.decrypt-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; background: #020406; border-radius: var(--rsm); padding: 16px; border: 1px solid rgba(0,212,180,0.15); position: relative; overflow: hidden; }
-.scan-line { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(0,212,180,0.1), transparent); height: 20px; animation: scanDown 3s linear infinite; pointer-events: none; }
-@keyframes scanDown { 0% { transform: translateY(-20px); } 100% { transform: translateY(180px); } }
-.decrypt-text { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal); line-height: 1.6; word-break: break-all; min-height: 60px; }
-.decrypt-btn { margin-top: 12px; align-self: flex-start; background: rgba(0,212,180,0.1); border: 1px solid var(--teal); color: var(--teal); padding: 6px 14px; font-family: 'Fira Code', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
-.decrypt-btn:hover { background: var(--teal); color: #000; box-shadow: 0 0 15px rgba(0,212,180,0.4); }
-
-/* ── GAMIFIED: STOCKWATCHER TRADER ── */
-.stock-wrap { flex: 1; display: flex; flex-direction: column; background: #0b0f18; border-radius: var(--rsm); border: 1px solid var(--border); overflow: hidden; position: relative; padding: 12px; }
-.stock-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.stock-title { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: #fff; }
-.stock-score { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--teal); font-weight: 700; }
-.stock-chart { flex: 1; width: 100%; min-height: 60px; border-bottom: 1px solid var(--border-h); margin-bottom: 10px; position: relative; }
-.stock-controls { display: flex; gap: 8px; }
-.trade-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: transform 0.1s, filter 0.2s; }
-.trade-btn:active { transform: scale(0.95); }
-.btn-up { background: var(--green); color: #000; }
-.btn-down { background: var(--red); color: #000; }
-.trade-btn:hover { filter: brightness(1.2); }
+/* ── CAR SVG WRAPPER ── */
+.car-wrap { 
+  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
+  min-height: 140px; position: relative; overflow: hidden; 
+  padding: 0; border-radius: var(--rsm); 
+  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
+}
+.svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
 
 /* ── MUSIC PLAYER ── */
 .music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
 .vinyl-container { position: relative; width: clamp(70px, 20vw, 90px); height: clamp(70px, 20vw, 90px); }
 .vinyl-record { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%); border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease); }
 .vinyl-record.playing { animation: spinRecord 2s linear infinite; }
+@keyframes spinRecord { 100% { transform: rotate(360deg); } }
 .vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
 .vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
 .tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); z-index: 5; }
@@ -178,6 +121,8 @@ const CSS = `
 .music-info { text-align: center; z-index: 2; }
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: clamp(13px, 4vw, 15px); margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
+.hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
+@keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
 .tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
@@ -236,6 +181,7 @@ const TECH_ROW_1 = [
   {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
   {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
   {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
+  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
 ];
 
 const TECH_ROW_2 = [
@@ -245,6 +191,7 @@ const TECH_ROW_2 = [
   {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
   {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
   {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
+  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
 ];
 
 const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
@@ -256,50 +203,12 @@ const SOCIALS = [
   {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
 ];
 
-/* ── GAME 1: CYBER DECRYPTER LOGIC ── */
-const targetString = "> IDENTITY VERIFIED\n> DELOITTE CYBER SIMULATION: PASS\n> AFS-CNN RESEARCH: PUBLISHED\n> SYSTEM: FULLY SECURED.";
-const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>";
-
-/* ── GAME 2: STOCKWATCHER TRADER LOGIC ── */
-const generateInitialStockData = () => Array.from({length: 20}, (_, i) => 50 + Math.sin(i) * 10 + Math.random() * 5);
-
 export default function HomePage() {
-  // Audio
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Blog
   const [latestPost, setLatestPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(true);
-
-  // Decrypter State
-  const [decryptedText, setDecryptText] = useState("0x8F9A... ENCRYPTED NODE\nAWAITING MANUAL OVERRIDE.");
-  const [isDecrypting, setIsDecrypting] = useState(false);
-
-  // StockTrader State
-  const [stockData, setStockData] = useState(generateInitialStockData());
-  const [score, setScore] = useState(0);
-
-  // Bug Smasher State
-  const [bugPos, setBugPos] = useState({ x: 50, y: 50 });
-  const [bugsFixed, setBugsFixed] = useState(0);
-
-  // Coffee State
-  const [coffeeLevel, setCoffeeLevel] = useState(50);
-
-  // Ping State
-  const [isPinging, setIsPinging] = useState(false);
-  const [pingRes, setPingRes] = useState("--");
-
-  // Commit Painter State
-  const commitColors = ['var(--surf2)', 'rgba(0,212,180,0.2)', 'rgba(0,212,180,0.5)', 'rgba(0,212,180,0.8)', 'var(--teal)'];
-  const [gridCells, setGridCells] = useState(Array(25).fill(0));
-
-  // Pomodoro State
-  const [timeLeft, setTimeLeft] = useState(1500); // 25 mins
-  const [timerActive, setTimerActive] = useState(false);
-
-  // ── HANDLERS ──
 
   const handlePlay = () => {
     if(audioRef.current) {
@@ -320,6 +229,7 @@ export default function HomePage() {
       try {
         const response = await api.get('/blogs');
         const posts = response.data;
+        
         if (posts && posts.length > 0) {
           const latest = posts[0];
           setLatestPost({
@@ -338,90 +248,6 @@ export default function HomePage() {
     }
     fetchLatestBlog();
   }, []);
-
-  const startDecryption = () => {
-    if(isDecrypting) return;
-    setIsDecrypting(true);
-    let iterations = 0;
-    const interval = setInterval(() => {
-      setDecryptText(targetString.split("").map((letter, index) => {
-        if(letter === '\n' || letter === ' ') return letter;
-        if(index < iterations) return targetString[index];
-        return chars[Math.floor(Math.random() * chars.length)];
-      }).join(""));
-      if(iterations >= targetString.length){
-        clearInterval(interval);
-        setIsDecrypting(false);
-      }
-      iterations += 1/3; 
-    }, 30);
-  };
-
-  const handleTrade = (prediction) => {
-    const currentPrice = stockData[stockData.length - 1];
-    const nextPrice = currentPrice + (Math.random() * 20 - 10);
-    const isUp = nextPrice > currentPrice;
-    if ((prediction === 'up' && isUp) || (prediction === 'down' && !isUp)) {
-      setScore(prev => prev + 100);
-    } else {
-      setScore(prev => prev - 50);
-    }
-    setStockData([...stockData.slice(1), nextPrice]);
-  };
-  const stockPolyline = stockData.map((val, i) => `${(i / (stockData.length - 1)) * 100},${100 - val}`).join(" ");
-
-  // Bug Smasher Logic
-  useEffect(() => {
-    const moveBug = setInterval(() => {
-      setBugPos({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 });
-    }, 1500);
-    return () => clearInterval(moveBug);
-  }, []);
-  const smashBug = (e) => {
-    e.stopPropagation();
-    setBugsFixed(prev => prev + 1);
-    setBugPos({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 });
-  };
-
-  // Coffee Logic
-  useEffect(() => {
-    const drain = setInterval(() => {
-      setCoffeeLevel(prev => Math.max(prev - 2, 0));
-    }, 2000);
-    return () => clearInterval(drain);
-  }, []);
-  const sipCoffee = () => setCoffeeLevel(prev => Math.min(prev + 25, 100));
-
-  // Ping Logic
-  const handlePing = () => {
-    if(isPinging) return;
-    setIsPinging(true);
-    setPingRes("Pinging...");
-    setTimeout(() => {
-      setIsPinging(false);
-      setPingRes(`${Math.floor(Math.random() * 40 + 12)} ms`);
-    }, 800);
-  };
-
-  // Commit Painter Logic
-  const paintCell = (idx) => {
-    const newCells = [...gridCells];
-    newCells[idx] = (newCells[idx] + 1) % commitColors.length;
-    setGridCells(newCells);
-  };
-
-  // Timer Logic
-  useEffect(() => {
-    let interval = null;
-    if (timerActive && timeLeft > 0) {
-      interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    } else if (timeLeft === 0) {
-      setTimerActive(false);
-    }
-    return () => clearInterval(interval);
-  }, [timerActive, timeLeft]);
-  const formatTime = (secs) => `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
-  const timerDashOffset = 200 - (timeLeft / 1500) * 200;
 
   return (
     <>
@@ -455,15 +281,93 @@ export default function HomePage() {
 
           <div className="bento r5">
 
-            {/* ── ROW 1 ── */}
+            {/* ROW 1 */}
+            {/* ── NATIVE SVG ANIMATED CAR ── */}
             <div className="card c2">
-              <div className="lbl"><Shield size={13}/>Security Clearance</div>
-              <div className="decrypt-wrap">
-                <div className="scan-line"></div>
-                <div className="decrypt-text" style={{ whiteSpace: 'pre-line' }}>{decryptedText}</div>
-                <button className="decrypt-btn" onClick={startDecryption} disabled={isDecrypting}>
-                  {isDecrypting ? 'Decrypting...' : 'Override Protocol'}
-                </button>
+              <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
+              <div className="car-wrap">
+                <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
+                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Deep Background (Slow Clouds/City) */}
+                  <g opacity="0.1" fill="var(--teal)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
+                    <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
+                    <path d="M 70 120 L 70 40 L 110 40 L 110 120 Z" />
+                    <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
+                  </g>
+
+                  {/* Mid Background (Fast Cityscape) */}
+                  <g opacity="0.2" fill="var(--violet)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
+                    <rect x="10" y="70" width="30" height="60" />
+                    <rect x="50" y="90" width="40" height="40" />
+                    <rect x="110" y="50" width="35" height="80" />
+                    <rect x="180" y="75" width="25" height="55" />
+                    <rect x="230" y="60" width="45" height="70" />
+                  </g>
+
+                  {/* The Road */}
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
+                    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
+                  </line>
+
+                  {/* Bouncing Car Body */}
+                  <g>
+                    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
+                    
+                    {/* Main Chassis */}
+                    <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
+                    
+                    {/* Window */}
+                    <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
+                    
+                    {/* Window Reflection Details */}
+                    <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+                    <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+
+                    {/* Taillight */}
+                    <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
+                    
+                    {/* Headlight */}
+                    <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
+                    
+                    {/* Headlight Beam */}
+                    <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
+                    
+                    {/* Door Outline */}
+                    <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
+                    <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
+                  </g>
+
+                  {/* Independent Spinning Back Wheel */}
+                  <g transform="translate(100, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
+                    </g>
+                  </g>
+
+                  {/* Independent Spinning Front Wheel */}
+                  <g transform="translate(180, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
+                    </g>
+                  </g>
+                </svg>
               </div>
             </div>
 
@@ -475,12 +379,16 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── ROW 2 ── */}
+            {/* ROW 2 */}
             <div className="card c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '10px' }}>
+              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
                 <img src="https://github-readme-stats-eight-theta.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="GitHub Stats" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-                <img src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=DWRSH&layout=compact&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000" alt="Top Langs" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+                <img src="https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000" alt="GitHub Streak" style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} />
+              </div>
+              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                 <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
               </div>
             </div>
 
@@ -507,32 +415,12 @@ export default function HomePage() {
                 <div className="music-info">
                   <div className="music-song">Lo-Fi Coding</div>
                   <div className="music-artist">Lofi Study</div>
+                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
                 </div>
               </div>
             </div>
 
-            {/* ── ROW 3 ── */}
-            <div className="card c2">
-              <div className="lbl"><Activity size={13}/>StockWatcher Simulator</div>
-              <div className="stock-wrap">
-                <div className="stock-header">
-                  <span className="stock-title">$PORTFOLIO PNL</span>
-                  <span className="stock-score" style={{color: score < 0 ? 'var(--red)' : 'var(--green)'}}>
-                    {score >= 0 ? '+' : ''}{score}
-                  </span>
-                </div>
-                <div className="stock-chart">
-                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{width: '100%', height: '100%', overflow: 'visible'}}>
-                    <polyline points={stockPolyline} fill="none" stroke={score < 0 ? 'var(--red)' : 'var(--teal)'} strokeWidth="2" vectorEffect="non-scaling-stroke" style={{transition: 'all 0.3s ease'}}/>
-                  </svg>
-                </div>
-                <div className="stock-controls">
-                  <button className="trade-btn btn-up" onClick={() => handleTrade('up')}>LONG ↑</button>
-                  <button className="trade-btn btn-down" onClick={() => handleTrade('down')}>SHORT ↓</button>
-                </div>
-              </div>
-            </div>
-
+            {/* ROW 3 */}
             <div className="card c2">
               <div className="lbl"><Layers size={13}/>Tech Stack</div>
               <div className="tech-marquee-wrapper">
@@ -553,92 +441,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── ROW 4 (NEW WIDGETS) ── */}
-            
-            {/* WIDGET 1: BUG SMASHER */}
-            <div className="card c1">
-              <div className="lbl"><Bug size={13}/>QA Testing</div>
-              <div className="bug-wrap" onClick={() => setBugPos({x: Math.random()*80+10, y: Math.random()*80+10})}>
-                 <Bug 
-                   className="bug-icon" 
-                   size={24} 
-                   style={{ left: `${bugPos.x}%`, top: `${bugPos.y}%` }} 
-                   onClick={smashBug} 
-                 />
-                 <span className="bug-score">Bugs Fixed: {bugsFixed}</span>
-              </div>
-            </div>
-
-            {/* WIDGET 2: CODE FUEL */}
-            <div className="card c1">
-              <div className="lbl"><Coffee size={13}/>Code Fuel</div>
-              <div className="fuel-wrap" onClick={sipCoffee}>
-                 <div className="coffee-cup">
-                    <div className="coffee-liquid" style={{ height: `${coffeeLevel}%` }}></div>
-                 </div>
-                 <span className="fuel-text">{coffeeLevel}% Caffeine</span>
-              </div>
-            </div>
-
-            {/* WIDGET 3: API PING */}
-            <div className="card c2">
-               <div className="lbl"><Server size={13}/>API Latency</div>
-               <div className="ping-wrap">
-                  <div className="ping-stage">
-                     <Terminal className="ping-client" size={24} />
-                     <div className="ping-path"></div>
-                     <div className={`ping-packet ${isPinging ? 'active' : ''}`}></div>
-                     <Server className="ping-server" size={24} />
-                  </div>
-                  <div className="ping-controls">
-                     <button className="ping-btn" onClick={handlePing}>Ping Server</button>
-                     <span className="ping-res">{pingRes}</span>
-                  </div>
-               </div>
-            </div>
-
-            {/* ── ROW 5 (NEW WIDGETS) ── */}
-            
-            {/* WIDGET 4: COMMIT PAINTER */}
-            <div className="card c1">
-               <div className="lbl"><Palette size={13}/>Commit Art</div>
-               <div className="painter-wrap">
-                  <div className="painter-grid">
-                     {gridCells.map((val, idx) => (
-                        <div 
-                          key={idx} 
-                          className="painter-cell" 
-                          style={{ background: commitColors[val], borderColor: val > 0 ? commitColors[val] : 'var(--border)' }}
-                          onMouseEnter={(e) => { if(e.buttons === 1) paintCell(idx) }}
-                          onClick={() => paintCell(idx)}
-                        ></div>
-                     ))}
-                  </div>
-               </div>
-            </div>
-
-            {/* WIDGET 5: FOCUS TIMER */}
-            <div className="card c1">
-               <div className="lbl"><Timer size={13}/>Focus Mode</div>
-               <div className="timer-wrap">
-                  <div className="timer-circle">
-                     <svg viewBox="0 0 70 70" className="timer-svg">
-                        <circle cx="35" cy="35" r="32" className="timer-bg" />
-                        <circle cx="35" cy="35" r="32" className="timer-prog" style={{ strokeDashoffset: timerDashOffset }} />
-                     </svg>
-                     <div className="timer-text">{formatTime(timeLeft)}</div>
-                  </div>
-                  <div className="timer-controls">
-                     <button className="timer-btn" onClick={() => setTimerActive(!timerActive)}>
-                       {timerActive ? <Square size={12} /> : <Play size={12} fill="currentColor" />}
-                     </button>
-                     <button className="timer-btn" onClick={() => { setTimerActive(false); setTimeLeft(1500); }}>
-                       <RotateCcw size={12} />
-                     </button>
-                  </div>
-               </div>
-            </div>
-
             <div className="card c2">
               <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
               <div className="soc-grid">
@@ -651,8 +453,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* ── ROW 6 ── */}
-            <div className="card c2 mob-full">
+            {/* ROW 4 */}
+            <div className="card c1 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -669,6 +471,18 @@ export default function HomePage() {
               ) : (
                 <p className="blog-desc">No posts found right now.</p>
               )}
+            </div>
+
+            <div className="card c1" style={{padding: 0}}>
+              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
+              <a href="https://maps.google.com/?q=Surat,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
+                <div className="map-wrap">
+                  <iframe
+                    src="https://maps.google.com/maps?q=Surat,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
+                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
+                  />
+                </div>
+              </a>
             </div>
 
             <div className="card c2 cta-card">
