@@ -81,10 +81,10 @@ router.post('/', async (req, res) => {
     // ─── 4. EXECUTE GEMINI API WITH FALLBACK MODELS ───────────────────────
     // Agar ek model fail ho jaye (jaise 404 error), toh loop automatically agle model pe shift hoga
     const fallbackModels = [
-      "models/gemini-1.5-flash",
-                "models/gemini-1.5-flash-latest",
-                "models/gemini-pro",
-                "models/gemini-1.0-pro"
+                "gemini-1.5-flash",
+                "gemini-1.5-flash-latest",
+                "gemini-pro",
+                "gemini-1.0-pro"
     ];
 
     let responseText = null;
