@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai'); // ← NEW SDK
 
 // ─── 1. EXACT MONGOOSE MODELS IMPORT ─────────────────────────────────────
 const Project = require('../models/Project');
 const Blog = require('../models/Blog');
 
-// Initialize Google Gemini AI (Backend .env mein GEMINI_API_KEY honi chahiye)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize Google Gemini AI with new SDK
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 router.post('/', async (req, res) => {
   try {
@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
       databaseProjects = await Project.find({})
         .select('title description tags repoUrl demoUrl')
         .lean();
-        
+
       databaseBlogs = await Blog.find({})
         .select('title slug')
         .lean();
@@ -76,15 +76,14 @@ router.post('/', async (req, res) => {
       }
     `;
 
-    const prompt = `${systemPrompt}\n\nUser's Question: "${message}"\nJSON Output:`;
+    const fullPrompt = `${systemPrompt}\n\nUser's Question: "${message}"\nJSON Output:`;
 
-    // ─── 4. EXECUTE GEMINI API WITH FALLBACK MODELS ───────────────────────
-    // Agar ek model fail ho jaye (jaise 404 error), toh loop automatically agle model pe shift hoga
+    // ─── 4. EXECUTE GEMINI API WITH FALLBACK MODELS (NEW SDK) ────────────
+    // Updated model names — old 1.5/1.0 models are fully deprecated & return 404
     const fallbackModels = [
-                "gemini-1.5-flash",
-                "gemini-1.5-flash-latest",
-                "gemini-pro",
-                "gemini-1.0-pro"
+      "gemini-2.0-flash",        // Best: fast, free tier, very capable
+      "gemini-2.0-flash-lite",   // Lighter version if flash hits rate limits
+      "gemini-2.5-flash",        // Latest & most capable flash model
     ];
 
     let responseText = null;
@@ -93,21 +92,24 @@ router.post('/', async (req, res) => {
     for (const modelName of fallbackModels) {
       try {
         console.log(`Trying Gemini API with model: ${modelName}...`);
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(prompt);
-        responseText = result.response.text();
-        
+
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: fullPrompt,
+        });
+
+        responseText = response.text;
         console.log(`Successfully generated response using: ${modelName}`);
-        break; // Agar response mil gaya, toh loop yahi rok do
+        break; // Stop loop on first success
       } catch (err) {
-        console.warn(`Model ${modelName} failed. Trying next available model... Error:`, err.message);
+        console.warn(`Model ${modelName} failed. Trying next... Error:`, err.message);
         lastError = err;
       }
     }
 
-    // Agar saare models fail ho gaye
+    // If all models failed
     if (!responseText) {
-      throw new Error(`All Gemini models failed to generate content. Last error: ${lastError?.message}`);
+      throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
     }
 
     // ─── 5. CLEAN AND PARSE THE AI OUTPUT ─────────────────────────────────
@@ -116,10 +118,10 @@ router.post('/', async (req, res) => {
       .replace(/```/gi, '')
       .trim();
 
-    // Extract exact JSON block securely
+    // Safely extract the JSON block
     const firstBraceIdx = cleanedJsonString.indexOf('{');
     const lastBraceIdx = cleanedJsonString.lastIndexOf('}');
-    
+
     if (firstBraceIdx !== -1 && lastBraceIdx !== -1) {
       cleanedJsonString = cleanedJsonString.substring(firstBraceIdx, lastBraceIdx + 1);
     }
@@ -130,10 +132,9 @@ router.post('/', async (req, res) => {
 
   } catch (error) {
     console.error("AI Chatbot System Error:", error);
-    
-    // Graceful production fallback
+
     return res.status(500).json({
-      text: "I ran into a temporary configuration glitch while querying my database. However, you can directly reach out to Darsh via email at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>!",
+      text: "I ran into a temporary configuration glitch. You can directly reach out to Darsh via email at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>!",
       actions: [{ label: "Get in Touch", path: "contact" }]
     });
   }
