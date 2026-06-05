@@ -3,7 +3,6 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // ─── 1. EXACT MONGOOSE MODELS IMPORT ─────────────────────────────────────
-// Tumhare structure ke hisaab se paths '../models/Project' hi honge
 const Project = require('../models/Project');
 const Blog = require('../models/Blog');
 
@@ -23,14 +22,10 @@ router.post('/', async (req, res) => {
     let databaseBlogs = [];
 
     try {
-      // Tumhare schema keys: title, description, tags, repoUrl, demoUrl
       databaseProjects = await Project.find({})
         .select('title description tags repoUrl demoUrl')
         .lean();
         
-      // Tumhare schema keys: title, content, slug, featuredImage
-      // Note: Hum 'content' fetch nahi kar rahe taaki AI ka token limit overload na ho. 
-      // Sirf title aur slug sufficient hai bot ke knowledge ke liye.
       databaseBlogs = await Blog.find({})
         .select('title slug')
         .lean();
@@ -81,12 +76,38 @@ router.post('/', async (req, res) => {
       }
     `;
 
-    // ─── 4. EXECUTE GEMINI API GENERATION ─────────────────────────────────
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `${systemPrompt}\n\nUser's Question: "${message}"\nJSON Output:`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    // ─── 4. EXECUTE GEMINI API WITH FALLBACK MODELS ───────────────────────
+    // Agar ek model fail ho jaye (jaise 404 error), toh loop automatically agle model pe shift hoga
+    const fallbackModels = [
+      "gemini-1.5-flash", // Fast & Default modern model
+      "gemini-1.0-pro",   // Highly stable fallback
+      "gemini-pro"        // Legacy stable fallback
+    ];
+
+    let responseText = null;
+    let lastError = null;
+
+    for (const modelName of fallbackModels) {
+      try {
+        console.log(`Trying Gemini API with model: ${modelName}...`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        responseText = result.response.text();
+        
+        console.log(`Successfully generated response using: ${modelName}`);
+        break; // Agar response mil gaya, toh loop yahi rok do
+      } catch (err) {
+        console.warn(`Model ${modelName} failed. Trying next available model... Error:`, err.message);
+        lastError = err;
+      }
+    }
+
+    // Agar saare models fail ho gaye
+    if (!responseText) {
+      throw new Error(`All Gemini models failed to generate content. Last error: ${lastError?.message}`);
+    }
 
     // ─── 5. CLEAN AND PARSE THE AI OUTPUT ─────────────────────────────────
     let cleanedJsonString = responseText
