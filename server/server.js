@@ -8,7 +8,8 @@ require('dotenv').config({ path: path.join(__dirname, '.env') }); // Sahi path s
 const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const blogRoutes = require('./routes/blogs');
-const statsRoutes = require('./routes/stats'); // Naya stats route import karein
+const statsRoutes = require('./routes/stats'); 
+const chatbotRoutes = require('./routes/chatbotRoutes'); // 👈 Naya Chatbot route import kiya
 
 const app = express();
 
@@ -26,7 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/blogs', blogRoutes);
-app.use('/api/stats', statsRoutes); // Naya stats route register karein
+app.use('/api/stats', statsRoutes); 
+app.use('/api/chat', chatbotRoutes); // 👈 Chatbot API endpoint register kiya
 
 // --- Database Connection ---
 const connectDB = async () => {
@@ -66,4 +68,3 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
