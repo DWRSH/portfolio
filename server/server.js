@@ -30,6 +30,14 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/stats', statsRoutes); 
 app.use('/api/chat', chatbotRoutes); // 👈 Chatbot API endpoint register kiya
 
+// 👇 NAYA ROUTE: Monitor tool ke error ko fix karne ke liye 👇
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    status: "success", 
+    message: "Portfolio Backend API is up and running smoothly!" 
+  });
+});
+
 // --- Database Connection ---
 const connectDB = async () => {
   const mongoUri = process.env.MONGO_URI;
