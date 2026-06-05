@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot } from 'lucide-react';
+import { MessageSquare, X, Send, ExternalLink, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /* ─── CHATBOT STYLES ──────────────────────────────────────────────────────── */
 const chatStyles = `
@@ -41,8 +42,8 @@ const chatStyles = `
     position: fixed;
     bottom: 110px;
     right: 30px;
-    width: 360px;
-    height: 520px;
+    width: 380px;
+    height: 560px;
     background: var(--cb-surf);
     border: 1px solid var(--cb-border);
     border-radius: 20px;
@@ -137,17 +138,20 @@ const chatStyles = `
 
   .cb-msg-row {
     display: flex;
+    flex-direction: column;
     width: 100%;
+    gap: 8px;
   }
-  .cb-msg-row.bot { justify-content: flex-start; }
-  .cb-msg-row.user { justify-content: flex-end; }
+  .cb-msg-row.bot { align-items: flex-start; }
+  .cb-msg-row.user { align-items: flex-end; }
 
   .cb-bubble {
-    max-width: 80%;
+    max-width: 85%;
     padding: 12px 16px;
     border-radius: 16px;
     font-size: 13.5px;
     line-height: 1.5;
+    word-wrap: break-word;
   }
   .cb-msg-row.bot .cb-bubble {
     background: var(--cb-surf2);
@@ -160,6 +164,42 @@ const chatStyles = `
     color: #000;
     border-bottom-right-radius: 4px;
     font-weight: 500;
+  }
+
+  /* Link formatting inside bubble */
+  .cb-bubble a {
+    color: var(--cb-primary);
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .cb-msg-row.user .cb-bubble a {
+    color: #000;
+  }
+
+  /* Action Buttons */
+  .cb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .cb-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 212, 180, 0.1);
+    border: 1px solid var(--cb-primary);
+    color: var(--cb-primary);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cb-action-btn:hover {
+    background: var(--cb-primary);
+    color: #000;
   }
 
   /* Input Area */
@@ -216,47 +256,90 @@ const chatStyles = `
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  const navigate = useNavigate(); // For programmatic routing
+  
   const [messages, setMessages] = useState([
     { 
       sender: 'bot', 
-      text: "Hey! I'm Darsh's AI Assistant. You can ask me about his MERN projects, Cyber Security work, or how to get in touch!" 
+      text: "Hey! I'm Darsh's AI Assistant. I know everything about his MERN stack skills, Cyber Security experience, projects, and academics. How can I help you today?",
+      actions: [
+        { label: "View Projects", path: "/projects" },
+        { label: "Contact Details", path: "contact" }
+      ]
     }
   ]);
   
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Pre-fed Knowledge Base / Mock AI Logic
+  // ─── 100% FACTUAL KNOWLEDGE BASE ───
   const getBotResponse = (query) => {
     const text = query.toLowerCase();
 
-    if (text.includes('project') || text.includes('work') || text.includes('build')) {
-      return "He is currently building 'StockWatcher' (a real-time trading system using FastAPI & MongoDB) and establishing 'AllVora', a digital services agency. What kind of project do you have in mind?";
+    // 1. Projects & Work
+    if (text.includes('project') || text.includes('work') || text.includes('build') || text.includes('portfolio')) {
+      return {
+        text: "Darsh is currently developing 'StockWatcher' (a real-time stock alert system using FastAPI & MongoDB) and establishing his own digital services startup called 'AllVora'. You can check out his complete portfolio here:",
+        actions: [{ label: "Go to Projects Page", path: "/projects" }]
+      };
     } 
-    else if (text.includes('skill') || text.includes('tech') || text.includes('stack')) {
-      return "He is a Full Stack Developer specializing in the MERN Stack, Python, and React Native. He also has strong expertise in Cyber Security and Deep Learning.";
+    // 2. Skills & Tech Stack
+    else if (text.includes('skill') || text.includes('tech') || text.includes('stack') || text.includes('mern')) {
+      return {
+        text: "He is a Full Stack Developer specializing in the MERN Stack, Python, and React Native (Expo). He also has strong expertise in Deep Learning architectures and Fintech API integrations.",
+        actions: [{ label: "View Developer Profile", path: "/about" }]
+      };
     } 
-    else if (text.includes('education') || text.includes('study') || text.includes('college') || text.includes('degree')) {
-      return "He is pursuing a B.Sc. in Computer Applications and Information Technology (CA & IT) at Ganpat University, currently in his 6th semester.";
+    // 3. Education & Background
+    else if (text.includes('education') || text.includes('study') || text.includes('college') || text.includes('degree') || text.includes('university')) {
+      return {
+        text: "Darsh is currently in his 6th semester pursuing a B.Sc. in Computer Applications and Information Technology (CA & IT) at Ganpat University. He is also preparing for the CUET PG 2026 exam to pursue an M.Sc. in Cyber Security.",
+        actions: []
+      };
     } 
-    else if (text.includes('cyber') || text.includes('security') || text.includes('hack')) {
-      return "He has a strong focus on ethical hacking and digital forensics. He recently completed a Cyber Security job simulation for Deloitte Australia, analyzing breach logs.";
+    // 4. Cyber Security & Experience
+    else if (text.includes('cyber') || text.includes('security') || text.includes('hack') || text.includes('experience')) {
+      return {
+        text: "He is deeply interested in digital forensics and ethical hacking. In January 2026, he successfully completed a Cyber Security job simulation for Deloitte Australia where he analyzed web breach logs.",
+        actions: []
+      };
     } 
-    else if (text.includes('ai') || text.includes('machine learning') || text.includes('cnn') || text.includes('research')) {
-      return "He authored a research paper titled 'Enhanced CNN with Adaptive Feature Selection for Image Classification (AFS-CNN)', diving deep into neural networks.";
+    // 5. Research & AI/Blog
+    else if (text.includes('ai') || text.includes('machine learning') || text.includes('cnn') || text.includes('research') || text.includes('paper') || text.includes('blog')) {
+      return {
+        text: "Darsh is actively involved in AI research! In February 2026, he authored a journal-style paper titled 'Enhanced CNN with Adaptive Feature Selection for Image Classification (AFS-CNN)'. You can read his articles here:",
+        actions: [{ label: "Read Blog & Research", path: "/blog" }]
+      };
     } 
-    else if (text.includes('contact') || text.includes('email') || text.includes('hire') || text.includes('talk')) {
-      return "You can email him directly at contact@darshprajapati.dev. He usually replies very quickly!";
+    // 6. Contact Details
+    else if (text.includes('contact') || text.includes('email') || text.includes('hire') || text.includes('talk') || text.includes('reach')) {
+      return {
+        text: <>You can email him directly at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>. He usually replies very quickly! You can also check his GitHub at <a href="https://github.com/DWRSH" target="_blank" rel="noreferrer">@DWRSH</a>.</>,
+        actions: []
+      };
     } 
+    // 7. General Greetings
     else if (text.includes('hi') || text.includes('hello') || text.includes('hey')) {
-      return "Hello there! How can I help you learn more about Darsh's profile?";
+      return {
+        text: "Hello there! How can I assist you? I can provide quick links to Darsh's projects, explain his M.Sc Cyber Security plans, or give you his direct contact info.",
+        actions: [
+          { label: "Show Projects", path: "/projects" },
+          { label: "Show Contact", path: "contact" }
+        ]
+      };
     } 
+    // Default Fallback
     else {
-      return "I'm a localized assistant. I can tell you about his projects, tech stack, university, or how to contact him. Try asking 'What are your skills?'";
+      return {
+        text: "I am specifically trained on Darsh's professional profile. I can tell you about his B.Sc CA & IT studies, his 'StockWatcher' project, his AI research, or how to contact him.",
+        actions: [
+          { label: "View Projects", path: "/projects" },
+          { label: "About Darsh", path: "/about" }
+        ]
+      };
     }
   };
 
@@ -265,15 +348,37 @@ export default function ChatBot() {
     if (!input.trim()) return;
 
     // Add user message
-    const newMessages = [...messages, { sender: 'user', text: input }];
-    setMessages(newMessages);
+    setMessages(prev => [...prev, { sender: 'user', text: input }]);
+    const currentInput = input;
     setInput('');
 
-    // Simulate typing delay for bot response
+    // Simulate thinking delay for bot
     setTimeout(() => {
-      const botResponse = getBotResponse(input);
-      setMessages(prev => [...prev, { sender: 'bot', text: botResponse }]);
+      const responseObj = getBotResponse(currentInput);
+      setMessages(prev => [...prev, { 
+        sender: 'bot', 
+        text: responseObj.text,
+        actions: responseObj.actions 
+      }]);
     }, 600);
+  };
+
+  // Handle Action Button Clicks
+  const handleActionClick = (action) => {
+    if (action.path === 'contact') {
+      // Direct contact logic
+      setMessages(prev => [...prev, { sender: 'user', text: "How can I contact Darsh?" }]);
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          sender: 'bot', 
+          text: <>You can email him at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>.</> 
+        }]);
+      }, 500);
+    } else {
+      // Use React Router to navigate seamlessly
+      navigate(action.path);
+      setIsOpen(false); // Optional: close chat when navigating
+    }
   };
 
   return (
@@ -282,7 +387,7 @@ export default function ChatBot() {
       
       {/* Floating Action Button */}
       <div className="chatbot-fab" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X size={28} /> : <MessageSquare size={28} />}
+        {isOpen ? <X size={28} color="#000" /> : <MessageSquare size={28} color="#000" />}
       </div>
 
       {/* Chat Window */}
@@ -290,6 +395,7 @@ export default function ChatBot() {
         
         <div className="cb-header">
           <div className="cb-header-left">
+            {/* Branding D Icon */}
             <div className="cb-avatar">D</div>
             <div>
               <h3 className="cb-title">Darsh's AI</h3>
@@ -305,6 +411,22 @@ export default function ChatBot() {
           {messages.map((msg, index) => (
             <div key={index} className={`cb-msg-row ${msg.sender}`}>
               <div className="cb-bubble">{msg.text}</div>
+              
+              {/* Render Action Buttons if available */}
+              {msg.actions && msg.actions.length > 0 && (
+                <div className="cb-actions">
+                  {msg.actions.map((act, i) => (
+                    <button 
+                      key={i} 
+                      className="cb-action-btn"
+                      onClick={() => handleActionClick(act)}
+                    >
+                      {act.label} 
+                      {act.path === 'contact' ? <ExternalLink size={12}/> : <ArrowRight size={12}/>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -314,7 +436,7 @@ export default function ChatBot() {
           <input 
             type="text" 
             className="cb-input" 
-            placeholder="Ask about my skills, projects..." 
+            placeholder="Ask about projects, education, skills..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
