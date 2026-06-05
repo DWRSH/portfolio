@@ -1,23 +1,59 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenAI } = require('@google/genai'); // ← NEW SDK
+const { GoogleGenAI } = require('@google/genai');
 
-// ─── 1. EXACT MONGOOSE MODELS IMPORT ─────────────────────────────────────
+// ─── 1. MONGOOSE MODELS ───────────────────────────────────────────────────
 const Project = require('../models/Project');
 const Blog = require('../models/Blog');
 
-// Initialize Google Gemini AI with new SDK
+// Initialize new Google GenAI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// ─── HELPER: Sleep for ms milliseconds ───────────────────────────────────
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// ─── HELPER: Call one model with up to `maxRetries` retries on 429/503 ──
+async function tryModelWithRetry(modelName, prompt, maxRetries = 2) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: prompt,
+      });
+      return response.text; // success
+    } catch (err) {
+      const errBody = typeof err.message === 'string' ? err.message : JSON.stringify(err);
+      const isRateLimited = errBody.includes('429') || errBody.includes('RESOURCE_EXHAUSTED');
+      const isOverloaded  = errBody.includes('503') || errBody.includes('UNAVAILABLE');
+      const isQuotaZero   = errBody.includes('limit: 0'); // retired / zeroed quota
+
+      // Retired model with zero quota — don't waste retries
+      if (isQuotaZero) {
+        throw new Error(`Model ${modelName} has zero quota (retired). Skipping.`);
+      }
+
+      if ((isRateLimited || isOverloaded) && attempt < maxRetries) {
+        const waitMs = attempt * 8000; // 8s, then 16s
+        console.warn(`Model ${modelName} hit ${isRateLimited ? '429' : '503'} on attempt ${attempt}. Waiting ${waitMs / 1000}s before retry...`);
+        await sleep(waitMs);
+        continue;
+      }
+
+      // Non-retryable error or last attempt
+      throw err;
+    }
+  }
+}
 
 router.post('/', async (req, res) => {
   try {
     const { message } = req.body;
 
     if (!message) {
-      return res.status(400).json({ text: "Message is required.", actions: [] });
+      return res.status(400).json({ text: 'Message is required.', actions: [] });
     }
 
-    // ─── 2. RETRIEVE LIVE DATA FROM MONGODB ──────────────────────────────
+    // ─── 2. RETRIEVE LIVE DATA FROM MONGODB ────────────────────────────
     let databaseProjects = [];
     let databaseBlogs = [];
 
@@ -30,15 +66,15 @@ router.post('/', async (req, res) => {
         .select('title slug')
         .lean();
     } catch (dbError) {
-      console.error("Database fetch failed for chatbot context:", dbError);
+      console.error('Database fetch failed for chatbot context:', dbError);
     }
 
-    // ─── 3. DEFINE THE SYSTEM PROMPT & CONTEXT ───────────────────────────
+    // ─── 3. SYSTEM PROMPT ──────────────────────────────────────────────
     const systemPrompt = `
       You are "Darsh's AI", a highly sophisticated, professional, and polite digital assistant for Darsh Prajapati's portfolio website.
       Your sole mission is to assist recruiters, clients, and visitors by providing 100% accurate, factual information about Darsh.
 
-      CRITICAL SECURITY RULE: Do NOT invent, hallucinate, or assume any facts, projects, experiences, or achievements. If a piece of information is not explicitly mentioned below in the data blocks, politely state that you do not have that information. 
+      CRITICAL SECURITY RULE: Do NOT invent, hallucinate, or assume any facts, projects, experiences, or achievements. If a piece of information is not explicitly mentioned below in the data blocks, politely state that you do not have that information.
 
       DARSH'S PROFESSIONAL PROFILE DATA:
       - Full Name: Darsh Prajapati
@@ -57,7 +93,7 @@ router.post('/', async (req, res) => {
       ${JSON.stringify(databaseBlogs)}
 
       STRICT OUTPUT FORMAT RULES:
-      1. You must respond in valid JSON format ONLY. 
+      1. You must respond in valid JSON format ONLY.
       2. Do NOT wrap your response in markdown text blocks like \`\`\`json ... \`\`\`. Just return the raw JSON object string.
       3. The JSON object must contain exactly two fields:
          - "text": A string containing your natural, helpful response. You can use standard HTML anchor tags (e.g., <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>) for emails, or use the exact 'repoUrl' or 'demoUrl' from the projects data if the user asks for links.
@@ -69,21 +105,21 @@ router.post('/', async (req, res) => {
          - If user wants contact information, add: {"label": "Get in Touch", "path": "contact"}
          - If not relevant, keep "actions": []
 
-      Example Output JSON layout structure:
+      Example Output:
       {
-        "text": "Darsh is a Full Stack Developer. He has built some amazing projects which you can check out, or email him at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>.",
+        "text": "Darsh is a Full Stack Developer. You can email him at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>.",
         "actions": [{"label": "Browse Projects", "path": "/projects"}, {"label": "Get in Touch", "path": "contact"}]
       }
     `;
 
     const fullPrompt = `${systemPrompt}\n\nUser's Question: "${message}"\nJSON Output:`;
 
-    // ─── 4. EXECUTE GEMINI API WITH FALLBACK MODELS (NEW SDK) ────────────
-    // Updated model names — old 1.5/1.0 models are fully deprecated & return 404
+    // ─── 4. FALLBACK MODEL CHAIN (current free-tier models, best first) ─
+   
     const fallbackModels = [
-      "gemini-2.0-flash",        // Best: fast, free tier, very capable
-      "gemini-2.0-flash-lite",   // Lighter version if flash hits rate limits
-      "gemini-2.5-flash",        // Latest & most capable flash model
+      'gemini-2.5-flash',       // Best quality, generous free tier
+      'gemini-2.5-flash-lite',  // Higher RPM fallback (15 RPM)
+      'gemini-3.5-flash',       // Newest model, 1500 RPD free tier
     ];
 
     let responseText = null;
@@ -91,51 +127,43 @@ router.post('/', async (req, res) => {
 
     for (const modelName of fallbackModels) {
       try {
-        console.log(`Trying Gemini API with model: ${modelName}...`);
-
-        const response = await ai.models.generateContent({
-          model: modelName,
-          contents: fullPrompt,
-        });
-
-        responseText = response.text;
-        console.log(`Successfully generated response using: ${modelName}`);
-        break; // Stop loop on first success
+        console.log(`Trying model: ${modelName}...`);
+        responseText = await tryModelWithRetry(modelName, fullPrompt, 2);
+        console.log(`✅ Success with model: ${modelName}`);
+        break;
       } catch (err) {
-        console.warn(`Model ${modelName} failed. Trying next... Error:`, err.message);
+        console.warn(`❌ Model ${modelName} failed: ${err.message}`);
         lastError = err;
       }
     }
 
-    // If all models failed
     if (!responseText) {
       throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
     }
 
-    // ─── 5. CLEAN AND PARSE THE AI OUTPUT ─────────────────────────────────
-    let cleanedJsonString = responseText
+    // ─── 5. CLEAN AND PARSE AI OUTPUT ─────────────────────────────────
+    let cleanedJson = responseText
       .replace(/```json/gi, '')
       .replace(/```/gi, '')
       .trim();
 
-    // Safely extract the JSON block
-    const firstBraceIdx = cleanedJsonString.indexOf('{');
-    const lastBraceIdx = cleanedJsonString.lastIndexOf('}');
+    const firstBrace = cleanedJson.indexOf('{');
+    const lastBrace  = cleanedJson.lastIndexOf('}');
 
-    if (firstBraceIdx !== -1 && lastBraceIdx !== -1) {
-      cleanedJsonString = cleanedJsonString.substring(firstBraceIdx, lastBraceIdx + 1);
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleanedJson = cleanedJson.substring(firstBrace, lastBrace + 1);
     }
 
-    const parsedAIResponse = JSON.parse(cleanedJsonString);
+    const parsedAIResponse = JSON.parse(cleanedJson);
 
     return res.status(200).json(parsedAIResponse);
 
   } catch (error) {
-    console.error("AI Chatbot System Error:", error);
+    console.error('AI Chatbot System Error:', error);
 
     return res.status(500).json({
-      text: "I ran into a temporary configuration glitch. You can directly reach out to Darsh via email at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>!",
-      actions: [{ label: "Get in Touch", path: "contact" }]
+      text: "I ran into a temporary glitch. You can directly reach Darsh via email at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>!",
+      actions: [{ label: 'Get in Touch', path: 'contact' }],
     });
   }
 });
