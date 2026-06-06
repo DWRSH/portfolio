@@ -287,13 +287,12 @@ export default function ChatBot() {
   ]);
   
   const messagesEndRef = useRef(null);
-  const typewriterIntervalRef = useRef(null); // Ref to hold the typewriter interval
+  const typewriterIntervalRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Clean up interval on unmount
   useEffect(() => {
     return () => {
       if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
@@ -307,13 +306,11 @@ export default function ChatBot() {
     const currentInput = input;
     const chatHistorySnapshot = [...messages];
     
-    // 1. Add User Message
     setMessages(prev => [...prev, { sender: 'user', text: currentInput }]);
     setInput('');
-    setIsTyping(true); // Show the loading dots while waiting for API
+    setIsTyping(true);
 
     try {
-      // 2. Call the Real Backend AI Route
       const response = await api.post('/chat', { 
         message: currentInput,
         history: chatHistorySnapshot.map(msg => ({
@@ -323,45 +320,52 @@ export default function ChatBot() {
       });
       
       const data = response.data;
-      setIsTyping(false); // Hide the dots, start the typewriter
+      setIsTyping(false);
 
-      // 3. Setup initial empty bot message
+      // Bot ka empty message inject karo jise badme fill karenge
       setMessages(prev => [...prev, { sender: 'bot', text: '', actions: [] }]);
       
-      // 4. Smart HTML Typewriter Logic
       let index = 0;
       let currentHtml = '';
       const fullHtml = data.text || '';
-      const speed = 15; // Speed of typing in milliseconds
+      const speed = 10; // Typing speed in ms
       
+      if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+
       typewriterIntervalRef.current = setInterval(() => {
         if (index < fullHtml.length) {
-          // If we hit an HTML tag, skip the typing effect for the tag itself
+          // 🔥 FIXED LOGIC: Agar HTML tag start hota hai (<), toh end tag (>) tak pura skip karo ek sath
           if (fullHtml[index] === '<') {
             let tag = '';
-            while (fullHtml[index] !== '>' && index < fullHtml.length) {
+            while (index < fullHtml.length && fullHtml[index] !== '>') {
               tag += fullHtml[index];
               index++;
             }
-            tag += '>';
+            if (index < fullHtml.length) {
+              tag += fullHtml[index]; // '>' character ko add karo
+              index++; // Index ko completely tag se aage badha do
+            }
             currentHtml += tag;
           } else {
             currentHtml += fullHtml[index];
             index++;
           }
           
-          // Update the text of the last message (the bot's message)
           setMessages(prev => {
             const newMsgs = [...prev];
-            newMsgs[newMsgs.length - 1].text = currentHtml;
+            if (newMsgs.length > 0) {
+              newMsgs[newMsgs.length - 1].text = currentHtml;
+            }
             return newMsgs;
           });
         } else {
-          // Typing finished! Add the action buttons at the end.
+          // Typing complete! Add buttons
           clearInterval(typewriterIntervalRef.current);
           setMessages(prev => {
             const newMsgs = [...prev];
-            newMsgs[newMsgs.length - 1].actions = data.actions || [];
+            if (newMsgs.length > 0) {
+              newMsgs[newMsgs.length - 1].actions = data.actions || [];
+            }
             return newMsgs;
           });
         }
@@ -471,7 +475,7 @@ export default function ChatBot() {
             placeholder="Ask me anything..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={isTyping || (messages.length > 0 && messages[messages.length - 1].sender === 'bot' && messages[messages.length - 1].actions && !messages[messages.length - 1].actions.length && !messages[messages.length - 1].text.includes('Hey!'))} // Basic way to prevent input while typing
+            disabled={isTyping} 
           />
           <button type="submit" className="cb-send-btn" disabled={!input.trim() || isTyping}>
             <Send size={18} />
