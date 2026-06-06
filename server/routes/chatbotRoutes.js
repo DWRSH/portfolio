@@ -1,9 +1,6 @@
-require('dns').setDefaultResultOrder('ipv4first'); // 👈 Fix for Node v22 & Render Timeout
-
 const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
-const nodemailer = require('nodemailer');
 
 // ─── 1. MONGOOSE MODELS ───────────────────────────────────────────────────
 const Project = require('../models/Project');
@@ -11,18 +8,6 @@ const Blog = require('../models/Blog');
 
 // Initialize new Google GenAI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-// ─── 2. NODEMAILER SETUP (BREVO SMTP) ─────────────────────────────────────
-// Background email bhejne ke liye robust transporter
-const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,           
-  secure: false,        // true for 465, false for 587
-  auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_PASS
-  }
-});
 
 // ─── HELPER: Sleep for ms milliseconds ───────────────────────────────────
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -77,7 +62,7 @@ router.post('/', async (req, res) => {
       console.error('Database fetch failed:', dbError);
     }
 
-    // 3. SMARTER SYSTEM PROMPT (Ask & Extract Contact)
+    // 3. SYSTEM PROMPT (Cleaned up, no receptionist rules)
     const systemPrompt = `
       You are "Darsh's AI", a highly sophisticated, professional, and visually structured digital assistant for Darsh Prajapati's portfolio website.
       Your sole mission is to assist recruiters, clients, and visitors by providing 100% accurate, beautifully formatted factual information about Darsh.
@@ -109,14 +94,8 @@ router.post('/', async (req, res) => {
       Return ONLY a valid JSON object. No markdown blocks like \`\`\`json.
       {
         "text": "Your formatted HTML string here",
-        "actions": [{"label": "Button Name", "path": "/path"}],
-        "sendEmailAlert": boolean,
-        "clientContact": "Extracted email/phone or null"
+        "actions": [{"label": "Button Name", "path": "/path"}]
       }
-
-      SECRET RECEPTIONIST RULES:
-      1. If the user expresses intent to hire, schedule a meeting, or do business, politely ask them for their email address or phone number in your "text" response so Darsh can contact them. Set "sendEmailAlert" to true.
-      2. If the user provides an email address, phone number, or social link in their message, extract it and put it exactly in the "clientContact" field. Otherwise, set "clientContact" to null.
     `;
 
     // 4. MAP CHAT HISTORY FOR GEMINI API
@@ -170,42 +149,7 @@ router.post('/', async (req, res) => {
     }
     const parsedAIResponse = JSON.parse(cleanedJson);
 
-    // 7. 🔥 ENHANCED EMAIL ALERT (WITH CONTACT INFO)
-    if (parsedAIResponse.sendEmailAlert || parsedAIResponse.clientContact) {
-      console.log("🚨 Lead or Contact Detected! Sending background email alert via Brevo...");
-      
-      const contactInfo = parsedAIResponse.clientContact 
-        ? `<span style="color: #d93025; font-weight: bold; font-size: 16px;">Contact Detail Provided: ${parsedAIResponse.clientContact}</span>` 
-        : `<span style="color: #f29900;">AI is currently asking the user for their email/phone.</span>`;
-
-      const mailOptions = {
-        from: process.env.BREVO_USER, // 👈 Must be your verified Brevo email
-        to: process.env.BREVO_USER,   // 👈 Can be any email where you want to receive alerts
-        subject: '🚀 New Client Lead from Portfolio Bot!',
-        html: `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-            <h2 style="color: #00d4b4;">New Lead Alert!</h2>
-            <p>Someone is interested in working with you via your AI Chatbot.</p>
-            
-            <div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #00d4b4; margin: 20px 0;">
-              <strong>Client's Latest Message:</strong><br/>
-              "${message}"
-            </div>
-
-            <div style="padding: 10px; border: 1px dashed #ccc; background-color: #fafafa;">
-              ${contactInfo}
-            </div>
-            
-            <p style="font-size: 12px; color: #666; margin-top: 20px;">*Check your chatbot conversation or wait for the user to reply with their email.*</p>
-          </div>
-        `
-      };
-
-      // Send email asynchronously so it doesn't block the chatbot response
-      transporter.sendMail(mailOptions).catch(err => console.error("Email sending failed:", err));
-    }
-
-    // 8. SEND RESPONSE TO FRONTEND
+    // 7. SEND RESPONSE TO FRONTEND
     return res.status(200).json({
       text: parsedAIResponse.text,
       actions: parsedAIResponse.actions
