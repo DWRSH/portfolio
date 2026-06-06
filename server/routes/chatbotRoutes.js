@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
+const nodemailer = require('nodemailer'); // 👈 Nodemailer Import
 
 // ─── 1. MONGOOSE MODELS ───────────────────────────────────────────────────
 const Project = require('../models/Project');
@@ -8,6 +9,16 @@ const Blog = require('../models/Blog');
 
 // Initialize new Google GenAI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// ─── 2. NODEMAILER SETUP ──────────────────────────────────────────────────
+// Background email bhejne ke liye transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // ─── HELPER: Sleep for ms milliseconds ───────────────────────────────────
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -62,7 +73,7 @@ router.post('/', async (req, res) => {
       console.error('Database fetch failed:', dbError);
     }
 
-    // 3. SYSTEM PROMPT 
+    // 3. SYSTEM PROMPT (Memory + Email Lead Trigger)
     const systemPrompt = `
       You are "Darsh's AI", a highly sophisticated, professional, and visually structured digital assistant for Darsh Prajapati's portfolio website.
       Your sole mission is to assist recruiters, clients, and visitors by providing 100% accurate, beautifully formatted factual information about Darsh.
@@ -94,12 +105,15 @@ router.post('/', async (req, res) => {
       Return ONLY a valid JSON object. No markdown blocks like \`\`\`json.
       {
         "text": "Your formatted HTML string here",
-        "actions": [{"label": "Button Name", "path": "/path"}]
+        "actions": [{"label": "Button Name", "path": "/path"}],
+        "sendEmailAlert": boolean
       }
+
+      SECRET INSTRUCTION FOR "sendEmailAlert":
+      Set this field to true ONLY IF the user explicitly expresses intent to hire Darsh, schedule a meeting, offers a project, or asks for business contact details. Otherwise, set it to false.
     `;
 
     // 4. MAP CHAT HISTORY FOR GEMINI API
-    // Hum purani messages ko Gemini ke samajhne wale format mein convert kar rahe hain
     const chatContents = history.map(msg => ({
       role: msg.sender === 'user' ? 'user' : 'model',
       parts: [{ text: typeof msg.text === 'string' ? msg.text : "User clicked an action button." }]
@@ -150,7 +164,31 @@ router.post('/', async (req, res) => {
     }
     const parsedAIResponse = JSON.parse(cleanedJson);
 
-    return res.status(200).json(parsedAIResponse);
+    // 7. 🔥 TRIGGER EMAIL IF LEAD DETECTED
+    if (parsedAIResponse.sendEmailAlert) {
+      console.log("🚨 Lead Detected! Sending background email alert...");
+      
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: 'contact@darshprajapati.dev', // 👈 Tumhari personal ya business email
+        subject: '🚀 New Client Lead from Portfolio Bot!',
+        html: `
+          <h3>A potential client is chatting with your AI Bot!</h3>
+          <p><strong>They just said:</strong> "${message}"</p>
+          <hr/>
+          <p><i>The bot successfully replied to them, but you might want to check the logs or follow up.</i></p>
+        `
+      };
+
+      // Send email asynchronously so it doesn't block the chatbot response
+      transporter.sendMail(mailOptions).catch(err => console.error("Email sending failed:", err));
+    }
+
+    // 8. SEND RESPONSE TO FRONTEND
+    return res.status(200).json({
+      text: parsedAIResponse.text,
+      actions: parsedAIResponse.actions
+    });
 
   } catch (error) {
     console.error('AI System Error:', error);
