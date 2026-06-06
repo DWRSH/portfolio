@@ -87,8 +87,8 @@ router.post('/', async (req, res) => {
       - Primary Contact Email: <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>
       
       OFFICIAL PROFILES & LINKS (Crucial for User Queries):
-      - GitHub Profile: <a href="https://github.com/DarshPrajapati" target="_blank" rel="noopener noreferrer">github.com/DarshPrajapati</a>
-      - LinkedIn Profile: <a href="https://linkedin.com/in/darshprajapati" target="_blank" rel="noopener noreferrer">linkedin.com/in/darshprajapati</a>
+      - GitHub Profile: <a href="https://github.com/DWRSH" target="_blank" rel="noopener noreferrer">github.com/DarshPrajapati</a>
+      - LinkedIn Profile: <a href="https://linkedin.com/in/darshprajapati15" target="_blank" rel="noopener noreferrer">linkedin.com/in/darshprajapati</a>
       - Portfolio Live URL: <a href="https://darshprajapati.dev" target="_blank">darshprajapati.dev</a>
 
       CORE TECH STACK & SKILLS:
