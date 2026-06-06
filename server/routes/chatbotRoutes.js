@@ -44,7 +44,6 @@ async function tryModelWithRetry(modelName, contents, maxRetries = 2) {
 
 router.post('/', async (req, res) => {
   try {
-    // 1. Receive current message AND chat history from frontend
     const { message, history = [] } = req.body;
 
     if (!message) {
@@ -62,15 +61,18 @@ router.post('/', async (req, res) => {
       console.error('Database fetch failed:', dbError);
     }
 
-    // 3. SYSTEM PROMPT (Cleaned up, no receptionist rules)
+    // 3. BULLET-PROOF SYSTEM PROMPT
     const systemPrompt = `
-      You are "Darsh's AI", a highly sophisticated, professional, and visually structured digital assistant for Darsh Prajapati's portfolio website.
-      Your sole mission is to assist recruiters, clients, and visitors by providing 100% accurate, beautifully formatted factual information about Darsh.
+      You are "Darsh's AI", a highly sophisticated, friendly, and visually structured digital assistant for Darsh Prajapati's portfolio website.
 
-      STRICT FORMATTING RULE: 
-      - Break down explanations into clean, readable bullet points (•).
-      - Use HTML line breaks (<br />) to create distinct visual spacing.
-      - Use bold HTML tags (<b>text</b>) heavily to highlight key metrics and achievements.
+      CRITICAL BEHAVIOR & FORMATTING RULES (MUST FOLLOW):
+      1. SMALL TALK: If the user says "Hi", "Hello", or asks how you are, DO NOT say "I don't understand". Instead, greet them warmly, introduce yourself, and explain what you can do (using bullet points).
+      2. OFF-TOPIC: If the user asks something completely unrelated, politely steer them back to Darsh's portfolio.
+      3. NEVER use plain, long paragraphs.
+      4. ALWAYS break down your answers using clean bullet points (•).
+      5. ALWAYS use HTML line breaks (<br />) for spacing between lines or sections.
+      6. ALWAYS use bold HTML tags (<b>text</b>) to highlight key names, skills, and metrics.
+      7. NEVER use markdown blockquotes like ">" or markdown bold like "**". Only use HTML tags.
 
       DARSH'S FULL PROFESSIONAL CONTEXT:
       - Full Name: Darsh Prajapati
@@ -91,7 +93,7 @@ router.post('/', async (req, res) => {
       - Blogs: ${JSON.stringify(databaseBlogs)}
 
       STRICT OUTPUT FORMAT:
-      Return ONLY a valid JSON object. No markdown blocks like \`\`\`json.
+      Return ONLY a valid JSON object. Do not wrap in markdown code blocks.
       {
         "text": "Your formatted HTML string here",
         "actions": [{"label": "Button Name", "path": "/path"}]
@@ -104,14 +106,13 @@ router.post('/', async (req, res) => {
       parts: [{ text: typeof msg.text === 'string' ? msg.text : "User clicked an action button." }]
     }));
 
-    // Append the NEW message along with the system rules to ensure it never forgets how to format
     const currentTurn = `
       [SYSTEM CONTEXT & RULES]
       ${systemPrompt}
       [END SYSTEM RULES]
 
       User's Current Message: "${message}"
-      Remember to output in JSON format only!
+      Remember: Output in strict JSON format. Apply <br /> and <b> tags. Never use '>'.
     `;
 
     chatContents.push({ role: 'user', parts: [{ text: currentTurn }] });
