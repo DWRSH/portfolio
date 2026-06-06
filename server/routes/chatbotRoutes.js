@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
-const nodemailer = require('nodemailer'); // 👈 Nodemailer Import
+const nodemailer = require('nodemailer');
 
 // ─── 1. MONGOOSE MODELS ───────────────────────────────────────────────────
 const Project = require('../models/Project');
@@ -10,13 +10,18 @@ const Blog = require('../models/Blog');
 // Initialize new Google GenAI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// ─── 2. NODEMAILER SETUP ──────────────────────────────────────────────────
-// Background email bhejne ke liye transporter
+// ─── 2. NODEMAILER SETUP (UPDATED FOR PRODUCTION) ─────────────────────────
+// Background email bhejne ke liye robust transporter
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,           // SSL connection ke liye explicit port
+  secure: true,        // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false // Render jaisi hosting par connection drop hone se bachata hai
   }
 });
 
@@ -173,10 +178,15 @@ router.post('/', async (req, res) => {
         to: 'contact@darshprajapati.dev', // 👈 Tumhari personal ya business email
         subject: '🚀 New Client Lead from Portfolio Bot!',
         html: `
-          <h3>A potential client is chatting with your AI Bot!</h3>
-          <p><strong>They just said:</strong> "${message}"</p>
-          <hr/>
-          <p><i>The bot successfully replied to them, but you might want to check the logs or follow up.</i></p>
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2 style="color: #00d4b4;">New Lead Alert!</h2>
+            <p>A potential client is chatting with your AI Bot right now.</p>
+            <div style="background-color: #f4f4f4; padding: 15px; border-left: 4px solid #00d4b4; margin: 20px 0;">
+              <strong>Client's Message:</strong><br/>
+              "${message}"
+            </div>
+            <p><i>The bot has already replied to them. Check your logs or prepare to follow up!</i></p>
+          </div>
         `
       };
 
