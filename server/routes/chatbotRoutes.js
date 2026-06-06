@@ -14,8 +14,9 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 // Background email bhejne ke liye robust transporter
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,           // SSL connection ke liye explicit port
-  secure: true,        // true for 465, false for other ports
+  port: 587,           // SSL connection ke liye explicit port
+  secure: false,        // true for 465, false for other ports
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
