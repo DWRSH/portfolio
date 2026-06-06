@@ -303,14 +303,25 @@ export default function ChatBot() {
 
     const currentInput = input;
     
+    // 📸 Take a snapshot of current messages to use as history BEFORE adding the new message
+    const chatHistorySnapshot = [...messages];
+    
     // 1. Add User Message
     setMessages(prev => [...prev, { sender: 'user', text: currentInput }]);
     setInput('');
     setIsTyping(true);
 
     try {
-      // 2. Call the Real Backend AI Route
-      const response = await api.post('/chat', { message: currentInput });
+      // 2. Call Backend with BOTH message and history
+      const response = await api.post('/chat', { 
+        message: currentInput,
+        history: chatHistorySnapshot.map(msg => ({
+          sender: msg.sender,
+          // Ensure we only send text to the AI (fallback for JSX components like contact links)
+          text: typeof msg.text === 'string' ? msg.text : "User asked a contextual question."
+        }))
+      });
+      
       const data = response.data;
 
       // 3. Add AI Response
@@ -375,15 +386,15 @@ export default function ChatBot() {
           {messages.map((msg, index) => (
             <div key={index} className={`cb-msg-row ${msg.sender}`}>
               {typeof msg.text === 'string' ? (
-  <div 
-    className="cb-bubble" 
-    dangerouslySetInnerHTML={{ __html: msg.text }} 
-  />
-) : (
-  <div className="cb-bubble">
-    {msg.text}
-  </div>
-)}
+                <div 
+                  className="cb-bubble" 
+                  dangerouslySetInnerHTML={{ __html: msg.text }} 
+                />
+              ) : (
+                <div className="cb-bubble">
+                  {msg.text}
+                </div>
+              )}
               
               {msg.actions && msg.actions.length > 0 && (
                 <div className="cb-actions">
