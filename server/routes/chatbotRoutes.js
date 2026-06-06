@@ -1,3 +1,5 @@
+require('dns').setDefaultResultOrder('ipv4first'); // 👈 Fix for Node v22 & Render Timeout
+
 const express = require('express');
 const router = express.Router();
 const { GoogleGenAI } = require('@google/genai');
@@ -10,19 +12,15 @@ const Blog = require('../models/Blog');
 // Initialize new Google GenAI SDK
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// ─── 2. NODEMAILER SETUP ──────────────────────────────────────────────────
+// ─── 2. NODEMAILER SETUP (BREVO SMTP) ─────────────────────────────────────
 // Background email bhejne ke liye robust transporter
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,           // SSL connection ke liye explicit port
-  secure: false,        // true for 465, false for other ports
-  requireTLS: true,
+  host: 'smtp-relay.brevo.com',
+  port: 587,           
+  secure: false,        // true for 465, false for 587
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: { 
-    rejectUnauthorized: false // Render jaisi hosting par connection drop hone se bachata hai
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS
   }
 });
 
@@ -174,15 +172,15 @@ router.post('/', async (req, res) => {
 
     // 7. 🔥 ENHANCED EMAIL ALERT (WITH CONTACT INFO)
     if (parsedAIResponse.sendEmailAlert || parsedAIResponse.clientContact) {
-      console.log("🚨 Lead or Contact Detected! Sending background email alert...");
+      console.log("🚨 Lead or Contact Detected! Sending background email alert via Brevo...");
       
       const contactInfo = parsedAIResponse.clientContact 
         ? `<span style="color: #d93025; font-weight: bold; font-size: 16px;">Contact Detail Provided: ${parsedAIResponse.clientContact}</span>` 
         : `<span style="color: #f29900;">AI is currently asking the user for their email/phone.</span>`;
 
       const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, // Sends back to your personal email
+        from: process.env.BREVO_USER, // 👈 Must be your verified Brevo email
+        to: process.env.BREVO_USER,   // 👈 Can be any email where you want to receive alerts
         subject: '🚀 New Client Lead from Portfolio Bot!',
         html: `
           <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
