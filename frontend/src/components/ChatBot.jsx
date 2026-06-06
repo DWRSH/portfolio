@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, ExternalLink, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axios'; // 👈 Tumhara axios instance import ho gaya
+import api from '../api/axios'; 
 
 /* ─── CHATBOT STYLES ──────────────────────────────────────────────────────── */
 const chatStyles = `
@@ -15,7 +15,6 @@ const chatStyles = `
     --cb-muted: rgba(255, 255, 255, 0.5);
   }
 
-  /* Floating Action Button */
   .chatbot-fab {
     position: fixed;
     bottom: 30px;
@@ -38,7 +37,6 @@ const chatStyles = `
     box-shadow: 0 15px 40px rgba(0, 212, 180, 0.5);
   }
 
-  /* Chat Window */
   .chatbot-window {
     position: fixed;
     bottom: 110px;
@@ -66,7 +64,6 @@ const chatStyles = `
     pointer-events: all;
   }
 
-  /* Header */
   .cb-header {
     padding: 16px 20px;
     background: var(--cb-surf2);
@@ -125,7 +122,6 @@ const chatStyles = `
   }
   .cb-close:hover { color: var(--cb-text); }
 
-  /* Message Area */
   .cb-messages {
     flex: 1;
     padding: 20px;
@@ -167,7 +163,6 @@ const chatStyles = `
     font-weight: 500;
   }
 
-  /* Link formatting inside bubble */
   .cb-bubble a {
     color: var(--cb-primary);
     text-decoration: underline;
@@ -177,13 +172,15 @@ const chatStyles = `
     color: #000;
   }
 
-  /* Action Buttons */
   .cb-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 4px;
+    animation: fadeIn 0.5s ease-in;
   }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  
   .cb-action-btn {
     display: inline-flex;
     align-items: center;
@@ -203,7 +200,6 @@ const chatStyles = `
     color: #000;
   }
 
-  /* Input Area */
   .cb-input-area {
     padding: 16px;
     background: var(--cb-surf2);
@@ -244,7 +240,6 @@ const chatStyles = `
   .cb-send-btn:active { transform: scale(0.9); }
   .cb-send-btn:disabled { background: var(--cb-muted); cursor: not-allowed; }
 
-  /* Typing Animation */
   .typing-dots {
     display: flex;
     gap: 4px;
@@ -292,53 +287,94 @@ export default function ChatBot() {
   ]);
   
   const messagesEndRef = useRef(null);
+  const typewriterIntervalRef = useRef(null); // Ref to hold the typewriter interval
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  // Clean up interval on unmount
+  useEffect(() => {
+    return () => {
+      if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+    };
+  }, []);
 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || isTyping) return;
 
     const currentInput = input;
-    
-    // 📸 Take a snapshot of current messages to use as history BEFORE adding the new message
     const chatHistorySnapshot = [...messages];
     
     // 1. Add User Message
     setMessages(prev => [...prev, { sender: 'user', text: currentInput }]);
     setInput('');
-    setIsTyping(true);
+    setIsTyping(true); // Show the loading dots while waiting for API
 
     try {
-      // 2. Call Backend with BOTH message and history
+      // 2. Call the Real Backend AI Route
       const response = await api.post('/chat', { 
         message: currentInput,
         history: chatHistorySnapshot.map(msg => ({
           sender: msg.sender,
-          // Ensure we only send text to the AI (fallback for JSX components like contact links)
-          text: typeof msg.text === 'string' ? msg.text : "User asked a contextual question."
+          text: typeof msg.text === 'string' ? msg.text : "User clicked an action."
         }))
       });
       
       const data = response.data;
+      setIsTyping(false); // Hide the dots, start the typewriter
 
-      // 3. Add AI Response
-      setMessages(prev => [...prev, { 
-        sender: 'bot', 
-        text: data.text,
-        actions: data.actions 
-      }]);
+      // 3. Setup initial empty bot message
+      setMessages(prev => [...prev, { sender: 'bot', text: '', actions: [] }]);
+      
+      // 4. Smart HTML Typewriter Logic
+      let index = 0;
+      let currentHtml = '';
+      const fullHtml = data.text || '';
+      const speed = 15; // Speed of typing in milliseconds
+      
+      typewriterIntervalRef.current = setInterval(() => {
+        if (index < fullHtml.length) {
+          // If we hit an HTML tag, skip the typing effect for the tag itself
+          if (fullHtml[index] === '<') {
+            let tag = '';
+            while (fullHtml[index] !== '>' && index < fullHtml.length) {
+              tag += fullHtml[index];
+              index++;
+            }
+            tag += '>';
+            currentHtml += tag;
+          } else {
+            currentHtml += fullHtml[index];
+            index++;
+          }
+          
+          // Update the text of the last message (the bot's message)
+          setMessages(prev => {
+            const newMsgs = [...prev];
+            newMsgs[newMsgs.length - 1].text = currentHtml;
+            return newMsgs;
+          });
+        } else {
+          // Typing finished! Add the action buttons at the end.
+          clearInterval(typewriterIntervalRef.current);
+          setMessages(prev => {
+            const newMsgs = [...prev];
+            newMsgs[newMsgs.length - 1].actions = data.actions || [];
+            return newMsgs;
+          });
+        }
+      }, speed);
+
     } catch (error) {
       console.error("Chat API failed:", error);
+      setIsTyping(false);
       setMessages(prev => [...prev, { 
         sender: 'bot', 
         text: "I'm having a little trouble connecting right now, but you can always email Darsh directly at <a href='mailto:contact@darshprajapati.dev'>contact@darshprajapati.dev</a>.",
         actions: [{ label: "Get in Touch", path: "contact" }] 
       }]);
-    } finally {
-      setIsTyping(false);
     }
   };
 
@@ -349,7 +385,8 @@ export default function ChatBot() {
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           sender: 'bot', 
-          text: <>You can email him at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>.</> 
+          text: `You can email him at <a href="mailto:contact@darshprajapati.dev">contact@darshprajapati.dev</a>.`,
+          actions: []
         }]);
         setIsTyping(false);
       }, 500);
@@ -434,7 +471,7 @@ export default function ChatBot() {
             placeholder="Ask me anything..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={isTyping}
+            disabled={isTyping || (messages.length > 0 && messages[messages.length - 1].sender === 'bot' && messages[messages.length - 1].actions && !messages[messages.length - 1].actions.length && !messages[messages.length - 1].text.includes('Hey!'))} // Basic way to prevent input while typing
           />
           <button type="submit" className="cb-send-btn" disabled={!input.trim() || isTyping}>
             <Send size={18} />
