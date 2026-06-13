@@ -401,7 +401,12 @@ export default function HomePage() {
 
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                 <img src="https://ghchart.rshah.org/00d4b4/DWRSH" alt="GitHub Commits" style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}/>
+               <img 
+  src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${Date.now()}`} 
+  alt="GitHub Commits" 
+  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
+/>
+
               </div>
             </div>
 
