@@ -402,10 +402,11 @@ export default function HomePage() {
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                <img 
-  src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${Date.now()}`} 
-  alt="GitHub Commits" 
-  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
+  src="https://github-readme-activity-graph.vercel.app/graph?username=DWRSH&bg_color=00000000&color=ffffff&line=00d4b4&point=7c6ff7&area=true&hide_border=true&cache_seconds=1800" 
+  alt="GitHub Activity Graph" 
+  style={{ width: '100%', height: '100%', maxHeight: '250px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }}
 />
+
 
               </div>
             </div>
