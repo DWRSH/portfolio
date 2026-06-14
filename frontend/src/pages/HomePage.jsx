@@ -177,7 +177,7 @@ body, html {
 .lbl svg { color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow)); }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   WIDGETS STYLING (Unchanged Data, IQ 300 Visuals)
+   WIDGETS STYLING
 ───────────────────────────────────────────────────────────────────────── */
 /* SVG CAR */
 .car-wrap { flex: 1; display: flex; align-items: flex-end; justify-content: center; min-height: 160px; position: relative; border-radius: var(--rsm); background: linear-gradient(180deg, transparent 0%, rgba(150, 194, 219, 0.05) 100%); overflow: hidden; transform: translateZ(30px); border: 1px solid rgba(255,255,255,0.02); }
@@ -232,6 +232,7 @@ body, html {
 .tm-right { transform: translateX(calc(-50% - 8px)); animation: scrollR 30s linear infinite; }
 .ticon { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; transition: all 0.5s var(--ease-elastic); backdrop-filter: blur(10px); }
 .ticon img { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); transition: transform 0.3s; }
+.ticon:hover img { transform: scale(1.1); filter: drop-shadow(0 8px 15px rgba(150, 194, 219, 0.4)); }
 .inv { filter: invert(1) brightness(0.9); }
 @keyframes scrollL { to { transform: translateX(calc(-50% - 8px)); } }
 @keyframes scrollR { to { transform: translateX(0); } }
@@ -241,6 +242,7 @@ body, html {
 .soc-item { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; transition: all 0.5s var(--ease-elastic); text-decoration: none; color: inherit; position: relative; overflow: hidden; }
 .soc-item::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(150, 194, 219, 0.15), transparent 70%); opacity: 0; transition: opacity 0.4s; }
 .soc-item:hover::before { opacity: 1; }
+.soc-item:hover { border-color: var(--primary); transform: translateY(-5px) translateZ(30px); box-shadow: 0 15px 30px rgba(0,0,0,0.6); }
 
 /* BLOG */
 .blog-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.3; color: #fff; transform: translateZ(30px); }
@@ -252,6 +254,7 @@ body, html {
 .map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 200px; position: relative; transform: translateZ(10px); border: 1px solid rgba(255,255,255,0.02); }
 .map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
 .map-wrap iframe { width: 100%; height: 100%; border: 0; filter: invert(95%) hue-rotate(180deg) saturate(1.8) contrast(0.85); transition: filter 0.5s; }
+.map-link:hover iframe { filter: invert(95%) hue-rotate(180deg) saturate(2) contrast(1); }
 .radar-ping { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; box-shadow: 0 0 20px var(--primary); }
 .radar-ping::after { content: ''; position: absolute; inset: -20px; border: 2px solid var(--primary); border-radius: 50%; animation: radar 2.5s infinite cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes radar { 0% { transform: scale(0.1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
@@ -265,7 +268,7 @@ body, html {
 `;
 
 /* ─────────────────────────────────────────────────────────────────────────
-   2. UNTOUCHED DATA ARRAYS
+   2. ORIGINAL DATA SETS (UNTOUCHED)
 ───────────────────────────────────────────────────────────────────────── */
 const TECH_ROW_1 = [
   {name:'React',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'},
@@ -308,7 +311,6 @@ const Magnetic = ({ children, className }) => {
     const { height, width, left, top } = ref.current.getBoundingClientRect();
     const x = clientX - (left + width / 2);
     const y = clientY - (top + height / 2);
-    // Pull the element 20% towards the mouse
     ref.current.style.transform = `translate3d(${x * 0.2}px, ${y * 0.2}px, 20px) scale(1.05)`;
   };
   const handleMouseLeave = () => {
@@ -352,7 +354,6 @@ const Canvas3D = () => {
         this.z -= 3; // Camera forward speed
         if (this.z <= 0) { this.z = 3000; this.x = (Math.random() - 0.5) * 5000; this.y = (Math.random() - 0.5) * 5000; }
         
-        // Quantum Repulsion based on mouse velocity
         let fov = 500;
         let x2d = (this.x * fov) / this.z + width / 2;
         let y2d = (this.y * fov) / this.z + height / 2;
@@ -399,7 +400,27 @@ const Canvas3D = () => {
   return <canvas ref={canvasRef} className="canvas-3d" />;
 };
 
-/** 3. HOLO TILT CARD (The Heart of 3D) */
+/** 3. CUSTOM MAGNETIC CURSOR */
+const CustomCursor = () => {
+  const cursorRef = useRef(null);
+  const dotRef = useRef(null);
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (dotRef.current) dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      if (cursorRef.current) {
+        cursorRef.current.animate({ transform: `translate3d(${e.clientX}px, ${e.clientY}px, 0)` }, 
+        { duration: 500, fill: "forwards", easing: "ease-out" });
+      }
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+  return (
+    <><div ref={dotRef} className="cursor-dot" /><div ref={cursorRef} className="cursor-ring" /></>
+  );
+};
+
+/** 4. HOLO TILT CARD (The Heart of 3D) */
 const HoloCard = ({ children, className, style, ...props }) => {
   const cardRef = useRef(null);
   const [transform, setTransform] = useState("perspective(1500px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
@@ -425,7 +446,6 @@ const HoloCard = ({ children, className, style, ...props }) => {
   };
 
   const handleMouseEnter = () => {
-    // Force cursor to turn into a ring on card hover
     document.querySelector('.cursor-ring')?.classList.add('hovering');
   };
   const handleMouseOut = () => {
@@ -451,7 +471,7 @@ const HoloCard = ({ children, className, style, ...props }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────────
-   4. THE MASTER HOMEPAGE
+   5. THE MASTER HOMEPAGE
 ───────────────────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const audioRef = useRef(null);
@@ -508,16 +528,12 @@ export default function HomePage() {
       <style>{MEGA_CSS}</style>
 
       {/* ── CINEMATIC PRELOADER ── */}
-      <div className={`preloader-wrap ${siteLoaded ? 'hidden' : ''}`}>
-        <div className="pl-bg-top" />
-        <div className="pl-bg-bottom" />
-        <div className="pl-content">
-          <div className="pl-counter">{percent}%</div>
-          <div className="pl-brand">
-            <span className="pl-letter">D</span><span className="pl-letter">A</span><span className="pl-letter">R</span><span className="pl-letter">S</span><span className="pl-letter">H</span>
-          </div>
-          <div className="pl-bar-container"><div className="pl-bar-fill" style={{ width: `${percent}%` }} /></div>
+      <div className={`preloader ${siteLoaded ? 'hidden' : ''}`}>
+        <div className="pl-counter">{percent}%</div>
+        <div className="pl-brand">
+          <span className="pl-letter">D</span><span className="pl-letter">A</span><span className="pl-letter">R</span><span className="pl-letter">S</span><span className="pl-letter">H</span>
         </div>
+        <div className="pl-bar-container"><div className="pl-bar-fill" style={{ width: `${percent}%` }} /></div>
       </div>
 
       <div className="noise-overlay" />
