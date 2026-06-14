@@ -8,7 +8,64 @@ import {
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
+   CUSTOM 3D TILT COMPONENT (Award-Winning Parallax Effect)
+───────────────────────────────────────────────────────────────────────── */
+const TiltCard = ({ children, className, style, ...props }) => {
+  const cardRef = useRef(null);
+  const [transform, setTransform] = useState("perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+  const [glare, setGlare] = useState({ opacity: 0, x: 50, y: 50 });
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Calculate rotation (-10 to 10 degrees max)
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+
+    setTransform(`perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
+    setGlare({
+      opacity: 0.15,
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTransform("perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+    setGlare({ opacity: 0, x: 50, y: 50 });
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`tilt-wrapper ${className}`}
+      style={{ ...style, transform }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      {...props}
+    >
+      <div 
+        className="tilt-glare" 
+        style={{
+          opacity: glare.opacity,
+          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.8) 0%, transparent 50%)`
+        }} 
+      />
+      <div className="tilt-content">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ULTRA 3D STYLES
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -20,41 +77,68 @@ const CSS = `
   --surf:      #0b0f18;
   --surf2:     #111620;
   --border:    rgba(255,255,255,0.07);
-  --border-h:  rgba(255,255,255,0.14);
-  --teal:      #96c2db; /* Updated to Blue-Grey */
-  --teal-dim:  rgba(150, 194, 219, 0.10); /* Updated to Blue-Grey */
-  --teal-glow: rgba(150, 194, 219, 0.22); /* Updated to Blue-Grey */
-  --violet:    #e5edf1; /* Updated to Light Blue-Grey */
+  --border-h:  rgba(150, 194, 219, 0.3);
+  --teal:      #96c2db; 
+  --teal-dim:  rgba(150, 194, 219, 0.10); 
+  --teal-glow: rgba(150, 194, 219, 0.22); 
+  --violet:    #e5edf1; 
   --text:      #ffffff;
   --muted:     rgba(255,255,255,0.40);
   --muted2:    rgba(255,255,255,0.22);
   --ease:      cubic-bezier(0.16,1,0.3,1);
-  --r:         18px;
+  --r:         20px;
   --rsm:       12px;
 }
 
-.hp { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; overflow-x: hidden; position: relative; }
+.hp { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; overflow-x: hidden; position: relative; perspective: 2000px; }
 
 /* Ambient Glows */
-.hp-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.hp-g1 { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(150, 194, 219, 0.055) 0%, transparent 65%); top: -350px; right: -250px; animation: floatA 18s ease-in-out infinite; }
-.hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(229, 237, 241, 0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
-@keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
+.hp-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; transform-style: preserve-3d; }
+.hp-g1 { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(150, 194, 219, 0.08) 0%, transparent 65%); top: -350px; right: -250px; animation: floatA 18s ease-in-out infinite; transform: translateZ(-200px); }
+.hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(229, 237, 241, 0.06) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; transform: translateZ(-100px); }
+@keyframes floatA { 0%, 100% { transform: translate(0,0) translateZ(-150px); } 50% { transform: translate(-40px,50px) translateZ(-50px); } }
 
 /* Page Body */
-.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; }
+.hp-body { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 100px 24px 64px; display: flex; flex-direction: column; gap: 56px; transform-style: preserve-3d; }
 
 /* ── Hero Section ── */
-.hero { display: flex; flex-direction: column; gap: 0; position: relative; }
-.hero-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 7px 16px; border-radius: 100px; border: 1px solid rgba(150, 194, 219, 0.3); background: rgba(150, 194, 219, 0.06); color: var(--teal); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 28px; backdrop-filter: blur(8px); }
+.hero { display: flex; flex-direction: column; gap: 0; position: relative; transform-style: preserve-3d; z-index: 10; }
+.hero-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 7px 16px; border-radius: 100px; border: 1px solid rgba(150, 194, 219, 0.3); background: rgba(150, 194, 219, 0.06); color: var(--teal); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 28px; backdrop-filter: blur(8px); transform: translateZ(30px); }
 .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 9px var(--teal); animation: blink 2.2s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .35; box-shadow: none; } }
 
-.hero-name { font-family: 'Syne', sans-serif; font-size: clamp(60px, 12vw, 168px); font-weight: 800; line-height: .88; letter-spacing: -.04em; margin-bottom: 32px; display: flex; flex-direction: column; }
-.hero-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.18); transition: all .5s var(--ease); cursor: default; }
-.hero-outline:hover { color: var(--teal); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 80px rgba(150, 194, 219, .28); }
+/* 3D TYPOGRAPHY EFFECT */
+.hero-name { 
+  font-family: 'Syne', sans-serif; 
+  font-size: clamp(60px, 12vw, 168px); 
+  font-weight: 800; 
+  line-height: .88; 
+  letter-spacing: -.04em; 
+  margin-bottom: 32px; 
+  display: flex; 
+  flex-direction: column; 
+  transform: translateZ(50px);
+  position: relative;
+}
+.hero-outline { 
+  color: #04060a; 
+  -webkit-text-stroke: 1.5px var(--teal); 
+  text-shadow: 
+    1px 1px 0 rgba(150, 194, 219, 0.8),
+    2px 2px 0 rgba(150, 194, 219, 0.6),
+    3px 3px 0 rgba(150, 194, 219, 0.4),
+    4px 4px 0 rgba(150, 194, 219, 0.2),
+    0 10px 30px rgba(150, 194, 219, 0.4);
+  transition: all .5s var(--ease); 
+  cursor: default; 
+}
+.hero-outline:hover { 
+  color: var(--teal); 
+  text-shadow: 0 0 80px rgba(150, 194, 219, .6); 
+  transform: translateZ(20px);
+}
 
-.hero-bottom { display: flex; flex-direction: column; gap: 28px; }
+.hero-bottom { display: flex; flex-direction: column; gap: 28px; transform: translateZ(40px); }
 @media(min-width: 768px) { .hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; } }
 .hero-bio { font-size: 17px; font-weight: 300; line-height: 1.65; color: var(--muted); max-width: 460px; }
 .hero-bio strong { color: #fff; font-weight: 500; }
@@ -62,41 +146,61 @@ const CSS = `
 .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; flex-shrink: 0; }
 .hbtn { position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 14px 28px; border-radius: 100px; font-size: 14.5px; font-weight: 600; text-decoration: none; overflow: hidden; z-index: 1; transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
 .hbtn::before { content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; border-radius: 100px; transition: transform .5s var(--ease); z-index: -1; }
-.hbtn:hover { transform: translateY(-3px); }
+.hbtn:hover { transform: translateY(-3px) translateZ(10px); }
 .hbtn-primary { background: var(--teal); color: #04060a; border: 1px solid var(--teal); }
 .hbtn-primary::before { background: #fff; }
-.hbtn-primary:hover { box-shadow: 0 12px 32px rgba(150, 194, 219, .22); }
+.hbtn-primary:hover { box-shadow: 0 12px 32px rgba(150, 194, 219, .4); }
 .hbtn-primary:hover::before { transform: translateY(-100%); }
 .hbtn-sec { background: rgba(255,255,255,.03); color: #fff; border: 1px solid var(--border); backdrop-filter: blur(10px); }
 .hbtn-sec::before { background: rgba(255,255,255,.07); }
 .hbtn-sec:hover { border-color: rgba(255,255,255,.18); }
 .hbtn-sec:hover::before { transform: translateY(-100%); }
 
-/* ── TRUE MOBILE BENTO GRID ── */
-.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: clamp(12px, 2vw, 16px); width: 100%; }
+/* ── 3D BENTO GRID ── */
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: clamp(16px, 2vw, 24px); width: 100%; transform-style: preserve-3d; perspective: 1500px; }
 .c1 { grid-column: span 1; } .c2 { grid-column: span 2; } .c3 { grid-column: span 3; }
 
 @media(max-width: 1024px) { .bento { grid-template-columns: repeat(3, 1fr); } .c4, .c3 { grid-column: span 3; } .c2 { grid-column: span 2; } }
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
-
-/* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
 @media(max-width: 640px) { 
   .hp-body { padding: 80px 16px 48px; gap: 40px; }
-  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 16px; } 
   .c1 { grid-column: span 1; } 
   .c2, .c3, .c4 { grid-column: span 2; } 
   .mob-full { grid-column: span 2 !important; }
-  
-  .stats-row { flex-direction: row !important; flex-wrap: nowrap !important; }
-  .stat-box { padding: 12px 4px !important; border-bottom: none !important; border-right: 1px solid var(--border) !important; }
-  .stat-box:last-child { border-right: none !important; }
-  .stat-num { font-size: 20px !important; }
-  .stat-lbl { font-size: 9px !important; }
 }
 
-.card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: clamp(16px, 3vw, 22px); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; transition: border-color .3s, transform .35s var(--ease), box-shadow .35s var(--ease); }
-.card:hover { border-color: var(--border-h); transform: translateY(-3px); box-shadow: 0 20px 48px rgba(0,0,0,.5); }
-.lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; }
+/* TILT WRAPPER MAGIC */
+.tilt-wrapper {
+  background: var(--surf); 
+  border: 1px solid var(--border); 
+  border-radius: var(--r); 
+  position: relative; 
+  transform-style: preserve-3d;
+  transition: border-color .3s, box-shadow .3s;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  will-change: transform;
+  display: flex; flex-direction: column;
+}
+.tilt-wrapper:hover {
+  border-color: var(--border-h);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 20px rgba(150, 194, 219, 0.1);
+  z-index: 10;
+}
+.tilt-glare {
+  position: absolute; inset: 0; pointer-events: none; z-index: 100;
+  border-radius: var(--r); mix-blend-mode: overlay; transition: opacity 0.3s;
+}
+.tilt-content {
+  padding: clamp(16px, 3vw, 24px);
+  display: flex; flex-direction: column; gap: 14px;
+  transform-style: preserve-3d;
+  flex: 1;
+  /* Lifts all content inside the card forward into 3D space */
+  transform: translateZ(40px); 
+}
+
+.lbl { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 2; transform: translateZ(10px); }
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
 /* ── CAR SVG WRAPPER ── */
@@ -105,70 +209,72 @@ const CSS = `
   min-height: 140px; position: relative; overflow: hidden; 
   padding: 0; border-radius: var(--rsm); 
   background: linear-gradient(to bottom, transparent 30%, rgba(150, 194, 219, 0.03) 100%); 
+  transform: translateZ(20px);
 }
 .svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
 
 /* ── MUSIC PLAYER ── */
-.music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; }
-.vinyl-container { position: relative; width: clamp(70px, 20vw, 90px); height: clamp(70px, 20vw, 90px); }
+.music-player-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; gap: 16px; cursor: pointer; transform: translateZ(30px); }
+.vinyl-container { position: relative; width: clamp(70px, 20vw, 90px); height: clamp(70px, 20vw, 90px); transform-style: preserve-3d; }
 .vinyl-record { width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, #000 30%, #1a1a1a 40%, #000 50%, #1a1a1a 60%, #000 70%, #1a1a1a 80%, #000 90%); border: 3px solid #333; box-shadow: 0 10px 20px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; transition: transform 0.3s var(--ease); }
 .vinyl-record.playing { animation: spinRecord 2s linear infinite; }
 @keyframes spinRecord { 100% { transform: rotate(360deg); } }
 .vinyl-label { width: 34%; height: 34%; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--violet)); border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
 .vinyl-hole { width: 6px; height: 6px; border-radius: 50%; background: #000; }
-.tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg); transition: transform 0.4s var(--ease); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); z-index: 5; }
-.tonearm.playing { transform: rotate(10deg); }
-.music-info { text-align: center; z-index: 2; }
+.tonearm { position: absolute; top: -10px; right: -15px; width: 35px; height: 60px; transform-origin: top right; transform: rotate(-35deg) translateZ(10px); transition: transform 0.4s var(--ease); filter: drop-shadow(4px 8px 10px rgba(0,0,0,0.8)); z-index: 5; }
+.tonearm.playing { transform: rotate(10deg) translateZ(10px); }
+.music-info { text-align: center; z-index: 2; transform: translateZ(10px); }
 .music-song { font-family: 'Syne', sans-serif; font-weight: 700; color: #fff; font-size: clamp(13px, 4vw, 15px); margin-bottom: 2px; }
 .music-artist { font-size: 11px; color: var(--muted); }
 .hover-hint { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); opacity: 0.7; margin-top: 8px; animation: pulseHint 2s infinite alternate; }
 @keyframes pulseHint { from { opacity: 0.3; } to { opacity: 1; } }
 
 /* ── INFINITE MARQUEE ── */
-.tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; }
+.tech-marquee-wrapper { position: relative; display: flex; flex-direction: column; gap: 14px; overflow: hidden; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); flex: 1; justify-content: center; transform: translateZ(20px); }
 .tm-track { display: flex; width: max-content; gap: 14px; }
 .tm-left { animation: scrollL 25s linear infinite; }
 .tm-right { transform: translateX(calc(-50% - 7px)); animation: scrollR 25s linear infinite; }
-.ticon { background: var(--surf2); border: 1px solid var(--border); border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: border-color .25s, transform .25s var(--ease); flex-shrink: 0; }
-.ticon:hover { border-color: var(--teal); transform: translateY(-3px); }
+.ticon { background: var(--surf2); border: 1px solid var(--border); border-radius: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: border-color .25s, transform .25s var(--ease); flex-shrink: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.ticon:hover { border-color: var(--teal); transform: translateY(-5px) translateZ(15px); box-shadow: 0 10px 25px rgba(150, 194, 219, 0.2); }
 .ticon img { width: 22px; height: 22px; object-fit: contain; }
 .inv { filter: invert(1) brightness(.8); }
 @keyframes scrollL { to { transform: translateX(calc(-50% - 7px)); } }
 @keyframes scrollR { to { transform: translateX(0); } }
 
 /* Stats & Others */
-.stats-row { display: flex; flex: 1; flex-direction: row; border-radius: var(--r); overflow: hidden; background: var(--surf2); border: 1px solid var(--border); }
-.stat-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; text-align: center; border-right: 1px solid var(--border); }
+.stats-row { display: flex; flex: 1; flex-direction: row; border-radius: var(--r); overflow: hidden; background: var(--surf2); border: 1px solid var(--border); transform: translateZ(30px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+.stat-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; text-align: center; border-right: 1px solid var(--border); transition: background 0.3s; }
+.stat-box:hover { background: rgba(255,255,255,0.03); }
 .stat-box:last-child { border-right: none; }
 .stat-num { font-family: 'Syne', sans-serif; font-size: clamp(24px, 4vw, 36px); font-weight: 800; color: #fff; line-height: 1; }
 .stat-num span { color: var(--teal); }
 .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: .07em; }
 
-.blog-title { font-family: 'Syne', sans-serif; font-size: 15.5px; font-weight: 700; line-height: 1.4; color: #fff; }
-.blog-desc { font-size: 12.5px; line-height: 1.6; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; }
-.blog-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-.read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(150, 194, 219, .2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
-.read-pill:hover { background: rgba(150, 194, 219, .18); border-color: rgba(150, 194, 219, .4); }
+.blog-title { font-family: 'Syne', sans-serif; font-size: 15.5px; font-weight: 700; line-height: 1.4; color: #fff; transform: translateZ(20px); }
+.blog-desc { font-size: 12.5px; line-height: 1.6; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; transform: translateZ(15px); }
+.blog-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; transform: translateZ(30px); }
+.read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(150, 194, 219, .2); padding: 6px 14px; border-radius: 100px; text-decoration: none; transition: all .2s; }
+.read-pill:hover { background: var(--teal); color: #000; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(150, 194, 219, 0.3); }
 
-.map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; transition: opacity 0.2s; }
-.map-link:hover { opacity: 0.85; }
-.map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; }
+.map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; transition: opacity 0.2s, transform 0.3s; transform: translateZ(20px); }
+.map-link:hover { opacity: 0.85; transform: translateZ(30px) scale(1.02); }
+.map-wrap { width: 100%; height: 100%; position: absolute; inset: 0; pointer-events: none; border-radius: var(--rsm); overflow: hidden;}
 .map-wrap iframe { width: 100%; height: 100%; border: 0; filter: invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8); }
 
-.soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; }
-.soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
-.soc-item:hover { border-color: var(--teal); background: rgba(150, 194, 219, 0.05); }
+.soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; transform: translateZ(30px); }
+.soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: inherit; transition: all .25s var(--ease); }
+.soc-item:hover { border-color: var(--teal); background: rgba(150, 194, 219, 0.08); transform: translateY(-4px) translateZ(20px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
 
-.cta-card { background: linear-gradient(135deg, rgba(150, 194, 219, .07) 0%, rgba(229, 237, 241, .07) 100%) !important; border-color: rgba(150, 194, 219, .18) !important; justify-content: center; }
-.cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--teal); color: #04060a; font-weight: 700; font-size: 13.5px; padding: 11px 22px; border-radius: 100px; text-decoration: none; align-self: flex-start; transition: all .2s; }
-.cta-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(150, 194, 219, .3); }
+.cta-card { background: linear-gradient(135deg, rgba(150, 194, 219, .1) 0%, rgba(229, 237, 241, .1) 100%) !important; border-color: rgba(150, 194, 219, .3) !important; justify-content: center; }
+.cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--teal); color: #04060a; font-weight: 700; font-size: 13.5px; padding: 12px 24px; border-radius: 100px; text-decoration: none; align-self: flex-start; transition: all .3s var(--ease); transform: translateZ(40px); }
+.cta-btn:hover { background: #fff; transform: translateY(-4px) translateZ(50px); box-shadow: 0 12px 30px rgba(150, 194, 219, .4); }
 
-@keyframes revealUp { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: translateY(0); } }
-.r1 { opacity: 0; animation: revealUp 0.8s var(--ease) .1s forwards; }
-.r2 { opacity: 0; animation: revealUp 0.8s var(--ease) .2s forwards; }
-.r3 { opacity: 0; animation: revealUp 0.8s var(--ease) .3s forwards; }
-.r4 { opacity: 0; animation: revealUp 0.8s var(--ease) .4s forwards; }
-.r5 { opacity: 0; animation: revealUp 0.8s var(--ease) .5s forwards; }
+@keyframes revealUp { from { opacity: 0; transform: translateY(40px) translateZ(-50px) rotateX(10deg); } to { opacity: 1; transform: translateY(0) translateZ(0) rotateX(0deg); } }
+.r1 { opacity: 0; animation: revealUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) .1s forwards; }
+.r2 { opacity: 0; animation: revealUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) .2s forwards; }
+.r3 { opacity: 0; animation: revealUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) .3s forwards; }
+.r4 { opacity: 0; animation: revealUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) .4s forwards; }
+.r5 { opacity: 0; animation: revealUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) .5s forwards; }
 
 .loading-pulse { display: inline-block; animation: pulse 1.5s infinite; color: var(--muted); font-size: 12px; }
 @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
@@ -283,7 +389,7 @@ export default function HomePage() {
 
             {/* ROW 1 */}
             {/* ── NATIVE SVG ANIMATED CAR ── */}
-            <div className="card c2">
+            <TiltCard className="c2">
               <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
               <div className="car-wrap">
                 <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
@@ -294,7 +400,6 @@ export default function HomePage() {
                     </linearGradient>
                   </defs>
 
-                  {/* Deep Background (Slow Clouds/City) */}
                   <g opacity="0.1" fill="var(--teal)">
                     <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
                     <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
@@ -302,7 +407,6 @@ export default function HomePage() {
                     <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
                   </g>
 
-                  {/* Mid Background (Fast Cityscape) */}
                   <g opacity="0.2" fill="var(--violet)">
                     <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
                     <rect x="10" y="70" width="30" height="60" />
@@ -312,41 +416,24 @@ export default function HomePage() {
                     <rect x="230" y="60" width="45" height="70" />
                   </g>
 
-                  {/* The Road */}
                   <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
                   <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
                     <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
                   </line>
 
-                  {/* Bouncing Car Body */}
                   <g>
                     <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
-                    
-                    {/* Main Chassis */}
                     <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
-                    
-                    {/* Window */}
                     <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
-                    
-                    {/* Window Reflection Details */}
                     <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
                     <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-
-                    {/* Taillight */}
                     <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
-                    
-                    {/* Headlight */}
                     <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
-                    
-                    {/* Headlight Beam */}
                     <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
-                    
-                    {/* Door Outline */}
                     <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
                     <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
                   </g>
 
-                  {/* Independent Spinning Back Wheel */}
                   <g transform="translate(100, 115)">
                     <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
                     <g>
@@ -357,7 +444,6 @@ export default function HomePage() {
                     </g>
                   </g>
 
-                  {/* Independent Spinning Front Wheel */}
                   <g transform="translate(180, 115)">
                     <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
                     <g>
@@ -369,47 +455,45 @@ export default function HomePage() {
                   </g>
                 </svg>
               </div>
-            </div>
+            </TiltCard>
 
-            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
-              <div className="stats-row">
-                <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
-                <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
-                <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
+            {/* Note: The stat box is kept as a standard div (not TiltCard) to prevent weird grid overlap, but we added internal 3D depth to its contents */}
+            <div className="tilt-wrapper c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
+              <div className="tilt-content" style={{padding: 0}}>
+                <div className="stats-row">
+                  <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
+                  <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
+                  <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
+                </div>
               </div>
             </div>
 
             {/* ROW 2 */}
-            <div className="card c3">
+            <TiltCard className="c3">
               <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
-                
-<img 
-  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
-  alt="GitHub Stats" 
-  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
-/>
-
-<img 
-  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
-  alt="GitHub Streak" 
-  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
-/>
-
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px', transform: 'translateZ(20px)' }}>
+                <img 
+                  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
+                  alt="GitHub Stats" 
+                  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
+                />
+                <img 
+                  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
+                  alt="GitHub Streak" 
+                  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
+                />
               </div>
-              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)', transform: 'translateZ(30px)' }}>
                <img 
-  src={`https://ghchart.rshah.org/96c2db/DWRSH?v=${Date.now()}`} 
-  alt="GitHub Commits" 
-  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
-/>
-
+                  src={`https://ghchart.rshah.org/96c2db/DWRSH?v=${Date.now()}`} 
+                  alt="GitHub Commits" 
+                  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
+                />
               </div>
-            </div>
+            </TiltCard>
 
-            <div 
-              className="card c1" 
+            <TiltCard 
+              className="c1" 
               style={{minHeight: '210px'}}
               onMouseEnter={handlePlay}
               onMouseLeave={handlePause}
@@ -434,10 +518,10 @@ export default function HomePage() {
                   <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
                 </div>
               </div>
-            </div>
+            </TiltCard>
 
             {/* ROW 3 */}
-            <div className="card c2">
+            <TiltCard className="c2">
               <div className="lbl"><Layers size={13}/>Tech Stack</div>
               <div className="tech-marquee-wrapper">
                 <div className="tm-track tm-left">
@@ -455,9 +539,9 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
-            </div>
+            </TiltCard>
 
-            <div className="card c2">
+            <TiltCard className="c2">
               <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
               <div className="soc-grid">
                 {SOCIALS.map(s=>(
@@ -467,10 +551,10 @@ export default function HomePage() {
                   </a>
                 ))}
               </div>
-            </div>
+            </TiltCard>
 
             {/* ROW 4 */}
-            <div className="card c1 mob-full">
+            <TiltCard className="c1 mob-full">
               <div className="lbl"><BookOpen size={13}/>Latest Post</div>
               {loadingPost ? (
                 <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
@@ -487,9 +571,9 @@ export default function HomePage() {
               ) : (
                 <p className="blog-desc">No posts found right now.</p>
               )}
-            </div>
+            </TiltCard>
 
-            <div className="card c1" style={{padding: 0}}>
+            <TiltCard className="c1" style={{padding: 0}}>
               <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
               <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
                 <div className="map-wrap">
@@ -499,14 +583,14 @@ export default function HomePage() {
                   />
                 </div>
               </a>
-            </div>
+            </TiltCard>
 
-            <div className="card c2 cta-card">
-              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px'}}>
+            <TiltCard className="c2 cta-card">
+              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px', transform: 'translateZ(20px)'}}>
                 Let's build <span style={{color: 'var(--teal)'}}>something great.</span>
               </p>
               <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
-            </div>
+            </TiltCard>
 
           </div>{/* /bento */}
         </div>
