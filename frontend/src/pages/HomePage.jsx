@@ -21,10 +21,10 @@ const CSS = `
   --surf2:     #111620;
   --border:    rgba(255,255,255,0.07);
   --border-h:  rgba(255,255,255,0.14);
-  --teal:      #00d4b4;
-  --teal-dim:  rgba(0,212,180,0.10);
-  --teal-glow: rgba(0,212,180,0.22);
-  --violet:    #7c6ff7;
+  --teal:      #96c2db; /* Updated to Blue-Grey */
+  --teal-dim:  rgba(150, 194, 219, 0.10); /* Updated to Blue-Grey */
+  --teal-glow: rgba(150, 194, 219, 0.22); /* Updated to Blue-Grey */
+  --violet:    #e5edf1; /* Updated to Light Blue-Grey */
   --text:      #ffffff;
   --muted:     rgba(255,255,255,0.40);
   --muted2:    rgba(255,255,255,0.22);
@@ -37,8 +37,8 @@ const CSS = `
 
 /* Ambient Glows */
 .hp-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.hp-g1 { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(0,212,180,0.055) 0%, transparent 65%); top: -350px; right: -250px; animation: floatA 18s ease-in-out infinite; }
-.hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(124,111,247,0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
+.hp-g1 { position: absolute; width: 900px; height: 900px; border-radius: 50%; background: radial-gradient(circle, rgba(150, 194, 219, 0.055) 0%, transparent 65%); top: -350px; right: -250px; animation: floatA 18s ease-in-out infinite; }
+.hp-g2 { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(229, 237, 241, 0.05) 0%, transparent 65%); bottom: -250px; left: -200px; animation: floatA 22s ease-in-out infinite reverse; }
 @keyframes floatA { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-28px,38px); } }
 
 /* Page Body */
@@ -46,13 +46,13 @@ const CSS = `
 
 /* ── Hero Section ── */
 .hero { display: flex; flex-direction: column; gap: 0; position: relative; }
-.hero-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 7px 16px; border-radius: 100px; border: 1px solid rgba(0,212,180,0.3); background: rgba(0,212,180,0.06); color: var(--teal); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 28px; backdrop-filter: blur(8px); }
+.hero-pill { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; padding: 7px 16px; border-radius: 100px; border: 1px solid rgba(150, 194, 219, 0.3); background: rgba(150, 194, 219, 0.06); color: var(--teal); font-size: 11.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 28px; backdrop-filter: blur(8px); }
 .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 9px var(--teal); animation: blink 2.2s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .35; box-shadow: none; } }
 
 .hero-name { font-family: 'Syne', sans-serif; font-size: clamp(60px, 12vw, 168px); font-weight: 800; line-height: .88; letter-spacing: -.04em; margin-bottom: 32px; display: flex; flex-direction: column; }
 .hero-outline { color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,0.18); transition: all .5s var(--ease); cursor: default; }
-.hero-outline:hover { color: var(--teal); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 80px rgba(0,212,180,.28); }
+.hero-outline:hover { color: var(--teal); -webkit-text-stroke: 1.5px transparent; text-shadow: 0 0 80px rgba(150, 194, 219, .28); }
 
 .hero-bottom { display: flex; flex-direction: column; gap: 28px; }
 @media(min-width: 768px) { .hero-bottom { flex-direction: row; justify-content: space-between; align-items: flex-end; } }
@@ -65,7 +65,7 @@ const CSS = `
 .hbtn:hover { transform: translateY(-3px); }
 .hbtn-primary { background: var(--teal); color: #04060a; border: 1px solid var(--teal); }
 .hbtn-primary::before { background: #fff; }
-.hbtn-primary:hover { box-shadow: 0 12px 32px rgba(0,212,180,.22); }
+.hbtn-primary:hover { box-shadow: 0 12px 32px rgba(150, 194, 219, .22); }
 .hbtn-primary:hover::before { transform: translateY(-100%); }
 .hbtn-sec { background: rgba(255,255,255,.03); color: #fff; border: 1px solid var(--border); backdrop-filter: blur(10px); }
 .hbtn-sec::before { background: rgba(255,255,255,.07); }
@@ -104,7 +104,7 @@ const CSS = `
   flex: 1; display: flex; align-items: flex-end; justify-content: center; 
   min-height: 140px; position: relative; overflow: hidden; 
   padding: 0; border-radius: var(--rsm); 
-  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
+  background: linear-gradient(to bottom, transparent 30%, rgba(150, 194, 219, 0.03) 100%); 
 }
 .svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
 
@@ -147,8 +147,8 @@ const CSS = `
 .blog-title { font-family: 'Syne', sans-serif; font-size: 15.5px; font-weight: 700; line-height: 1.4; color: #fff; }
 .blog-desc { font-size: 12.5px; line-height: 1.6; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 10px; }
 .blog-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-.read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(0,212,180,.2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
-.read-pill:hover { background: rgba(0,212,180,.18); border-color: rgba(0,212,180,.4); }
+.read-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--teal); background: var(--teal-dim); border: 1px solid rgba(150, 194, 219, .2); padding: 4px 11px; border-radius: 100px; text-decoration: none; transition: background .2s, border-color .2s; }
+.read-pill:hover { background: rgba(150, 194, 219, .18); border-color: rgba(150, 194, 219, .4); }
 
 .map-link { flex: 1; display: flex; flex-direction: column; text-decoration: none; border-radius: var(--rsm); overflow: hidden; min-height: 160px; position: relative; transition: opacity 0.2s; }
 .map-link:hover { opacity: 0.85; }
@@ -157,11 +157,11 @@ const CSS = `
 
 .soc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; flex: 1; }
 .soc-item { background: var(--surf2); border: 1px solid var(--border); border-radius: var(--rsm); padding: 14px; display: flex; flex-direction: column; gap: 5px; text-decoration: none; color: inherit; transition: border-color .25s, background .25s; }
-.soc-item:hover { border-color: var(--teal); background: rgba(0,212,180,0.05); }
+.soc-item:hover { border-color: var(--teal); background: rgba(150, 194, 219, 0.05); }
 
-.cta-card { background: linear-gradient(135deg, rgba(0,212,180,.07) 0%, rgba(124,111,247,.07) 100%) !important; border-color: rgba(0,212,180,.18) !important; justify-content: center; }
+.cta-card { background: linear-gradient(135deg, rgba(150, 194, 219, .07) 0%, rgba(229, 237, 241, .07) 100%) !important; border-color: rgba(150, 194, 219, .18) !important; justify-content: center; }
 .cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; background: var(--teal); color: #04060a; font-weight: 700; font-size: 13.5px; padding: 11px 22px; border-radius: 100px; text-decoration: none; align-self: flex-start; transition: all .2s; }
-.cta-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(0,212,180,.3); }
+.cta-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 26px rgba(150, 194, 219, .3); }
 
 @keyframes revealUp { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: translateY(0); } }
 .r1 { opacity: 0; animation: revealUp 0.8s var(--ease) .1s forwards; }
@@ -198,7 +198,7 @@ const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
 const MARQUEE_2 = [...TECH_ROW_2, ...TECH_ROW_2, ...TECH_ROW_2];
 
 const SOCIALS = [
-  {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
+  {icon:'🐙', name:'GitHub',    handle:'@DWRSH',  href:'https://github.com/DWRSH'},
   {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'https://www.linkedin.com/in/darshprajapati15'},
   {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
 ];
@@ -289,8 +289,8 @@ export default function HomePage() {
                 <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
                   <defs>
                     <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
-                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
+                      <stop offset="0%" stopColor="rgba(150, 194, 219, 0.4)" />
+                      <stop offset="100%" stopColor="rgba(150, 194, 219, 0)" />
                     </linearGradient>
                   </defs>
 
@@ -385,29 +385,25 @@ export default function HomePage() {
               {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
                 
-
 <img 
-  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
+  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
   alt="GitHub Stats" 
   style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
 />
 
 <img 
-  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
+  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=96c2db&text_color=ffffff&icon_color=e5edf1&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
   alt="GitHub Streak" 
   style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
 />
 
-
               </div>
               <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
                <img 
-  src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${Date.now()}`} 
+  src={`https://ghchart.rshah.org/96c2db/DWRSH?v=${Date.now()}`} 
   alt="GitHub Commits" 
   style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
 />
-
-
 
               </div>
             </div>
