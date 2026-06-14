@@ -4,7 +4,7 @@ import { Home, User, Briefcase, FileText, ArrowUpRight } from 'lucide-react';
 /* ─── ULTRA-PREMIUM STYLES ────────────────────────────────────────────────── */
 const eliteHeaderStyles = `
   :root {
-    --primary: #00d2b4;
+    --primary: #96c2db; /* Updated to Blue-Grey */
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.55);
     --glass-nav-bg: rgba(5, 7, 10, 0.4);
@@ -63,7 +63,7 @@ const eliteHeaderStyles = `
     background: var(--primary); 
     display: flex; align-items: center; justify-content: center;
     font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
-    color: #000; box-shadow: 0 0 16px rgba(0,210,180,0.3);
+    color: #000; box-shadow: 0 0 16px rgba(150, 194, 219, 0.3); /* Updated RGB for Blue-Grey glow */
   }
   .eh-brand-text {
     font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
