@@ -6,7 +6,7 @@ import api from '../api/axios';
 /* ─── CHATBOT STYLES ──────────────────────────────────────────────────────── */
 const chatStyles = `
   :root {
-    --cb-primary: #00d4b4;
+    --cb-primary: #96c2db; /* Updated to Blue-Grey */
     --cb-bg: #04060a;
     --cb-surf: #0b0f18;
     --cb-surf2: #111620;
@@ -22,19 +22,19 @@ const chatStyles = `
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--cb-primary), #00a38a);
+    background: linear-gradient(135deg, var(--cb-primary), #7aacc7); /* Updated gradient */
     color: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 212, 180, 0.3);
+    box-shadow: 0 10px 30px rgba(150, 194, 219, 0.3); /* Updated RGB for Blue-Grey glow */
     z-index: 9999;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
   }
   .chatbot-fab:hover {
     transform: scale(1.1) translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 212, 180, 0.5);
+    box-shadow: 0 15px 40px rgba(150, 194, 219, 0.5); /* Updated RGB */
   }
 
   .chatbot-window {
@@ -185,7 +185,7 @@ const chatStyles = `
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0, 212, 180, 0.1);
+    background: rgba(150, 194, 219, 0.1); /* Updated RGB */
     border: 1px solid var(--cb-primary);
     color: var(--cb-primary);
     padding: 8px 14px;
