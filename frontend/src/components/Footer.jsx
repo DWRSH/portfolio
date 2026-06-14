@@ -5,7 +5,7 @@ import { Github, Linkedin, Twitter, Mail, ArrowUpRight, MapPin } from 'lucide-re
 const eliteFooterStyles = `
   :root {
     --bg-ultra-dark: #020406;
-    --primary: #00d2b4;
+    --primary: #96c2db; /* Updated to Blue-Grey */
     --text-main: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.4);
     --border-subtle: rgba(255, 255, 255, 0.08);
@@ -27,7 +27,7 @@ const eliteFooterStyles = `
     border-bottom: 1px solid var(--border-subtle);
     padding: 16px 0;
     overflow: hidden;
-    background: rgba(0, 210, 180, 0.02);
+    background: rgba(150, 194, 219, 0.02); /* Updated RGB for Blue-Grey */
     display: flex;
     white-space: nowrap;
   }
@@ -83,7 +83,7 @@ const eliteFooterStyles = `
     color: var(--primary);
     -webkit-text-stroke: 1px transparent;
     transform: scale(1.02);
-    text-shadow: 0 0 80px rgba(0, 210, 180, 0.4);
+    text-shadow: 0 0 80px rgba(150, 194, 219, 0.4); /* Updated RGB for Blue-Grey glow */
   }
   .mf-sub-heading {
     font-size: 18px;
@@ -116,7 +116,7 @@ const eliteFooterStyles = `
   /* Row Hover Glass Fill */
   .mf-row::before {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(0,210,180,0.05), transparent);
+    background: linear-gradient(90deg, transparent, rgba(150, 194, 219, 0.05), transparent); /* Updated RGB for Blue-Grey */
     transform: scaleY(0); transform-origin: bottom;
     transition: transform 0.5s var(--easing-premium);
     z-index: 0;
@@ -263,7 +263,7 @@ export default function Footer() {
         <div className="marquee-wrapper">
           <div className="marquee-content">
             {/* Duplicated for seamless loop */}
-            {[1, 2].map((group) => (
+            {[-1, 2].map((group) => (
               <div key={group} className="marquee-text">
                 AVAILABLE FOR WORK <span>✦</span>
                 FULL STACK ENGINEERING <span>✦</span>
