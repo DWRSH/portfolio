@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Download, Sparkles, MapPin, Trophy,
-  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
+  ArrowRight, Download, Sparkles, MapPin, Trophy,
+  Github, Layers, Wrench, BookOpen, ExternalLink, Headphones, Mail, Gamepad2
 } from "lucide-react";
 
 import api from '../api/axios';
 
 /* ─────────────────────────────────────────────────────────────────────────
-   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
+   STYLES (Perfect Grid + Native SVG Car + Strict Horizontal Stats)
 ───────────────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@400;500&display=swap');
@@ -16,21 +16,21 @@ const CSS = `
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #04060a;
-  --surf:      #0b0f18;
-  --surf2:     #111620;
-  --border:    rgba(255,255,255,0.07);
-  --border-h:  rgba(255,255,255,0.14);
-  --teal:      #00d4b4;
-  --teal-dim:  rgba(0,212,180,0.10);
-  --teal-glow: rgba(0,212,180,0.22);
-  --violet:    #7c6ff7;
-  --text:      #ffffff;
-  --muted:     rgba(255,255,255,0.40);
-  --muted2:    rgba(255,255,255,0.22);
-  --ease:      cubic-bezier(0.16,1,0.3,1);
-  --r:         18px;
-  --rsm:       12px;
+  --bg:        #04060a;
+  --surf:      #0b0f18;
+  --surf2:     #111620;
+  --border:    rgba(255,255,255,0.07);
+  --border-h:  rgba(255,255,255,0.14);
+  --teal:      #00d4b4;
+  --teal-dim:  rgba(0,212,180,0.10);
+  --teal-glow: rgba(0,212,180,0.22);
+  --violet:    #7c6ff7;
+  --text:      #ffffff;
+  --muted:     rgba(255,255,255,0.40);
+  --muted2:    rgba(255,255,255,0.22);
+  --ease:      cubic-bezier(0.16,1,0.3,1);
+  --r:         18px;
+  --rsm:       12px;
 }
 
 .hp { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; overflow-x: hidden; position: relative; }
@@ -80,18 +80,18 @@ const CSS = `
 @media(max-width: 768px) { .bento { grid-template-columns: repeat(2, 1fr); } .c4, .c3, .c2 { grid-column: span 2; } .c1 { grid-column: span 1; } }
 
 /* 🔴 MOBILE LAYOUT: Maintain 2 cols & Strict Horizontal Stats */
-@media(max-width: 640px) { 
-  .hp-body { padding: 80px 16px 48px; gap: 40px; }
-  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
-  .c1 { grid-column: span 1; } 
-  .c2, .c3, .c4 { grid-column: span 2; } 
-  .mob-full { grid-column: span 2 !important; }
-  
-  .stats-row { flex-direction: row !important; flex-wrap: nowrap !important; }
-  .stat-box { padding: 12px 4px !important; border-bottom: none !important; border-right: 1px solid var(--border) !important; }
-  .stat-box:last-child { border-right: none !important; }
-  .stat-num { font-size: 20px !important; }
-  .stat-lbl { font-size: 9px !important; }
+@media(max-width: 640px) { 
+  .hp-body { padding: 80px 16px 48px; gap: 40px; }
+  .bento { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
+  .c1 { grid-column: span 1; } 
+  .c2, .c3, .c4 { grid-column: span 2; } 
+  .mob-full { grid-column: span 2 !important; }
+  
+  .stats-row { flex-direction: row !important; flex-wrap: nowrap !important; }
+  .stat-box { padding: 12px 4px !important; border-bottom: none !important; border-right: 1px solid var(--border) !important; }
+  .stat-box:last-child { border-right: none !important; }
+  .stat-num { font-size: 20px !important; }
+  .stat-lbl { font-size: 9px !important; }
 }
 
 .card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r); padding: clamp(16px, 3vw, 22px); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; transition: border-color .3s, transform .35s var(--ease), box-shadow .35s var(--ease); }
@@ -100,11 +100,11 @@ const CSS = `
 .lbl svg { color: var(--muted2); flex-shrink: 0; }
 
 /* ── CAR SVG WRAPPER ── */
-.car-wrap { 
-  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
-  min-height: 140px; position: relative; overflow: hidden; 
-  padding: 0; border-radius: var(--rsm); 
-  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
+.car-wrap { 
+  flex: 1; display: flex; align-items: flex-end; justify-content: center; 
+  min-height: 140px; position: relative; overflow: hidden; 
+  padding: 0; border-radius: var(--rsm); 
+  background: linear-gradient(to bottom, transparent 30%, rgba(0,212,180,0.03) 100%); 
 }
 .svg-scene { width: 100%; height: 100%; max-height: 150px; object-fit: contain; }
 
@@ -175,346 +175,343 @@ const CSS = `
 `;
 
 const TECH_ROW_1 = [
-  {name:'React',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'},
-  {name:'Node JS',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg'},
-  {name:'MongoDB',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg'},
-  {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
-  {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
-  {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
-  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
+  {name:'React',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg'},
+  {name:'Node JS',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg'},
+  {name:'MongoDB',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg'},
+  {name:'Python',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg'},
+  {name:'FastAPI',  url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg'},
+  {name:'HTML5',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg'},
+  {name:'CSS3',     url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg'},
 ];
 
 const TECH_ROW_2 = [
-  {name:'JavaScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
-  {name:'TypeScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg'},
-  {name:'Docker',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'},
-  {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
-  {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
-  {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
-  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
+  {name:'JavaScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg'},
+  {name:'TypeScript',url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg'},
+  {name:'Docker',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg'},
+  {name:'GitHub',   url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',inv:true},
+  {name:'Figma',    url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg'},
+  {name:'Tailwind', url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg'},
+  {name:'AWS',      url:'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg',inv:true},
 ];
 
 const MARQUEE_1 = [...TECH_ROW_1, ...TECH_ROW_1, ...TECH_ROW_1];
 const MARQUEE_2 = [...TECH_ROW_2, ...TECH_ROW_2, ...TECH_ROW_2];
 
 const SOCIALS = [
-  {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
-  {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'https://www.linkedin.com/in/darshprajapati15'},
-  {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
+  {icon:'🐙', name:'GitHub',   handle:'@DWRSH',  href:'https://github.com/DWRSH'},
+  {icon:'💼', name:'LinkedIn', handle:'Darsh',    href:'https://www.linkedin.com/in/darshprajapati15'},
+  {icon:'𝕏',  name:'Twitter',  handle:'@dwrsh_',  href:'#'},
 ];
 
 export default function HomePage() {
-  const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const [latestPost, setLatestPost] = useState(null);
-  const [loadingPost, setLoadingPost] = useState(true);
+  const [latestPost, setLatestPost] = useState(null);
+  const [loadingPost, setLoadingPost] = useState(true);
 
-  const handlePlay = () => {
-    if(audioRef.current) {
-      audioRef.current.volume = 0.5;
-      audioRef.current.play().catch(()=>console.log("Autoplay prevented"));
-      setIsPlaying(true);
-    }
-  };
-  const handlePause = () => {
-    if(audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
+  const handlePlay = () => {
+    if(audioRef.current) {
+      audioRef.current.volume = 0.5;
+      audioRef.current.play().catch(()=>console.log("Autoplay prevented"));
+      setIsPlaying(true);
+    }
+  };
+  const handlePause = () => {
+    if(audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
 
-  useEffect(() => {
-    async function fetchLatestBlog() {
-      try {
-        const response = await api.get('/blogs');
-        const posts = response.data;
-        
-        if (posts && posts.length > 0) {
-          const latest = posts[0];
-          setLatestPost({
-            title: latest.title,
-            desc: latest.desc || (latest.content ? latest.content.substring(0, 120) + '...' : 'Click to read this article.'),
-            link: `/blog/${latest.slug || latest._id}`
-          });
-        } else {
-          setLatestPost(null);
-        }
-        setLoadingPost(false);
-      } catch (error) {
-        console.error("Failed to sync latest blog:", error);
-        setLoadingPost(false);
-      }
-    }
-    fetchLatestBlog();
-  }, []);
+  useEffect(() => {
+    async function fetchLatestBlog() {
+      try {
+        const response = await api.get('/blogs');
+        const posts = response.data;
+        
+        if (posts && posts.length > 0) {
+          const latest = posts[0];
+          setLatestPost({
+            title: latest.title,
+            desc: latest.desc || (latest.content ? latest.content.substring(0, 120) + '...' : 'Click to read this article.'),
+            link: `/blog/${latest.slug || latest._id}`
+          });
+        } else {
+          setLatestPost(null);
+        }
+        setLoadingPost(false);
+      } catch (error) {
+        console.error("Failed to sync latest blog:", error);
+        setLoadingPost(false);
+      }
+    }
+    fetchLatestBlog();
+  }, []);
 
-  return (
-    <>
-      <style>{CSS}</style>
-      <div className="hp">
-        
-        <div className="hp-ambient">
-          <div className="hp-g1"/><div className="hp-g2"/>
-        </div>
+  return (
+    <>
+      {/* 🔴 FIXED: Using dangerouslySetInnerHTML to render CSS properly */}
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <div className="hp">
+        
+        <div className="hp-ambient">
+          <div className="hp-g1"/><div className="hp-g2"/>
+        </div>
 
-        <div className="hp-body">
-          <section className="hero">
-            <div className="hero-pill r1"><div className="hero-dot"/> Available for New Projects</div>
-            
-            <h1 className="hero-name r2">
-              <span className="hero-outline">DARSH</span>
-            </h1>
+        <div className="hp-body">
+          <section className="hero">
+            <div className="hero-pill r1"><div className="hero-dot"/> Available for New Projects</div>
+            
+            <h1 className="hero-name r2">
+              <span className="hero-outline">DARSH</span>
+            </h1>
 
-            <div className="hero-bottom r3">
-              <p className="hero-bio">
-                I engineer <strong>high-performance</strong>, aesthetic digital
-                architectures. Specialising in the <strong>MERN stack</strong> —
-                bridging heavy-duty backends with pixel-perfect frontends.
-              </p>
-              <div className="hero-btns">
-                <a href="/Darsh_resume.pdf" className="hbtn hbtn-primary">Download CV <Download size={17}/></a>
-                <Link to="/projects" className="hbtn hbtn-sec">Explore Work <ArrowRight size={17}/></Link>
-              </div>
-            </div>
-          </section>
+            <div className="hero-bottom r3">
+              <p className="hero-bio">
+                I engineer <strong>high-performance</strong>, aesthetic digital
+                architectures. Specialising in the <strong>MERN stack</strong> —
+                bridging heavy-duty backends with pixel-perfect frontends.
+              </p>
+              <div className="hero-btns">
+                <a href="/Darsh_resume.pdf" className="hbtn hbtn-primary">Download CV <Download size={17}/></a>
+                <Link to="/projects" className="hbtn hbtn-sec">Explore Work <ArrowRight size={17}/></Link>
+              </div>
+            </div>
+          </section>
 
-          <div className="bento r5">
+          <div className="bento r5">
 
-            {/* ROW 1 */}
-            {/* ── NATIVE SVG ANIMATED CAR ── */}
-            <div className="card c2">
-              <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
-              <div className="car-wrap">
-                <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
-                  <defs>
-                    <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
-                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
-                    </linearGradient>
-                  </defs>
+            {/* ROW 1 */}
+            {/* ── NATIVE SVG ANIMATED CAR ── */}
+            <div className="card c2">
+              <div className="lbl"><Gamepad2 size={13}/>Keep Moving</div>
+              <div className="car-wrap">
+                <svg viewBox="0 0 300 150" className="svg-scene" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="headlight-beam" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="rgba(0, 212, 180, 0.4)" />
+                      <stop offset="100%" stopColor="rgba(0, 212, 180, 0)" />
+                    </linearGradient>
+                  </defs>
 
-                  {/* Deep Background (Slow Clouds/City) */}
-                  <g opacity="0.1" fill="var(--teal)">
-                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
-                    <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
-                    <path d="M 70 120 L 70 40 L 110 40 L 110 120 Z" />
-                    <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
-                  </g>
+                  {/* Deep Background (Slow Clouds/City) */}
+                  <g opacity="0.1" fill="var(--teal)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="12s" repeatCount="indefinite" />
+                    <path d="M 20 120 L 20 60 L 50 60 L 50 120 Z" />
+                    <path d="M 70 120 L 70 40 L 110 40 L 110 120 Z" />
+                    <path d="M 150 120 L 150 80 L 190 80 L 190 120 Z" />
+                  </g>
 
-                  {/* Mid Background (Fast Cityscape) */}
-                  <g opacity="0.2" fill="var(--violet)">
-                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
-                    <rect x="10" y="70" width="30" height="60" />
-                    <rect x="50" y="90" width="40" height="40" />
-                    <rect x="110" y="50" width="35" height="80" />
-                    <rect x="180" y="75" width="25" height="55" />
-                    <rect x="230" y="60" width="45" height="70" />
-                  </g>
+                  {/* Mid Background (Fast Cityscape) */}
+                  <g opacity="0.2" fill="var(--violet)">
+                    <animateTransform attributeName="transform" type="translate" from="300,0" to="-300,0" dur="6s" repeatCount="indefinite" />
+                    <rect x="10" y="70" width="30" height="60" />
+                    <rect x="50" y="90" width="40" height="40" />
+                    <rect x="110" y="50" width="35" height="80" />
+                    <rect x="180" y="75" width="25" height="55" />
+                    <rect x="230" y="60" width="45" height="70" />
+                  </g>
 
-                  {/* The Road */}
-                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
-                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
-                    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
-                  </line>
+                  {/* The Road */}
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--border)" strokeWidth="3" />
+                  <line x1="0" y1="130" x2="300" y2="130" stroke="var(--muted)" strokeWidth="3" strokeDasharray="30 20">
+                    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.4s" repeatCount="indefinite" />
+                  </line>
 
-                  {/* Bouncing Car Body */}
-                  <g>
-                    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
-                    
-                    {/* Main Chassis */}
-                    <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
-                    
-                    {/* Window */}
-                    <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
-                    
-                    {/* Window Reflection Details */}
-                    <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
-                    <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+                  {/* Bouncing Car Body */}
+                  <g>
+                    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-2.5; 0,0" dur="0.4s" repeatCount="indefinite" />
+                    
+                    {/* Main Chassis */}
+                    <path d="M 65 110 L 60 85 L 95 65 L 160 65 L 190 85 L 210 85 Q 220 85 220 95 L 220 110 Z" fill="var(--surf2)" stroke="var(--teal)" strokeWidth="2.5" />
+                    
+                    {/* Window */}
+                    <path d="M 98 68 L 155 68 L 180 85 L 85 85 Z" fill="#04060a" stroke="var(--teal)" strokeWidth="1.5" />
+                    
+                    {/* Window Reflection Details */}
+                    <line x1="120" y1="68" x2="105" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+                    <line x1="135" y1="68" x2="120" y2="85" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
 
-                    {/* Taillight */}
-                    <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
-                    
-                    {/* Headlight */}
-                    <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
-                    
-                    {/* Headlight Beam */}
-                    <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
-                    
-                    {/* Door Outline */}
-                    <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
-                    <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
-                  </g>
+                    {/* Taillight */}
+                    <path d="M 60 90 L 65 90 L 65 100 L 60 100 Z" fill="#ff5f56" />
+                    
+                    {/* Headlight */}
+                    <path d="M 210 92 L 220 92 L 220 102 L 210 102 Z" fill="#fff" />
+                    
+                    {/* Headlight Beam */}
+                    <polygon points="220,92 290,75 290,115 220,102" fill="url(#headlight-beam)" />
+                    
+                    {/* Door Outline */}
+                    <line x1="130" y1="85" x2="130" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
+                    <line x1="90" y1="85" x2="90" y2="110" stroke="var(--teal)" strokeWidth="1.5" opacity="0.5" />
+                  </g>
 
-                  {/* Independent Spinning Back Wheel */}
-                  <g transform="translate(100, 115)">
-                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
-                    <g>
-                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
-                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
-                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
-                    </g>
-                  </g>
+                  {/* Independent Spinning Back Wheel */}
+                  <g transform="translate(100, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
+                    </g>
+                  </g>
 
-                  {/* Independent Spinning Front Wheel */}
-                  <g transform="translate(180, 115)">
-                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
-                    <g>
-                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
-                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
-                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
-                    </g>
-                  </g>
-                </svg>
-              </div>
-            </div>
+                  {/* Independent Spinning Front Wheel */}
+                  <g transform="translate(180, 115)">
+                    <circle cx="0" cy="0" r="14" fill="#0b0f18" stroke="var(--violet)" strokeWidth="3" />
+                    <g>
+                      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="0.4s" repeatCount="indefinite" />
+                      <line x1="-14" y1="0" x2="14" y2="0" stroke="var(--violet)" strokeWidth="2" />
+                      <line x1="0" y1="-14" x2="0" y2="14" stroke="var(--violet)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="4" fill="var(--teal)" />
+                    </g>
+                  </g>
+                </svg>
+              </div>
+            </div>
 
-            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
-              <div className="stats-row">
-                <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
-                <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
-                <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
-              </div>
-            </div>
+            <div className="card c2" style={{padding: 0, justifyContent: 'center', background: 'transparent', border: 'none', boxShadow: 'none'}}>
+              <div className="stats-row">
+                <div className="stat-box"><div className="stat-num">13<span>+</span></div><div className="stat-lbl">Projects</div></div>
+                <div className="stat-box"><div className="stat-num">2<span>+</span></div><div className="stat-lbl">Years Exp</div></div>
+                <div className="stat-box"><div className="stat-num">6<span>+</span></div><div className="stat-lbl">Hubs</div></div>
+              </div>
+            </div>
 
-            {/* ROW 2 */}
-            <div className="card c3">
-              <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
-              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
-                
-
-<img 
-  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
-  alt="GitHub Stats" 
-  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
+            {/* ROW 2 */}
+            <div className="card c3">
+              <div className="lbl"><Github size={13}/>Live GitHub Data (@DWRSH)</div>
+              {/* FIXED GITHUB STATS - Using Grid to prevent squishing and ensure proper wrapping */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '10px' }}>
+                
+<img 
+  src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&bg_color=00000000&cache_seconds=1800&v=${Date.now()}`} 
+  alt="GitHub Stats" 
+  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
 />
 
-<img 
-  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
-  alt="GitHub Streak" 
-  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
+<img 
+  src={`https://streak-stats.demolab.com/?user=DWRSH&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&background=00000000&cache_seconds=1800&v=${Date.now()}`} 
+  alt="GitHub Streak" 
+  style={{ width: '100%', height: '100%', maxHeight: '140px', objectFit: 'contain', background: 'var(--surf2)', borderRadius: '12px', border: '1px solid var(--border)' }} 
 />
 
-
-              </div>
-              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-               <img 
-  src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${Date.now()}`} 
-  alt="GitHub Commits" 
-  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
+              </div>
+              <div style={{ width: '100%', overflowX: 'auto', marginTop: '16px', background: 'var(--surf2)', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+               <img 
+  src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${Date.now()}`} 
+  alt="GitHub Commits" 
+  style={{ minWidth: '600px', width: '100%', filter: 'hue-rotate(345deg) saturate(1.2)' }}
 />
 
+              </div>
+            </div>
 
+            <div 
+              className="card c1" 
+              style={{minHeight: '210px'}}
+              onMouseEnter={handlePlay}
+              onMouseLeave={handlePause}
+              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
+            >
+              <div className="lbl"><Headphones size={13}/>Vibes</div>
+              <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
+              <div className="music-player-wrap">
+                <div className="vinyl-container">
+                  <div className={`vinyl-record ${isPlaying ? 'playing' : ''}`}>
+                    <div className="vinyl-label"><div className="vinyl-hole"/></div>
+                  </div>
+                  <svg className={`tonearm ${isPlaying ? 'playing' : ''}`} viewBox="0 0 40 80">
+                    <circle cx="30" cy="10" r="8" fill="#555" stroke="#222" strokeWidth="2"/>
+                    <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#ccc" strokeWidth="4" strokeLinecap="round"/>
+                    <rect x="2" y="65" width="12" height="15" rx="2" fill="#222" transform="rotate(25 8 72)"/>
+                  </svg>
+                </div>
+                <div className="music-info">
+                  <div className="music-song">Lo-Fi Coding</div>
+                  <div className="music-artist">Lofi Study</div>
+                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
+                </div>
+              </div>
+            </div>
 
-              </div>
-            </div>
+            {/* ROW 3 */}
+            <div className="card c2">
+              <div className="lbl"><Layers size={13}/>Tech Stack</div>
+              <div className="tech-marquee-wrapper">
+                <div className="tm-track tm-left">
+                  {MARQUEE_1.map((t, i) => (
+                    <div className="ticon" title={t.name} key={`m1-${i}`}>
+                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
+                    </div>
+                  ))}
+                </div>
+                <div className="tm-track tm-right">
+                  {MARQUEE_2.map((t, i) => (
+                    <div className="ticon" title={t.name} key={`m2-${i}`}>
+                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-            <div 
-              className="card c1" 
-              style={{minHeight: '210px'}}
-              onMouseEnter={handlePlay}
-              onMouseLeave={handlePause}
-              onTouchStart={() => isPlaying ? handlePause() : handlePlay()}
-            >
-              <div className="lbl"><Headphones size={13}/>Vibes</div>
-              <audio ref={audioRef} loop src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" preload="auto" />
-              <div className="music-player-wrap">
-                <div className="vinyl-container">
-                  <div className={`vinyl-record ${isPlaying ? 'playing' : ''}`}>
-                    <div className="vinyl-label"><div className="vinyl-hole"/></div>
-                  </div>
-                  <svg className={`tonearm ${isPlaying ? 'playing' : ''}`} viewBox="0 0 40 80">
-                    <circle cx="30" cy="10" r="8" fill="#555" stroke="#222" strokeWidth="2"/>
-                    <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#ccc" strokeWidth="4" strokeLinecap="round"/>
-                    <rect x="2" y="65" width="12" height="15" rx="2" fill="#222" transform="rotate(25 8 72)"/>
-                  </svg>
-                </div>
-                <div className="music-info">
-                  <div className="music-song">Lo-Fi Coding</div>
-                  <div className="music-artist">Lofi Study</div>
-                  <div className="hover-hint">{isPlaying ? 'Playing...' : 'Tap to Play'}</div>
-                </div>
-              </div>
-            </div>
+            <div className="card c2">
+              <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
+              <div className="soc-grid">
+                {SOCIALS.map(s=>(
+                  <a className="soc-item" key={s.name} href={s.href} target="_blank" rel="noreferrer">
+                    <span style={{fontSize: '18px'}}>{s.icon}</span>
+                    <span style={{fontWeight: 700, fontSize: '13px', color: '#fff'}}>{s.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
 
-            {/* ROW 3 */}
-            <div className="card c2">
-              <div className="lbl"><Layers size={13}/>Tech Stack</div>
-              <div className="tech-marquee-wrapper">
-                <div className="tm-track tm-left">
-                  {MARQUEE_1.map((t, i) => (
-                    <div className="ticon" title={t.name} key={`m1-${i}`}>
-                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
-                    </div>
-                  ))}
-                </div>
-                <div className="tm-track tm-right">
-                  {MARQUEE_2.map((t, i) => (
-                    <div className="ticon" title={t.name} key={`m2-${i}`}>
-                      <img src={t.url} alt={t.name} className={t.inv ? 'inv' : ''}/>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* ROW 4 */}
+            <div className="card c1 mob-full">
+              <div className="lbl"><BookOpen size={13}/>Latest Post</div>
+              {loadingPost ? (
+                <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <span className="loading-pulse">Syncing latest feed...</span>
+                </div>
+              ) : latestPost ? (
+                <>
+                  <p className="blog-title">{latestPost.title}</p>
+                  <p className="blog-desc">{latestPost.desc}</p>
+                  <div className="blog-meta">
+                    <Link to={latestPost.link} className="read-pill">Read <ArrowRight size={11}/></Link>
+                  </div>
+                </>
+              ) : (
+                <p className="blog-desc">No posts found right now.</p>
+              )}
+            </div>
 
-            <div className="card c2">
-              <div className="lbl"><ExternalLink size={13}/>Find Me Online</div>
-              <div className="soc-grid">
-                {SOCIALS.map(s=>(
-                  <a className="soc-item" key={s.name} href={s.href} target="_blank" rel="noreferrer">
-                    <span style={{fontSize: '18px'}}>{s.icon}</span>
-                    <span style={{fontWeight: 700, fontSize: '13px', color: '#fff'}}>{s.name}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
+            <div className="card c1" style={{padding: 0}}>
+              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
+              <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
+                <div className="map-wrap">
+                  <iframe
+                    src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
+                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
+                  />
+                </div>
+              </a>
+            </div>
 
-            {/* ROW 4 */}
-            <div className="card c1 mob-full">
-              <div className="lbl"><BookOpen size={13}/>Latest Post</div>
-              {loadingPost ? (
-                <div style={{flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <span className="loading-pulse">Syncing latest feed...</span>
-                </div>
-              ) : latestPost ? (
-                <>
-                  <p className="blog-title">{latestPost.title}</p>
-                  <p className="blog-desc">{latestPost.desc}</p>
-                  <div className="blog-meta">
-                    <Link to={latestPost.link} className="read-pill">Read <ArrowRight size={11}/></Link>
-                  </div>
-                </>
-              ) : (
-                <p className="blog-desc">No posts found right now.</p>
-              )}
-            </div>
+            <div className="card c2 cta-card">
+              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px'}}>
+                Let's build <span style={{color: 'var(--teal)'}}>something great.</span>
+              </p>
+              <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
+            </div>
 
-            <div className="card c1" style={{padding: 0}}>
-              <div className="lbl" style={{padding: '16px 16px 0', position: 'absolute', zIndex: 10}}><MapPin size={13}/>Location</div>
-              <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map-link">
-                <div className="map-wrap">
-                  <iframe
-                    src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed"
-                    allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map"
-                  />
-                </div>
-              </a>
-            </div>
-
-            <div className="card c2 cta-card">
-              <p style={{fontFamily: 'Syne', fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 800, color: '#fff', lineHeight: 1.2, marginBottom: '12px'}}>
-                Let's build <span style={{color: 'var(--teal)'}}>something great.</span>
-              </p>
-              <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15}/> Get in Touch</a>
-            </div>
-
-          </div>{/* /bento */}
-        </div>
-      </div>
-    </>
-  );
+          </div>{/* /bento */}
+        </div>
+      </div>
+    </>
+  );
 }
