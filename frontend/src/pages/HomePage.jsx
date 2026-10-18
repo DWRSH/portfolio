@@ -1,184 +1,188 @@
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, RoundedBox, Sparkles } from "@react-three/drei";
+import { Environment, Lightformer, RoundedBox, Sparkles } from "@react-three/drei";
 import { MathUtils } from "three";
+import * as GC from "react-github-calendar";
 import {
-  ArrowRight, Download, MapPin, Github, Layers, BookOpen,
-  ExternalLink, Headphones, Mail, Gamepad2,
+  ArrowRight, ArrowUpRight, Download, MapPin, Github, Linkedin, Twitter,
+  Layers, BookOpen, Headphones, Mail, Gamepad2,
 } from "lucide-react";
 import api from "../api/axios";
 
-/* Install: npm i three @react-three/fiber @react-three/drei
-   (React 18 → @react-three/fiber@8 + @react-three/drei@9) */
+const GitHubCalendar = GC.default || GC.GitHubCalendar;
+const ACC = "#3ddbc0";
+const REDUCE = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-const TEAL = "#00d4b4", VIOLET = "#7c6ff7", PINK = "#ff6b9d", AMBER = "#ffb84d";
-const ORB_COLORS = [TEAL, VIOLET, PINK, AMBER];
-
-/* ───────────────────────── STYLES ───────────────────────── */
+/* ───────────────────────── STYLES ─────────────────────────
+   Palette: ink #07090d · panel #0d1117 · paper #f3f1ec · mist #8d939e · one accent (teal)
+   Type: Instrument Serif (display) + Inter Tight (text)                          */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter+Tight:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#04060a;--surf:#0b0f18;--surf2:#111620;--border:rgba(255,255,255,.07);--border-h:rgba(255,255,255,.16);
---teal:${TEAL};--violet:${VIOLET};--muted:rgba(255,255,255,.45);--ease:cubic-bezier(.16,1,.3,1);--r:20px}
-.hp{background:var(--bg);background-image:radial-gradient(rgba(255,255,255,.045) 1px,transparent 1px);background-size:28px 28px;
-font-family:'DM Sans',sans-serif;color:#fff;min-height:100vh;overflow-x:hidden}
-.hp a:focus-visible,.hp button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
-.hp-body{max-width:1180px;margin:0 auto;padding:90px 24px 64px;display:flex;flex-direction:column;gap:48px}
+:root{--bg:#07090d;--panel:#0d1117;--panel2:#121821;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.18);
+--ink:#f3f1ec;--muted:#8d939e;--acc:${ACC};--ease:cubic-bezier(.16,1,.3,1);--r:16px;--serif:'Instrument Serif',serif}
+.hp{background:var(--bg);color:var(--ink);font-family:'Inter Tight',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;position:relative}
+.hp::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(900px 520px at 78% -8%,rgba(61,219,192,.08),transparent 70%)}
+.hp a:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.hp-body{position:relative;max-width:1160px;margin:0 auto;padding:96px 24px 72px;display:flex;flex-direction:column;gap:72px}
 
 /* Hero */
-.hero{position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px}
-.hero-3d{position:absolute;top:-70px;right:-6%;width:68%;height:calc(100% + 70px);z-index:0}
-.hero-in{position:relative;z-index:1;display:flex;flex-direction:column;gap:26px;pointer-events:none}
-.hero-in a,.hero-in .hero-name{pointer-events:auto}
-.hero-pill{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:100px;
-border:1px solid rgba(0,212,180,.3);background:rgba(0,212,180,.06);color:var(--teal);font-size:13px;font-weight:600}
-.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 9px var(--teal);animation:blink 2.2s infinite}
-@keyframes blink{50%{opacity:.3}}
-.hero-name{font-family:'Syne',sans-serif;font-size:clamp(64px,15vw,200px);font-weight:800;line-height:.9;letter-spacing:-.04em;display:flex;cursor:default;width:fit-content}
-.hl{display:inline-block;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.3);transition:transform .45s var(--ease),color .25s,-webkit-text-stroke-color .25s}
-.hl:hover{transform:translateY(-16px) rotate(-7deg);color:var(--teal);-webkit-text-stroke-color:transparent}
-.hero-bottom{display:flex;flex-direction:column;gap:24px}
-@media(min-width:768px){.hero-bottom{flex-direction:row;justify-content:space-between;align-items:flex-end}}
-.hero-bio{font-size:17px;font-weight:300;line-height:1.65;color:var(--muted);max-width:440px}
-.hero-bio strong{color:#fff;font-weight:500}
-.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
-.hbtn{display:inline-flex;align-items:center;gap:9px;padding:14px 26px;border-radius:100px;font-size:15px;font-weight:600;text-decoration:none;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .2s}
-.hbtn:hover{transform:translateY(-3px) scale(1.03)}
-.hbtn-primary{background:var(--teal);color:#04060a}
-.hbtn-primary:hover{box-shadow:0 12px 32px rgba(0,212,180,.3);background:#fff}
-.hbtn-sec{background:rgba(255,255,255,.04);color:#fff;border:1px solid var(--border-h);backdrop-filter:blur(10px)}
-.orb-hint{position:absolute;z-index:1;right:12%;top:8px;font-size:12px;color:var(--muted);pointer-events:none}
-@media(max-width:767px){.hero{min-height:560px}.hero-3d{width:120%;right:-10%;top:-30px;opacity:.7}.orb-hint{display:none}}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:24px;min-height:620px}
+.copy{display:flex;flex-direction:column;gap:28px}
+.status{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;font-size:14px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px rgba(61,219,192,.15);animation:ping 2.4s infinite}
+@keyframes ping{50%{box-shadow:0 0 0 9px rgba(61,219,192,0)}}
+.name{font-family:var(--serif);font-weight:400;font-size:clamp(56px,8.4vw,120px);line-height:.95;letter-spacing:-.025em}
+.bio{font-size:clamp(17px,2vw,20px);line-height:1.6;color:var(--muted);max-width:480px;font-weight:300}
+.bio b{color:var(--ink);font-weight:500}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:100px;font-size:15px;font-weight:500;text-decoration:none;transition:transform .4s var(--ease),background .25s,border-color .25s}
+.btn:hover{transform:translateY(-2px)}
+.btn-p{background:var(--ink);color:#07090d}.btn-p:hover{background:var(--acc)}
+.btn-s{border:1px solid var(--line2);color:var(--ink)}.btn-s:hover{border-color:var(--ink)}
+.facts{display:flex;max-width:480px;border-top:1px solid var(--line);padding-top:22px}
+.fact{flex:1}.fact+.fact{padding-left:22px;border-left:1px solid var(--line)}
+.fact b{display:block;font-family:var(--serif);font-weight:400;font-size:36px;line-height:1}
+.fact span{font-size:13px;color:var(--muted)}
+.hero-3d{position:relative;height:min(620px,72vh);min-height:420px}
+.hint{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:12px;color:var(--muted);pointer-events:none}
+.rise{opacity:0;transform:translateY(18px);animation:rise 1.1s var(--ease) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+@media(max-width:860px){.hero{grid-template-columns:1fr;min-height:0}.hero-3d{order:-1;height:340px;min-height:0}}
 
-/* Bento */
-.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;perspective:1400px}
-.c1{grid-column:span 1}.c2{grid-column:span 2}.c3{grid-column:span 3}
-@media(max-width:1024px){.bento{grid-template-columns:repeat(3,1fr)}.c3{grid-column:span 3}}
-@media(max-width:768px){.bento{grid-template-columns:repeat(2,1fr);gap:12px}.c2,.c3{grid-column:span 2}.mob-full{grid-column:span 2}}
-.card{--mx:50%;--my:50%;background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:clamp(16px,3vw,22px);
-position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;transform-style:preserve-3d;
-transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;will-change:transform}
-.card::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
-background:radial-gradient(260px circle at var(--mx) var(--my),rgba(0,212,180,.14),transparent 70%)}
-.card:hover{border-color:var(--border-h);box-shadow:0 24px 50px rgba(0,0,0,.55)}
-.card:hover::after{opacity:1}
-.lbl{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--muted)}
+/* Grid + cards */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;perspective:1600px}
+.c1{grid-column:span 1}.c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}
+@media(max-width:1024px){.bento{grid-template-columns:repeat(2,1fr)}.c1{grid-column:span 1}.c2,.c3,.c4{grid-column:span 2}}
+@media(max-width:560px){.c1{grid-column:span 2}}
+.card{--mx:50%;--my:50%;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:16px;background:var(--panel);
+border:1px solid var(--line);border-radius:var(--r);padding:22px;transition:transform .6s var(--ease)}
+.card::before{content:'';position:absolute;inset:0;z-index:2;border-radius:inherit;padding:1px;pointer-events:none;opacity:0;transition:opacity .4s;
+background:radial-gradient(240px circle at var(--mx) var(--my),rgba(61,219,192,.6),transparent 70%);
+-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.card::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(340px circle at var(--mx) var(--my),rgba(61,219,192,.05),transparent 70%)}
+.card:hover::before,.card:hover::after{opacity:1}
+.lbl{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--muted)}
+.lbl small{margin-left:auto;font-size:12px;font-weight:400}
+.car{height:230px;border-radius:12px;overflow:hidden;cursor:pointer;touch-action:pan-y;background:#0a0d12}
 
-/* 3D car */
-.car-wrap{height:210px;border-radius:12px;overflow:hidden;cursor:pointer;touch-action:pan-y}
-.car-hint{font-size:12px;color:var(--muted);margin-left:auto}
-
-/* Stats */
-.stats-row{display:flex;flex:1;gap:12px}
-.stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:var(--r);
-background:var(--surf2);border:1px solid var(--border);padding:16px 6px;transition:transform .35s var(--ease),border-color .2s}
-.stat:hover{transform:translateY(-6px) rotate(-2deg);border-color:var(--teal)}
-.stat-num{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,40px);font-weight:800;line-height:1}
-.stat-num span{color:var(--teal)}
-.stat-lbl{font-size:12px;color:var(--muted)}
+/* Post */
+.post-title{font-family:var(--serif);font-size:27px;line-height:1.15;letter-spacing:-.01em}
+.post-desc{font-size:14px;line-height:1.6;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--acc);text-decoration:none;margin-top:auto}
+.link svg{transition:transform .35s var(--ease)}.link:hover svg{transform:translateX(4px)}
+.pulse{font-size:13px;color:var(--muted);animation:ping2 1.5s infinite}@keyframes ping2{50%{opacity:.4}}
 
 /* Vinyl */
-.vinyl-card{cursor:pointer;min-height:210px}
-.music-player-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px}
-.vinyl-container{position:relative;width:clamp(70px,20vw,90px);height:clamp(70px,20vw,90px)}
-.vinyl-record{width:100%;height:100%;border-radius:50%;border:3px solid #333;box-shadow:0 10px 20px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
-background:radial-gradient(circle,#000 30%,#1a1a1a 40%,#000 50%,#1a1a1a 60%,#000 70%,#1a1a1a 80%,#000 90%)}
-.vinyl-record.playing{animation:spin 2s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.vinyl-label{width:34%;height:34%;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--violet));display:flex;align-items:center;justify-content:center}
-.vinyl-hole{width:6px;height:6px;border-radius:50%;background:#000}
-.tonearm{position:absolute;top:-10px;right:-15px;width:35px;height:60px;transform-origin:top right;transform:rotate(-35deg);transition:transform .4s var(--ease);z-index:5}
-.tonearm.playing{transform:rotate(10deg)}
-.music-info{text-align:center}
-.music-song{font-family:'Syne',sans-serif;font-weight:600;font-size:15px}
-.music-artist,.hover-hint{font-size:12px;color:var(--muted)}
-.hover-hint{color:var(--teal);margin-top:6px}
+.vinyl-card{cursor:pointer;min-height:230px}
+.player{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:18px}
+.vinyl{position:relative;width:88px;height:88px}
+.disc{width:100%;height:100%;border-radius:50%;border:2px solid #2a2f38;box-shadow:0 12px 24px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
+background:repeating-radial-gradient(circle,#050607 0 3px,#14181e 3px 4px)}
+.disc.on{animation:spin 2.4s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.disc i{width:32%;height:32%;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center}
+.disc i::after{content:'';width:5px;height:5px;border-radius:50%;background:#07090d}
+.arm{position:absolute;top:-10px;right:-15px;width:35px;height:60px;transform-origin:top right;transform:rotate(-35deg);transition:transform .5s var(--ease);z-index:3}
+.arm.on{transform:rotate(10deg)}
+.song{font-family:var(--serif);font-size:21px;text-align:center}
+.artist{font-size:13px;color:var(--muted);text-align:center;margin-top:2px}
 
-/* Marquee */
-.marquee{display:flex;flex-direction:column;gap:14px;overflow:hidden;flex:1;justify-content:center;mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent)}
-.tm-track{display:flex;width:max-content;gap:14px}
-.tm-left{animation:scrollL 25s linear infinite}
-.tm-right{transform:translateX(calc(-50% - 7px));animation:scrollR 25s linear infinite}
-.ticon{background:var(--surf2);border:1px solid var(--border);border-radius:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s var(--ease),border-color .2s}
-.ticon:hover{border-color:var(--teal);transform:translateY(-6px) rotate(8deg) scale(1.15)}
-.ticon img{width:22px;height:22px}
-.inv{filter:invert(1) brightness(.8)}
-@keyframes scrollL{to{transform:translateX(calc(-50% - 7px))}}
-@keyframes scrollR{to{transform:translateX(0)}}
+/* Calendar / marquee / social */
+.cal{overflow-x:auto;padding:4px 0 2px}.cal text{fill:var(--muted)!important}
+.marquee{display:flex;flex-direction:column;gap:14px;overflow:hidden;flex:1;justify-content:center;mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.track{display:flex;width:max-content;gap:14px}
+.t-l{animation:sl 28s linear infinite}.t-r{transform:translateX(calc(-50% - 7px));animation:sr 28s linear infinite}
+@keyframes sl{to{transform:translateX(calc(-50% - 7px))}}@keyframes sr{to{transform:translateX(0)}}
+.ticon{width:46px;height:46px;flex-shrink:0;border-radius:12px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:transform .4s var(--ease),border-color .25s}
+.ticon img{width:22px;height:22px;filter:grayscale(1) opacity(.6);transition:filter .3s}
+.ticon img.inv{filter:grayscale(1) invert(1) opacity(.6)}
+.ticon:hover{transform:translateY(-5px);border-color:var(--line2)}
+.ticon:hover img{filter:none}.ticon:hover img.inv{filter:invert(1)}
+.soc{display:flex;flex-direction:column}
+.soc a{display:flex;align-items:center;gap:12px;padding:15px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:15px;transition:color .25s,padding .4s var(--ease)}
+.soc a:first-child{border-top:0}.soc a:hover{color:var(--acc);padding-left:8px}
+.soc em{margin-left:auto;font-style:normal;font-size:13px;color:var(--muted)}
+.map{flex:1;min-height:170px;position:relative;border-radius:12px;overflow:hidden;display:block}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;filter:invert(.92) hue-rotate(180deg) grayscale(.85) contrast(.85)}
 
-/* Misc */
-.gh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.gh-img{width:100%;max-height:140px;object-fit:contain;background:var(--surf2);border-radius:12px;border:1px solid var(--border)}
-.blog-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;line-height:1.4}
-.blog-desc{font-size:13px;line-height:1.6;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.read-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--teal);background:rgba(0,212,180,.1);border:1px solid rgba(0,212,180,.2);padding:5px 12px;border-radius:100px;text-decoration:none;margin-top:auto;align-self:flex-start}
-.map-link{flex:1;min-height:160px;position:relative;border-radius:12px;overflow:hidden;display:block}
-.map-link iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;filter:invert(90%) hue-rotate(180deg) saturate(1.5) contrast(.8)}
-.soc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;flex:1}
-.soc-item{background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#fff;font-weight:600;font-size:14px;transition:transform .35s var(--ease),border-color .2s}
-.soc-item:hover{border-color:var(--teal);transform:translateY(-5px) rotate(-1.5deg)}
-.cta-card{background:linear-gradient(135deg,rgba(0,212,180,.09),rgba(124,111,247,.09))!important;border-color:rgba(0,212,180,.2)!important;justify-content:center}
-.cta-title{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;line-height:1.2}
-.cta-btn{display:inline-flex;align-items:center;gap:7px;background:var(--teal);color:#04060a;font-weight:700;font-size:14px;padding:11px 22px;border-radius:100px;text-decoration:none;align-self:flex-start;transition:transform .3s var(--ease),background .2s}
-.cta-btn:hover{background:#fff;transform:translateY(-2px) scale(1.05)}
-.pulse{color:var(--muted);font-size:13px;animation:blink 1.5s infinite}
+/* CTA */
+.cta{flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:28px;padding:clamp(28px,5vw,56px);
+background:radial-gradient(640px 260px at 0 0,rgba(61,219,192,.1),transparent 70%),var(--panel)}
+.cta-title{font-family:var(--serif);font-size:clamp(36px,5.4vw,68px);line-height:1;letter-spacing:-.02em;max-width:660px}
+.cta-side{display:flex;flex-direction:column;gap:12px;align-items:flex-start;font-size:14px;color:var(--muted)}
 
-@media(prefers-reduced-motion:reduce){.hp *{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){.hp *{animation:none!important;transition:none!important}.rise{opacity:1;transform:none}}
 `;
 
-/* ───────────────────────── 3D: HERO ORB ───────────────────────── */
-function Orb() {
-  const group = useRef(), mesh = useRef(), pop = useRef(0);
-  const [i, setI] = useState(0);
-  const [hov, setHov] = useState(false);
-  const color = ORB_COLORS[i];
+/* ───────────────────────── helpers ───────────────────────── */
+function useInView() {
+  const ref = useRef();
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const o = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "120px" });
+    o.observe(ref.current);
+    return () => o.disconnect();
+  }, []);
+  return [ref, visible];
+}
+const loop = (visible) => (visible && !REDUCE ? "always" : "demand"); // pause off-screen canvases
 
-  useFrame(({ pointer }) => {
-    const g = group.current;
-    g.rotation.y += (MathUtils.clamp(pointer.x, -1, 1) * 0.7 - g.rotation.y) * 0.06;
-    g.rotation.x += (-MathUtils.clamp(pointer.y, -1, 1) * 0.4 - g.rotation.x) * 0.06;
-    pop.current *= 0.92;
-    const target = (hov ? 1.1 : 1) + pop.current * 0.4;
-    mesh.current.scale.setScalar(MathUtils.lerp(mesh.current.scale.x, target, 0.15));
+function Tilt({ className = "", children, ...rest }) {
+  const ref = useRef();
+  const move = (e) => {
+    if (e.pointerType !== "mouse") return;
+    const el = ref.current, r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    el.style.transform = `rotateX(${(0.5 - y) * 5}deg) rotateY(${(x - 0.5) * 6}deg)`;
+    el.style.setProperty("--mx", `${x * 100}%`);
+    el.style.setProperty("--my", `${y * 100}%`);
+  };
+  return (
+    <div ref={ref} className={`card ${className}`} onPointerMove={move} onPointerLeave={() => (ref.current.style.transform = "")} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+/* ───────────────────────── 3D: armillary hero ─────────────────────────
+   Three polished metal rings gyrate around a glowing core. Pointer = parallax, hover = faster spin. */
+const RINGS = [
+  { r: 1.9, rot: [0, 0, 0], axis: "y", s: 0.22, accent: false },
+  { r: 1.55, rot: [1.1, 0, 0], axis: "x", s: -0.3, accent: false },
+  { r: 1.2, rot: [0, 1, 0.8], axis: "z", s: 0.38, accent: true },
+];
+
+function Armillary() {
+  const group = useRef(), rings = useRef([]), core = useRef(), speed = useRef(1);
+  const [hov, setHov] = useState(false);
+
+  useFrame(({ pointer, clock }, delta) => {
+    const dt = Math.min(delta, 0.05), g = group.current;
+    g.rotation.y = MathUtils.lerp(g.rotation.y, MathUtils.clamp(pointer.x, -1, 1) * 0.5, 0.05);
+    g.rotation.x = MathUtils.lerp(g.rotation.x, -MathUtils.clamp(pointer.y, -1, 1) * 0.35, 0.05);
+    speed.current = MathUtils.lerp(speed.current, hov ? 3.2 : 1, 0.05);
+    RINGS.forEach((d, i) => { rings.current[i].rotation[d.axis] += dt * d.s * speed.current; });
+    core.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 1.6) * 0.05);
   });
 
   return (
     <group ref={group}>
-      <Float speed={2} floatIntensity={1.2} rotationIntensity={0.5}>
-        <mesh
-          ref={mesh}
-          onClick={() => { pop.current = 1; setI((n) => (n + 1) % ORB_COLORS.length); }}
-          onPointerOver={() => { document.body.style.cursor = "pointer"; setHov(true); }}
-          onPointerOut={() => { document.body.style.cursor = ""; setHov(false); }}
-        >
-          <sphereGeometry args={[1.5, 64, 64]} />
-          <MeshDistortMaterial color={color} distort={hov ? 0.6 : 0.4} speed={hov ? 4 : 2} roughness={0.2} metalness={0.3} />
-        </mesh>
-      </Float>
-      {/* orbiting satellites */}
-      <Satellites />
-      <pointLight position={[3, 2, 4]} intensity={40} color={color} />
-    </group>
-  );
-}
-
-function Satellites() {
-  const g = useRef();
-  useFrame((_, dt) => { g.current.rotation.y += dt * 0.6; g.current.rotation.z += dt * 0.15; });
-  const items = [[2.5, 0, 0, VIOLET, 0.2], [-2.3, 0.6, 1, TEAL, 0.16], [0.4, -2.2, -1.6, PINK, 0.18], [0, 2.4, 1, AMBER, 0.14]];
-  return (
-    <group ref={g}>
-      <mesh rotation={[1.2, 0, 0]}>
-        <torusGeometry args={[2.5, 0.012, 16, 120]} />
-        <meshBasicMaterial color="#fff" transparent opacity={0.25} />
+      <mesh onPointerOver={() => setHov(true)} onPointerOut={() => setHov(false)}>
+        <sphereGeometry args={[2.1, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {items.map(([x, y, z, c, s], k) => (
-        <mesh key={k} position={[x, y, z]}>
-          <octahedronGeometry args={[s]} />
-          <meshStandardMaterial color={c} emissive={c} emissiveIntensity={0.8} />
+      {RINGS.map((d, i) => (
+        <mesh key={i} ref={(el) => (rings.current[i] = el)} rotation={d.rot}>
+          <torusGeometry args={[d.r, 0.032, 32, 220]} />
+          <meshStandardMaterial color={d.accent ? ACC : "#d5d8de"} metalness={1} roughness={d.accent ? 0.28 : 0.18} />
         </mesh>
       ))}
+      <mesh ref={core}>
+        <sphereGeometry args={[0.42, 48, 48]} />
+        <meshStandardMaterial color="#0a3a33" emissive={ACC} emissiveIntensity={1.6} roughness={0.35} />
+      </mesh>
+      <pointLight color={ACC} intensity={14} distance={7} />
     </group>
   );
 }
@@ -186,18 +190,19 @@ function Satellites() {
 function HeroScene() {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[-3, 4, 3]} intensity={1.6} />
-      <Orb />
-      <Sparkles count={70} scale={9} size={2.5} speed={0.4} color={TEAL} />
+      <Environment resolution={256}>
+        <Lightformer form="rect" intensity={3.5} position={[0, 4, -5]} scale={[12, 2, 1]} />
+        <Lightformer form="ring" color={ACC} intensity={3} position={[4, 1, 2]} scale={4} />
+        <Lightformer form="rect" intensity={1.5} position={[-5, -1, 3]} scale={[6, 1, 1]} />
+      </Environment>
+      <Armillary />
+      <Sparkles count={36} scale={8} size={1.6} speed={0.25} opacity={0.5} color={ACC} />
     </>
   );
 }
 
-/* ───────────────────────── 3D: DRIVING CAR ───────────────────────── */
-const BUILDINGS = Array.from({ length: 9 }, (_, i) => ({
-  x: i * 1.9 - 8, h: 1 + ((i * 37) % 5) * 0.6, w: 0.9 + (i % 3) * 0.3, c: i % 2 ? VIOLET : TEAL,
-}));
+/* ───────────────────────── 3D: night drive ───────────────────────── */
+const BUILDINGS = Array.from({ length: 9 }, (_, i) => ({ x: i * 1.9 - 8, h: 1 + ((i * 37) % 5) * 0.6, w: 0.9 + (i % 3) * 0.3 }));
 
 function CarScene() {
   const car = useRef(), wheels = useRef([]), dashes = useRef([]), blds = useRef([]);
@@ -217,11 +222,9 @@ function CarScene() {
 
   return (
     <>
-      <fog attach="fog" args={["#0b0f18", 6, 14]} />
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[3, 5, 4]} intensity={1.6} />
-
-      {/* tap anywhere = jump */}
+      <fog attach="fog" args={["#0a0d12", 6, 14]} />
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[3, 5, 4]} intensity={2} />
       <mesh position={[0, 1, 2]} onClick={() => { if (phys.current.y === 0) phys.current.vy = 5.5; }}>
         <planeGeometry args={[20, 10]} />
         <meshBasicMaterial transparent opacity={0} />
@@ -230,28 +233,33 @@ function CarScene() {
       {BUILDINGS.map((b, k) => (
         <mesh key={k} ref={(el) => (blds.current[k] = el)} position={[b.x, b.h / 2, -3]}>
           <boxGeometry args={[b.w, b.h, 0.8]} />
-          <meshStandardMaterial color="#111620" emissive={b.c} emissiveIntensity={0.12} />
+          <meshStandardMaterial color="#10151d" emissive={ACC} emissiveIntensity={0.05} />
         </mesh>
       ))}
-
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]}>
         <planeGeometry args={[30, 3]} />
-        <meshStandardMaterial color="#080b12" />
+        <meshStandardMaterial color="#07090d" />
       </mesh>
       {Array.from({ length: 8 }, (_, k) => (
         <mesh key={k} ref={(el) => (dashes.current[k] = el)} rotation-x={-Math.PI / 2} position={[k * 2 - 8, 0.005, 1.1]}>
-          <planeGeometry args={[0.8, 0.07]} />
-          <meshBasicMaterial color="#fff" transparent opacity={0.45} />
+          <planeGeometry args={[0.8, 0.06]} />
+          <meshBasicMaterial color="#f3f1ec" transparent opacity={0.35} />
         </mesh>
       ))}
 
       <group ref={car}>
         <RoundedBox args={[2.2, 0.5, 1]} radius={0.12} position={[0, 0.5, 0]}>
-          <meshStandardMaterial color="#1a2030" metalness={0.6} roughness={0.3} />
+          <meshStandardMaterial color="#2a3446" metalness={0.7} roughness={0.28} />
         </RoundedBox>
         <RoundedBox args={[1.1, 0.42, 0.86]} radius={0.12} position={[-0.15, 0.92, 0]}>
-          <meshStandardMaterial color={TEAL} metalness={0.3} roughness={0.25} />
+          <meshStandardMaterial color="#0c1016" metalness={0.9} roughness={0.12} />
         </RoundedBox>
+        {[0.505, -0.505].map((z) => (
+          <mesh key={z} position={[0, 0.5, z]}>
+            <boxGeometry args={[2.0, 0.03, 0.006]} />
+            <meshStandardMaterial color={ACC} emissive={ACC} emissiveIntensity={1.4} />
+          </mesh>
+        ))}
         {[0.3, -0.3].map((z) => (
           <React.Fragment key={z}>
             <mesh position={[1.1, 0.55, z]}>
@@ -260,20 +268,20 @@ function CarScene() {
             </mesh>
             <mesh position={[-1.1, 0.55, z]}>
               <boxGeometry args={[0.05, 0.12, 0.2]} />
-              <meshStandardMaterial color="#ff5f56" emissive="#ff5f56" emissiveIntensity={1.5} />
+              <meshStandardMaterial color="#ff5f56" emissive="#ff5f56" emissiveIntensity={1.4} />
             </mesh>
           </React.Fragment>
         ))}
-        <pointLight position={[1.7, 0.6, 0]} color={TEAL} intensity={8} distance={4} />
+        <pointLight position={[1.7, 0.6, 0]} color={ACC} intensity={8} distance={4} />
         {[[-0.7, 0.52], [-0.7, -0.52], [0.7, 0.52], [0.7, -0.52]].map(([x, z], k) => (
           <group key={k} position={[x, 0.3, z]} ref={(el) => (wheels.current[k] = el)}>
             <mesh rotation-x={Math.PI / 2}>
-              <cylinderGeometry args={[0.3, 0.3, 0.18, 20]} />
-              <meshStandardMaterial color="#0b0f18" />
+              <cylinderGeometry args={[0.3, 0.3, 0.18, 24]} />
+              <meshStandardMaterial color="#0a0d12" roughness={0.6} />
             </mesh>
             <mesh>
-              <boxGeometry args={[0.46, 0.06, 0.2]} />
-              <meshStandardMaterial color={VIOLET} emissive={VIOLET} emissiveIntensity={0.6} />
+              <boxGeometry args={[0.46, 0.05, 0.2]} />
+              <meshStandardMaterial color="#c9ccd2" metalness={1} roughness={0.25} />
             </mesh>
           </group>
         ))}
@@ -282,69 +290,58 @@ function CarScene() {
   );
 }
 
-/* ───────────────────────── 3D-tilt card ───────────────────────── */
-function Tilt({ className = "", children, ...rest }) {
-  const ref = useRef();
-  const move = (e) => {
-    const el = ref.current, r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    el.style.transform = `rotateX(${(0.5 - y) * 9}deg) rotateY(${(x - 0.5) * 11}deg) scale(1.015)`;
-    el.style.setProperty("--mx", `${x * 100}%`);
-    el.style.setProperty("--my", `${y * 100}%`);
-  };
+function CarCard() {
+  const [ref, visible] = useInView();
   return (
-    <div
-      ref={ref}
-      className={`card ${className}`}
-      onPointerMove={move}
-      onPointerLeave={() => (ref.current.style.transform = "")}
-      {...rest}
-    >
-      {children}
-    </div>
+    <Tilt className="c2">
+      <div className="lbl"><Gamepad2 size={15} /> Keep moving <small>Tap to jump</small></div>
+      <div className="car" ref={ref}>
+        <Canvas camera={{ position: [0, 1.5, 6.5], fov: 35 }} dpr={[1, 1.75]} frameloop={loop(visible)}>
+          <Suspense fallback={null}><CarScene /></Suspense>
+        </Canvas>
+      </div>
+    </Tilt>
   );
 }
 
-/* ───────────────────────── DATA ───────────────────────── */
+/* ───────────────────────── data ───────────────────────── */
 const dev = (n, f = `${n}-original`) => `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${n}/${f}.svg`;
-const ROW1 = [
-  { name: "React", url: dev("react") }, { name: "Node JS", url: dev("nodejs") }, { name: "MongoDB", url: dev("mongodb") },
-  { name: "Python", url: dev("python") }, { name: "FastAPI", url: dev("fastapi") }, { name: "HTML5", url: dev("html5") }, { name: "CSS3", url: dev("css3") },
-];
+const ROW1 = ["react", "nodejs", "mongodb", "python", "fastapi", "html5", "css3"].map((n) => ({ name: n, url: dev(n) }));
 const ROW2 = [
-  { name: "JavaScript", url: dev("javascript") }, { name: "TypeScript", url: dev("typescript") }, { name: "Docker", url: dev("docker") },
-  { name: "GitHub", url: dev("github"), inv: true }, { name: "Figma", url: dev("figma") }, { name: "Tailwind", url: dev("tailwindcss") },
-  { name: "AWS", url: dev("amazonwebservices", "amazonwebservices-original-wordmark"), inv: true },
+  { name: "javascript", url: dev("javascript") }, { name: "typescript", url: dev("typescript") }, { name: "docker", url: dev("docker") },
+  { name: "github", url: dev("github"), inv: true }, { name: "figma", url: dev("figma") }, { name: "tailwind", url: dev("tailwindcss") },
+  { name: "aws", url: dev("amazonwebservices", "amazonwebservices-original-wordmark"), inv: true },
 ];
-const M1 = [...ROW1, ...ROW1, ...ROW1], M2 = [...ROW2, ...ROW2, ...ROW2];
+const MARQUEE = [[[...ROW1, ...ROW1, ...ROW1], "t-l"], [[...ROW2, ...ROW2, ...ROW2], "t-r"]];
 const SOCIALS = [
-  { icon: "🐙", name: "GitHub", href: "https://github.com/DWRSH" },
-  { icon: "💼", name: "LinkedIn", href: "https://www.linkedin.com/in/darshprajapati15" },
-  { icon: "𝕏", name: "Twitter", href: "#" },
+  { Icon: Github, name: "GitHub", handle: "@DWRSH", href: "https://github.com/DWRSH" },
+  { Icon: Linkedin, name: "LinkedIn", handle: "darshprajapati15", href: "https://www.linkedin.com/in/darshprajapati15" },
+  { Icon: Twitter, name: "Twitter", handle: "@dwrsh_", href: "#" },
 ];
+const FACTS = [["13+", "Projects"], ["2+", "Years of experience"], ["6+", "Hubs"]];
 
-/* ───────────────────────── PAGE ───────────────────────── */
+/* ───────────────────────── page ───────────────────────── */
 export default function HomePage() {
-  const heroRef = useRef(), audioRef = useRef();
-  const bust = useRef(Date.now()).current; // stable cache-buster (Date.now() in render reloaded images on every state change)
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [latestPost, setLatestPost] = useState(null);
+  const [heroRef, heroVisible] = useInView();
+  const audioRef = useRef();
+  const [playing, setPlaying] = useState(false);
+  const [post, setPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(true);
 
   const play = () => {
     if (!audioRef.current) return;
     audioRef.current.volume = 0.5;
     audioRef.current.play().catch(() => {});
-    setIsPlaying(true);
+    setPlaying(true);
   };
-  const pause = () => { audioRef.current?.pause(); setIsPlaying(false); };
+  const pause = () => { audioRef.current?.pause(); setPlaying(false); };
 
   useEffect(() => {
     (async () => {
       try {
-        const { data: posts } = await api.get("/blogs");
-        const p = posts?.[0];
-        setLatestPost(p ? {
+        const { data } = await api.get("/blogs");
+        const p = data?.[0];
+        setPost(p ? {
           title: p.title,
           desc: p.desc || (p.content ? p.content.substring(0, 120) + "..." : "Click to read this article."),
           link: `/blog/${p.slug || p._id}`,
@@ -357,104 +354,93 @@ export default function HomePage() {
     })();
   }, []);
 
-  const gh = `&theme=transparent&title_color=00d4b4&text_color=ffffff&icon_color=7c6ff7&hide_border=true&cache_seconds=1800&v=${bust}`;
+  const d = (s) => ({ animationDelay: `${s}s` });
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="hp">
         <div className="hp-body">
-          {/* HERO — the one big 3D moment */}
           <section className="hero" ref={heroRef}>
+            <div className="copy">
+              <div className="status rise" style={d(0.1)}><span className="dot" /> Available for new projects</div>
+              <h1 className="name rise" style={d(0.2)}>Darsh Prajapati</h1>
+              <p className="bio rise" style={d(0.35)}>
+                I engineer <b>high-performance</b>, thoughtfully designed web products. I specialise in the <b>MERN stack</b>,
+                pairing heavy-duty backends with pixel-perfect frontends.
+              </p>
+              <div className="btns rise" style={d(0.5)}>
+                <a href="/Darsh_resume.pdf" className="btn btn-p">Download CV <Download size={16} /></a>
+                <Link to="/projects" className="btn btn-s">Explore work <ArrowRight size={16} /></Link>
+              </div>
+              <div className="facts rise" style={d(0.65)}>
+                {FACTS.map(([n, l]) => <div className="fact" key={l}><b>{n}</b><span>{l}</span></div>)}
+              </div>
+            </div>
+
             <div className="hero-3d">
-              <Canvas
-                camera={{ position: [0, 0, 6], fov: 45 }}
-                dpr={[1, 1.75]}
-                eventSource={heroRef}
-                eventPrefix="client"
-                style={{ touchAction: "pan-y" }}
-              >
+              <Canvas camera={{ position: [0, 0, 6], fov: 40 }} dpr={[1, 1.75]} frameloop={loop(heroVisible)}
+                eventSource={heroRef} eventPrefix="client" style={{ touchAction: "pan-y" }}>
                 <Suspense fallback={null}><HeroScene /></Suspense>
               </Canvas>
-            </div>
-            <span className="orb-hint">Click the orb to change its mood</span>
-
-            <div className="hero-in">
-              <div className="hero-pill"><span className="hero-dot" /> Available for new projects</div>
-              <h1 className="hero-name" aria-label="Darsh">
-                {"DARSH".split("").map((c, k) => <span className="hl" key={k} aria-hidden="true">{c}</span>)}
-              </h1>
-              <div className="hero-bottom">
-                <p className="hero-bio">
-                  I engineer <strong>high-performance</strong>, aesthetic digital architectures. Specialising in the{" "}
-                  <strong>MERN stack</strong>, bridging heavy-duty backends with pixel-perfect frontends.
-                </p>
-                <div className="hero-btns">
-                  <a href="/Darsh_resume.pdf" className="hbtn hbtn-primary">Download CV <Download size={17} /></a>
-                  <Link to="/projects" className="hbtn hbtn-sec">Explore work <ArrowRight size={17} /></Link>
-                </div>
-              </div>
+              <span className="hint">Hover the rings to wind them up</span>
             </div>
           </section>
 
           <div className="bento">
-            <Tilt className="c2">
-              <div className="lbl"><Gamepad2 size={14} /> Keep moving <span className="car-hint">Tap to jump</span></div>
-              <div className="car-wrap">
-                <Canvas camera={{ position: [0, 1.5, 6.5], fov: 35 }} dpr={[1, 1.75]}>
-                  <Suspense fallback={null}><CarScene /></Suspense>
-                </Canvas>
-              </div>
+            <CarCard />
+
+            <Tilt className="c1">
+              <div className="lbl"><BookOpen size={15} /> Latest post</div>
+              {loadingPost ? <span className="pulse">Syncing latest feed…</span> : post ? (
+                <>
+                  <p className="post-title">{post.title}</p>
+                  <p className="post-desc">{post.desc}</p>
+                  <Link to={post.link} className="link">Read post <ArrowRight size={14} /></Link>
+                </>
+              ) : <p className="post-desc">No posts yet.</p>}
             </Tilt>
 
-            <div className="c2 stats-row">
-              {[["13", "Projects"], ["2", "Years exp"], ["6", "Hubs"]].map(([n, l]) => (
-                <div className="stat" key={l}>
-                  <div className="stat-num">{n}<span>+</span></div>
-                  <div className="stat-lbl">{l}</div>
-                </div>
-              ))}
-            </div>
-
-            <Tilt className="c3">
-              <div className="lbl"><Github size={14} /> Live GitHub data (@DWRSH)</div>
-              <div className="gh-grid">
-                <img className="gh-img" alt="GitHub stats" src={`https://github-readme-stats.vercel.app/api?username=DWRSH&show_icons=true&bg_color=00000000${gh}`} />
-                <img className="gh-img" alt="GitHub streak" src={`https://streak-stats.demolab.com/?user=DWRSH&background=00000000${gh}`} />
-              </div>
-              <div style={{ overflowX: "auto", background: "var(--surf2)", padding: 12, borderRadius: 12, border: "1px solid var(--border)" }}>
-                <img alt="GitHub commits" src={`https://ghchart.rshah.org/00d4b4/DWRSH?v=${bust}`}
-                  style={{ minWidth: 600, width: "100%", filter: "hue-rotate(345deg) saturate(1.2)" }} />
-              </div>
-            </Tilt>
-
-            <Tilt className="c1 vinyl-card" onMouseEnter={play} onMouseLeave={pause} onTouchStart={() => (isPlaying ? pause() : play())}>
-              <div className="lbl"><Headphones size={14} /> Vibes</div>
-              <audio ref={audioRef} loop preload="auto" src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" />
-              <div className="music-player-wrap">
-                <div className="vinyl-container">
-                  <div className={`vinyl-record ${isPlaying ? "playing" : ""}`}>
-                    <div className="vinyl-label"><div className="vinyl-hole" /></div>
-                  </div>
-                  <svg className={`tonearm ${isPlaying ? "playing" : ""}`} viewBox="0 0 40 80" aria-hidden="true">
-                    <circle cx="30" cy="10" r="8" fill="#555" stroke="#222" strokeWidth="2" />
-                    <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#ccc" strokeWidth="4" strokeLinecap="round" />
-                    <rect x="2" y="65" width="12" height="15" rx="2" fill="#222" transform="rotate(25 8 72)" />
+            <Tilt className="c1 vinyl-card" onMouseEnter={play} onMouseLeave={pause} onTouchStart={() => (playing ? pause() : play())}>
+              <div className="lbl"><Headphones size={15} /> Vibes</div>
+              <audio ref={audioRef} loop preload="none" src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" />
+              <div className="player">
+                <div className="vinyl">
+                  <div className={`disc ${playing ? "on" : ""}`}><i /></div>
+                  <svg className={`arm ${playing ? "on" : ""}`} viewBox="0 0 40 80" aria-hidden="true">
+                    <circle cx="30" cy="10" r="8" fill="#3a404a" stroke="#1a1d23" strokeWidth="2" />
+                    <path d="M 30 10 Q 30 50 10 70" fill="none" stroke="#c9ccd2" strokeWidth="3.5" strokeLinecap="round" />
+                    <rect x="2" y="65" width="12" height="15" rx="2" fill="#1a1d23" transform="rotate(25 8 72)" />
                   </svg>
                 </div>
-                <div className="music-info">
-                  <div className="music-song">Lo-Fi Coding</div>
-                  <div className="music-artist">Lofi Study</div>
-                  <div className="hover-hint">{isPlaying ? "Playing…" : "Hover or tap to play"}</div>
+                <div>
+                  <div className="song">Lo-Fi Coding</div>
+                  <div className="artist">{playing ? "Now playing" : "Hover or tap to play"}</div>
                 </div>
               </div>
             </Tilt>
 
+            <Tilt className="c3">
+              <div className="lbl"><Github size={15} /> Contributions <small>@DWRSH</small></div>
+              <div className="cal">
+                <GitHubCalendar username="DWRSH" colorScheme="dark" blockSize={11} blockMargin={4} fontSize={12}
+                  theme={{ dark: ["#141a22", "#0f4a43", "#14806f", "#27b8a0", ACC] }} />
+              </div>
+            </Tilt>
+
+            <Tilt className="c1" style={{ padding: 0 }}>
+              <div className="lbl" style={{ position: "absolute", top: 18, left: 20, zIndex: 3 }}><MapPin size={15} /> Based in Gujarat</div>
+              <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map" aria-label="Open location in Google Maps">
+                <iframe title="Map" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+                  src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=m&z=10&ie=UTF8&iwloc=&output=embed" />
+              </a>
+            </Tilt>
+
             <Tilt className="c2">
-              <div className="lbl"><Layers size={14} /> Tech stack</div>
+              <div className="lbl"><Layers size={15} /> Tech stack</div>
               <div className="marquee">
-                {[[M1, "tm-left"], [M2, "tm-right"]].map(([list, cls]) => (
-                  <div className={`tm-track ${cls}`} key={cls}>
+                {MARQUEE.map(([list, cls]) => (
+                  <div className={`track ${cls}`} key={cls}>
                     {list.map((t, k) => (
                       <div className="ticon" title={t.name} key={k}><img src={t.url} alt={t.name} className={t.inv ? "inv" : ""} /></div>
                     ))}
@@ -464,42 +450,22 @@ export default function HomePage() {
             </Tilt>
 
             <Tilt className="c2">
-              <div className="lbl"><ExternalLink size={14} /> Find me online</div>
-              <div className="soc-grid">
-                {SOCIALS.map((s) => (
-                  <a className="soc-item" key={s.name} href={s.href} target="_blank" rel="noreferrer">
-                    <span style={{ fontSize: 20 }}>{s.icon}</span>{s.name}
+              <div className="lbl">Find me online</div>
+              <nav className="soc">
+                {SOCIALS.map(({ Icon, name, handle, href }) => (
+                  <a key={name} href={href} target="_blank" rel="noreferrer">
+                    <Icon size={18} /> {name} <em>{handle}</em> <ArrowUpRight size={16} />
                   </a>
                 ))}
+              </nav>
+            </Tilt>
+
+            <Tilt className="c4 cta">
+              <p className="cta-title">Let's build something worth keeping.</p>
+              <div className="cta-side">
+                contact@darshprajapati.dev
+                <a href="mailto:contact@darshprajapati.dev" className="btn btn-p"><Mail size={16} /> Get in touch</a>
               </div>
-            </Tilt>
-
-            <Tilt className="c1 mob-full">
-              <div className="lbl"><BookOpen size={14} /> Latest post</div>
-              {loadingPost ? (
-                <span className="pulse">Syncing latest feed…</span>
-              ) : latestPost ? (
-                <>
-                  <p className="blog-title">{latestPost.title}</p>
-                  <p className="blog-desc">{latestPost.desc}</p>
-                  <Link to={latestPost.link} className="read-pill">Read post <ArrowRight size={12} /></Link>
-                </>
-              ) : (
-                <p className="blog-desc">No posts yet.</p>
-              )}
-            </Tilt>
-
-            <Tilt className="c1" style={{ padding: 0 }}>
-              <div className="lbl" style={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}><MapPin size={14} /> Location</div>
-              <a href="https://maps.google.com/?q=Idar,Gujarat,India" target="_blank" rel="noreferrer" className="map-link" aria-label="Open location in Google Maps">
-                <iframe title="Map" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                  src="https://maps.google.com/maps?q=Idar,Gujarat,India&t=k&z=10&ie=UTF8&iwloc=&output=embed" />
-              </a>
-            </Tilt>
-
-            <Tilt className="c2 cta-card">
-              <p className="cta-title">Let's build something great together.</p>
-              <a href="mailto:contact@darshprajapati.dev" className="cta-btn"><Mail size={15} /> Get in touch</a>
             </Tilt>
           </div>
         </div>
